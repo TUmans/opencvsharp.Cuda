@@ -1,24 +1,51 @@
-# build_opencv_cuda.ps1
-# Based on the professional OpenCV build workflow.
+# Build OpenCV from source for Windows x64 development.
+# Output: opencv_artifacts/ (include/ + lib/ + bin/)
+#
+# Prerequisites:
+#   - Visual Studio 2022 or 2026 Build Tools (with "Desktop development with C++" workload; VS 2019 is not supported)
+#   - CMake 3.20+  (available in PATH)
+#   - Git          (available in PATH, with submodules initialized)
+#   - vcpkg        (available in PATH or VCPKG_INSTALLATION_ROOT set)
+#
+# Usage:
+#   .\build_opencv_windows.ps1
+#   .\build_opencv_windows.ps1 -Jobs 8
+#
+# Before first run, initialize submodules if not already done:
+#   git submodule update --init --recursive
 
 param(
-    [int]$Jobs = 8  # Increased to 8 for faster CUDA compilation
+    [int]$Jobs = 4
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = $PSScriptRoot
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# --- 1. PREREQUISITE CHECKS ---
 function Require-Command($name) {
     if (-not (Get-Command $name -ErrorAction SilentlyContinue)) {
         throw "Required command '$name' not found in PATH."
     }
 }
-Require-Command cmake
+
+if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
+    Write-Error @"
+cmake was not found in PATH.
+
+To fix this, choose one of the following:
+  1. Install CMake via winget:
+       winget install Kitware.CMake
+     Then reopen this terminal so PATH is updated.
+  2. Install CMake 3.20+ from https://cmake.org/download/ and add it to PATH.
+  3. Launch this script from a developer shell that includes cmake in PATH.
+"@
+    exit 1
+}
 Require-Command git
 
-# Verify submodules
+# ---------------------------------------------------------------------------
+# Verify submodules are present
+# ---------------------------------------------------------------------------
 if (-not (Test-Path "$RepoRoot/opencv/CMakeLists.txt")) {
     throw "opencv submodule not found. Run: git submodule update --init --recursive"
 }
@@ -26,79 +53,90 @@ if (-not (Test-Path "$RepoRoot/opencv_contrib/modules")) {
     throw "opencv_contrib submodule not found. Run: git submodule update --init --recursive"
 }
 
-# --- 2. DETECT VISUAL STUDIO ---
+$OpenCvVersion = (git -C "$RepoRoot/opencv" describe --tags --exact-match 2>$null)
+if (-not $OpenCvVersion) { $OpenCvVersion = (git -C "$RepoRoot/opencv" rev-parse --short HEAD) }
+Write-Host "OpenCV version: $OpenCvVersion"
+
+# ---------------------------------------------------------------------------
+# Detect Visual Studio generator via vswhere
+# ---------------------------------------------------------------------------
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {
-    throw "vswhere.exe not found. Install Visual Studio or Build Tools first."
+    throw "vswhere.exe not found at '$vswhere'. Install Visual Studio or Build Tools first."
 }
-$vsInstallVersion = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
-$vsInstallPath    = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+$vsInstallVersion = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion 2>$null
+$vsDisplayName    = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property displayName    2>$null
+$vsInstallPath    = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath   2>$null
+if (-not $vsInstallVersion) {
+    throw "No Visual Studio installation with C++ tools found. Install 'Desktop development with C++' workload."
+}
 $vsMajor = [int]($vsInstallVersion.Split('.')[0])
-$generatorMap = @{ 17 = "Visual Studio 17 2022"; 18 = "Visual Studio 18 2026" }
+$generatorMap = @{
+    17 = "Visual Studio 17 2022"
+    18 = "Visual Studio 18 2026"
+}
 $vsGenerator = $generatorMap[$vsMajor]
+if (-not $vsGenerator) {
+    throw "Unsupported Visual Studio major version: $vsMajor (from '$vsInstallVersion'). Visual Studio 2022 or 2026 is required."
+}
+Write-Host "Using generator: $vsGenerator ($vsDisplayName)"
 
-Write-Host "Using generator: $vsGenerator" -ForegroundColor Cyan
+# ---------------------------------------------------------------------------
+# Configure
+# ---------------------------------------------------------------------------
+$buildDir   = "$RepoRoot/opencv/build-vs$vsMajor"
+$installDir = "$RepoRoot/opencv_artifacts"
 
-# --- 3. PATH CONFIGURATION ---
-$buildDir     = "$RepoRoot/opencv/build-cuda"
-$installDir   = "$RepoRoot/opencv_artifacts"
-$optionsFile  = "$RepoRoot/cmake/opencv_build_options_cuda.cmake"
-
-# Resolve vcpkg (for Tesseract/dependencies)
+# ---------------------------------------------------------------------------
+# Resolve Tesseract prefix via vcpkg
+# ---------------------------------------------------------------------------
 $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
 if (-not $vcpkgRoot) {
     $vcpkgCmd = Get-Command vcpkg -ErrorAction SilentlyContinue
     if ($vcpkgCmd) { $vcpkgRoot = Split-Path $vcpkgCmd.Source }
 }
-if (-not $vcpkgRoot) { throw "vcpkg not found. Please set VCPKG_INSTALLATION_ROOT." }
-$vcpkgToolchain = "$vcpkgRoot/scripts/buildsystems/vcpkg.cmake"
+if (-not $vcpkgRoot) {
+    Write-Error @"
+vcpkg was not found.
 
-$cudaRoot     = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8"
-$cudnnInclude = "C:/Program Files/NVIDIA/CUDNN/v9.20/include/12.9"
-$cudnnLib     = "C:/Program Files/NVIDIA/CUDNN/v9.20/lib/12.9/x64/cudnn.lib"
-$videoSdkDir  = "D:/Video_Codec_SDK_13.0.37"
-
-$vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
-if (-not $vcpkgRoot) { $vcpkgRoot = Split-Path (Get-Command vcpkg).Source }
-$vcpkgToolchain = "$vcpkgRoot/scripts/buildsystems/vcpkg.cmake"
-
-$env:CUDA_PATH = $cudaRoot
-$env:PATH = "$cudaRoot/bin;$cudaRoot/libnvvp;$env:PATH"
-
-# --- 4. CONFIGURE (THE CMAKE CALL) ---
-if (Test-Path $buildDir) {
-    Write-Host "Removing old build directory for a clean CUDA build..." -ForegroundColor Yellow
-    Remove-Item $buildDir -Recurse -Force
+Install vcpkg and add it to PATH:
+  git clone https://github.com/microsoft/vcpkg C:\vcpkg
+  C:\vcpkg\bootstrap-vcpkg.bat
+  # Then add C:\vcpkg to PATH, or set:
+  #   `$env:VCPKG_INSTALLATION_ROOT = 'C:\vcpkg'
+"@
+    exit 1
 }
-New-Item -ItemType Directory -Path $buildDir
+$vcpkgToolchain = "$vcpkgRoot/scripts/buildsystems/vcpkg.cmake"
+$vcpkgInstalledDir = "$RepoRoot/vcpkg_installed"
+Write-Host "Using vcpkg toolchain: $vcpkgToolchain"
 
-Write-Host "Options file path: $optionsFile" -ForegroundColor Yellow
-if (-not (Test-Path $optionsFile)) {
-    throw "CMake options file NOT FOUND at: $optionsFile"
+Write-Host "Configuring OpenCV $OpenCvVersion ..."
+# Remove stale CMakeCache.txt so generator/compiler settings are never overridden by a previous run.
+$cmakeCache = "$buildDir/CMakeCache.txt"
+if (Test-Path $cmakeCache) {
+    Write-Host "Removing stale CMakeCache.txt ..."
+    Remove-Item $cmakeCache -Force
 }
-
-Write-Host "Configuring OpenCV with CUDA..." -ForegroundColor Cyan
 cmake `
-    -C "$optionsFile" `
+    -C "$RepoRoot/cmake/opencv_build_options_cuda.cmake" `
     -S "$RepoRoot/opencv" `
     -B "$buildDir" `
     -G "$vsGenerator" -A x64 `
-    -D "CUDA_TOOLKIT_ROOT_DIR=$cudaRoot" `
-    -D "CUDA_NVCC_EXECUTABLE=$cudaRoot/bin/nvcc.exe" `
-    -D "CUDNN_INCLUDE_DIR=$cudnnInclude" `
-    -D "CUDNN_LIBRARY=$cudnnLib" `
-    -D "VIDEO_CODEC_SDK_DIR=$videoSdkDir" `
-    -D "OPENCV_EXTRA_MODULES_PATH=$RepoRoot/opencv_contrib/modules" `
-    -D "CMAKE_INSTALL_PREFIX=$installDir" `
     -D "CMAKE_GENERATOR_INSTANCE=$vsInstallPath" `
     -D "CMAKE_TOOLCHAIN_FILE=$vcpkgToolchain" `
-    -D "VCPKG_TARGET_TRIPLET=x64-windows" `
-    -D "CUDA_NVCC_FLAGS=-allow-unsupported-compiler" 
+    -D "VCPKG_TARGET_TRIPLET=x64-windows-static" `
+    -D "VCPKG_INSTALLED_DIR=$vcpkgInstalledDir" `
+    -D "VCPKG_OVERLAY_TRIPLETS=$RepoRoot/cmake/triplets" `
+    -D "OPENCV_EXTRA_MODULES_PATH=$RepoRoot/opencv_contrib/modules" `
+    -D "CMAKE_INSTALL_PREFIX=$installDir"
 
-# --- 5. BUILD & INSTALL ---
-Write-Host "Building OpenCV CUDA (This will take a long time)..." -ForegroundColor Cyan
+# ---------------------------------------------------------------------------
+# Build + Install
+# ---------------------------------------------------------------------------
+Write-Host "Building OpenCV (this takes 30-60 minutes on first run) ..."
 cmake --build "$buildDir" --config Release -j $Jobs
 cmake --install "$buildDir" --config Release
 
 Write-Host ""
-Write-Host "Done! Your CUDA-enabled OpenCV is in: $installDir" -ForegroundColor Green
+Write-Host "Done. OpenCV installed to: $installDir"
