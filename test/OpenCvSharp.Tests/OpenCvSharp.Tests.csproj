@@ -31,6 +31,24 @@
     <ProjectReference Include="..\..\src\OpenCvSharp\OpenCvSharp.csproj" />
     <ProjectReference Include="..\..\src\OpenCvSharp.Extensions\OpenCvSharp.Extensions.csproj" />
   </ItemGroup>
+	<ItemGroup>
+		<None Include="dll\x64\*.dll">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\opencv_artifacts\x64\vc18\bin\*">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\src\build\Release\*">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\src\OpenCvSharp\bin\Release\netstandard2.1\*">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
     <Reference Include="System.Net.Http" />
