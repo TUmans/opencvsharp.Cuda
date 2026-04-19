@@ -3,190 +3,189 @@
 #ifdef ENABLED_CUDA
 
 #include "include_opencv.h"
+#include <opencv2/core/cuda.hpp>
 
 #pragma region Device
 
 CVAPI(int) cuda_getCudaEnabledDeviceCount()
 {
-    return getCudaEnabledDeviceCount();
+    return cv::cuda::getCudaEnabledDeviceCount();
 }
 
 CVAPI(void) cuda_setDevice(int device)
 {
-    setDevice(device);
+    cv::cuda::setDevice(device);
 }
+
 CVAPI(int) cuda_getDevice()
 {
-    return getDevice();
+    return cv::cuda::getDevice();
 }
 
 CVAPI(void) cuda_resetDevice()
 {
-    resetDevice();
+    cv::cuda::resetDevice();
 }
 
 CVAPI(int) cuda_deviceSupports(int feature_set)
 {
-    return deviceSupports(
-        static_cast<FeatureSet>(feature_set)) ? 1 : 0;
+    return cv::cuda::deviceSupports(static_cast<cv::cuda::FeatureSet>(feature_set)) ? 1 : 0;
 }
 
 // TargetArchs
 CVAPI(int) cuda_TargetArchs_builtWith(int feature_set)
 {
-    return TargetArchs::builtWith(
-        static_cast<FeatureSet>(feature_set)) ? 1 : 0;
+    return cv::cuda::TargetArchs::builtWith(static_cast<cv::cuda::FeatureSet>(feature_set)) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_has(int major, int minor)
 {
-    return TargetArchs::has(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::has(major, minor) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_hasPtx(int major, int minor)
 {
-    return TargetArchs::hasPtx(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::hasPtx(major, minor) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_hasBin(int major, int minor)
 {
-    return TargetArchs::hasBin(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::hasBin(major, minor) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_hasEqualOrLessPtx(int major, int minor)
 {
-    return TargetArchs::hasEqualOrLessPtx(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::hasEqualOrLessPtx(major, minor) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_hasEqualOrGreater(int major, int minor)
 {
-    return TargetArchs::hasEqualOrGreater(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::hasEqualOrGreater(major, minor) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_hasEqualOrGreaterPtx(int major, int minor)
 {
-    return TargetArchs::hasEqualOrGreaterPtx(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::hasEqualOrGreaterPtx(major, minor) ? 1 : 0;
 }
 CVAPI(int) cuda_TargetArchs_hasEqualOrGreaterBin(int major, int minor)
 {
-    return TargetArchs::hasEqualOrGreaterBin(major, minor) ? 1 : 0;
+    return cv::cuda::TargetArchs::hasEqualOrGreaterBin(major, minor) ? 1 : 0;
 }
 
 // DeviceInfo
-CVAPI(DeviceInfo*) cuda_DeviceInfo_new1()
+CVAPI(cv::cuda::DeviceInfo *) cuda_DeviceInfo_new1()
 {
-    return new DeviceInfo();
+    return new cv::cuda::DeviceInfo();
 }
-CVAPI(DeviceInfo*) cuda_DeviceInfo_new2(int deviceId)
+CVAPI(cv::cuda::DeviceInfo *) cuda_DeviceInfo_new2(int deviceId)
 {
-    return new DeviceInfo(deviceId);
+    return new cv::cuda::DeviceInfo(deviceId);
 }
-CVAPI(void) cuda_DeviceInfo_delete(DeviceInfo *obj)
+CVAPI(void) cuda_DeviceInfo_delete(cv::cuda::DeviceInfo *obj)
 {
     delete obj;
 }
 
-CVAPI(void) cuda_DeviceInfo_name(DeviceInfo *obj, char *buf, int bufLength)
-{ 
+CVAPI(void) cuda_DeviceInfo_name(cv::cuda::DeviceInfo *obj, char *buf, int bufLength)
+{
     copyString(obj->name(), buf, bufLength);
 }
-CVAPI(int) cuda_DeviceInfo_majorVersion(DeviceInfo *obj)
-{ 
-    return obj->majorVersion(); 
+CVAPI(int) cuda_DeviceInfo_majorVersion(cv::cuda::DeviceInfo *obj)
+{
+    return obj->majorVersion();
 }
-CVAPI(int) cuda_DeviceInfo_minorVersion(DeviceInfo *obj)
-{ 
+CVAPI(int) cuda_DeviceInfo_minorVersion(cv::cuda::DeviceInfo *obj)
+{
     return obj->minorVersion();
 }
-CVAPI(int) cuda_DeviceInfo_multiProcessorCount(DeviceInfo *obj)
-{ 
+CVAPI(int) cuda_DeviceInfo_multiProcessorCount(cv::cuda::DeviceInfo *obj)
+{
     return obj->multiProcessorCount();
 }
-CVAPI(uint64) cuda_DeviceInfo_sharedMemPerBlock(DeviceInfo *obj)
+CVAPI(uint64_t) cuda_DeviceInfo_sharedMemPerBlock(cv::cuda::DeviceInfo *obj)
 {
-    return obj->sharedMemPerBlock();
+    return (uint64_t)obj->sharedMemPerBlock();
 }
 CVAPI(void) cuda_DeviceInfo_queryMemory(
-    DeviceInfo *obj, uint64 *totalMemory, uint64 *freeMemory)
+    cv::cuda::DeviceInfo *obj, uint64_t *totalMemory, uint64_t *freeMemory)
 {
     size_t totalMemory0, freeMemory0;
     obj->queryMemory(totalMemory0, freeMemory0);
-    *totalMemory = totalMemory0;
-    *freeMemory = freeMemory0;
+    *totalMemory = (uint64_t)totalMemory0;
+    *freeMemory = (uint64_t)freeMemory0;
 }
-CVAPI(uint64) cuda_DeviceInfo_freeMemory(DeviceInfo *obj)
+CVAPI(uint64_t) cuda_DeviceInfo_freeMemory(cv::cuda::DeviceInfo *obj)
 {
-    return obj->freeMemory();
+    return (uint64_t)obj->freeMemory();
 }
-CVAPI(uint64) cuda_DeviceInfo_totalMemory(DeviceInfo *obj)
+CVAPI(uint64_t) cuda_DeviceInfo_totalMemory(cv::cuda::DeviceInfo *obj)
 {
-    return obj->totalMemory();
+    return (uint64_t)obj->totalMemory();
 }
-CVAPI(int) cuda_DeviceInfo_supports(DeviceInfo *obj, int feature_set)
+CVAPI(int) cuda_DeviceInfo_supports(cv::cuda::DeviceInfo *obj, int feature_set)
 {
-    return obj->supports(static_cast<FeatureSet>(feature_set)) ? 1 : 0;
+    return obj->supports(static_cast<cv::cuda::FeatureSet>(feature_set)) ? 1 : 0;
 }
-CVAPI(int) cuda_DeviceInfo_isCompatible(DeviceInfo *obj)
+CVAPI(int) cuda_DeviceInfo_isCompatible(cv::cuda::DeviceInfo *obj)
 {
     return obj->isCompatible() ? 1 : 0;
 }
-CVAPI(int) cuda_DeviceInfo_deviceID(DeviceInfo *obj)
+CVAPI(int) cuda_DeviceInfo_deviceID(cv::cuda::DeviceInfo *obj)
 {
     return obj->deviceID();
 }
-CVAPI(int) cuda_DeviceInfo_canMapHostMemory(DeviceInfo *obj)
+CVAPI(int) cuda_DeviceInfo_canMapHostMemory(cv::cuda::DeviceInfo *obj)
 {
     return obj->canMapHostMemory() ? 1 : 0;
 }
 
-
 CVAPI(void) cuda_printCudaDeviceInfo(int device)
 {
-    printCudaDeviceInfo(device);
+    cv::cuda::printCudaDeviceInfo(device);
 }
 CVAPI(void) cuda_printShortCudaDeviceInfo(int device)
 {
-    printShortCudaDeviceInfo(device);
+    cv::cuda::printShortCudaDeviceInfo(device);
 }
 
 #pragma endregion
 
 #pragma region Stream
 
-CVAPI(Stream*) cuda_Stream_new1()
+CVAPI(cv::cuda::Stream *) cuda_Stream_new1()
 {
-    return new Stream();
+    return new cv::cuda::Stream();
 }
-CVAPI(Stream*) cuda_Stream_new2(Stream* s)
+CVAPI(cv::cuda::Stream *) cuda_Stream_new2(cv::cuda::Stream *s)
 {
-    return new Stream(*s);
+    return new cv::cuda::Stream(*s);
 }
 
-CVAPI(void) cuda_Stream_delete(Stream *obj)
+CVAPI(void) cuda_Stream_delete(cv::cuda::Stream *obj)
 {
     delete obj;
 }
 
-CVAPI(void) cuda_Stream_opAssign(Stream *left, Stream *right)
+CVAPI(void) cuda_Stream_opAssign(cv::cuda::Stream *left, cv::cuda::Stream *right)
 {
     *left = *right;
 }
 
-CVAPI(int) cuda_Stream_queryIfComplete(Stream *obj)
+CVAPI(int) cuda_Stream_queryIfComplete(cv::cuda::Stream *obj)
 {
     return obj->queryIfComplete() ? 1 : 0;
 }
-CVAPI(void) cuda_Stream_waitForCompletion(Stream *obj)
+CVAPI(void) cuda_Stream_waitForCompletion(cv::cuda::Stream *obj)
 {
     obj->waitForCompletion();
 }
 
 CVAPI(void) cuda_Stream_enqueueHostCallback(
-    Stream *obj, Stream::StreamCallback callback, void* userData)
+    cv::cuda::Stream *obj, cv::cuda::Stream::StreamCallback callback, void *userData)
 {
     obj->enqueueHostCallback(callback, userData);
 }
 
-CVAPI(Stream*) cuda_Stream_Null()
+CVAPI(cv::cuda::Stream *) cuda_Stream_Null()
 {
-    return &Stream::Null();
+    return const_cast<cv::cuda::Stream *>(&cv::cuda::Stream::Null());
 }
 
-CVAPI(int) cuda_Stream_bool(Stream *obj)
+CVAPI(int) cuda_Stream_bool(cv::cuda::Stream *obj)
 {
     return (bool)(*obj) ? 1 : 0;
 }
