@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using OpenCvSharp.Cuda;
+using OpenCvSharp.Internal;
 
 namespace OpenCvSharp
 {
@@ -118,7 +119,7 @@ namespace OpenCvSharp
             ThrowIfGpuNotAvailable();
             if (m is null)
                 throw new ArgumentNullException(nameof(m));
-            NativeMethods.cuda_createContinuous1(rows, cols, type, m.CvPtr);
+            NativeMethods.cuda_createContinuous1(rows, cols, (int)type, m.CvPtr);
             GC.KeepAlive(m);
         }
 
@@ -132,7 +133,7 @@ namespace OpenCvSharp
         public static GpuMat CreateContinuous(int rows, int cols, MatType type)
         {
             ThrowIfGpuNotAvailable();
-            IntPtr ret = NativeMethods.cuda_createContinuous2(rows, cols, type);
+            IntPtr ret = NativeMethods.cuda_createContinuous2(rows, cols, (int)type);
             return new GpuMat(ret);
         }
 
@@ -173,7 +174,7 @@ namespace OpenCvSharp
             ThrowIfGpuNotAvailable();
             if (m is null)
                 throw new ArgumentNullException(nameof(m));
-            NativeMethods.cuda_ensureSizeIsEnough(rows, cols, type, m.CvPtr);
+            NativeMethods.cuda_ensureSizeIsEnough(rows, cols, (int)type, m.CvPtr);
             GC.KeepAlive(m);
         }
 

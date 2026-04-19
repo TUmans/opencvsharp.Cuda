@@ -22,7 +22,7 @@ namespace OpenCvSharp.Cuda
         /// </summary>
         /// <param name="ptr"></param>
         protected DisposableGpuObject(IntPtr ptr)
-            : base(CvPtr)
+            : base(ptr)
         {
         }
 
@@ -41,7 +41,7 @@ namespace OpenCvSharp.Cuda
         /// <param name="ptr"></param>
         /// <param name="isEnabledDispose"></param>
         protected DisposableGpuObject(IntPtr ptr, bool isEnabledDispose)
-            : base(CvPtr, isEnabledDispose)
+            : base(ptr, isEnabledDispose)
         {
         }
 

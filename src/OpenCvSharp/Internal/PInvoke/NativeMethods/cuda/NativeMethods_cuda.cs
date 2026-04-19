@@ -7,7 +7,7 @@ using OpenCvSharp.Cuda;
 
 #pragma warning disable 1591
 
-namespace OpenCvSharp
+namespace OpenCvSharp.Internal
 {
     // ReSharper disable InconsistentNaming
 

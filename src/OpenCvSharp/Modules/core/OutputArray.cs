@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Internal.Vectors;
 
@@ -54,11 +55,12 @@ public class OutputArray : CvObject
         {
             if (mat is null)
                 throw new ArgumentNullException(nameof(mat));
-            var p = NativeMethods.core_OutputArray_new_byGpuMat(mat.CvPtr);
+            NativeMethods.HandleException(
+            NativeMethods.core_OutputArray_new_byUMat(mat.CvPtr, out var p));
             GC.KeepAlive(mat);
             obj = mat;
             InitSafeHandle(p);
-        }
+    }
 #endif
 
     /// <summary>

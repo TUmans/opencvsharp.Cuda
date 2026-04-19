@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
+using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Internal.Vectors;
 
