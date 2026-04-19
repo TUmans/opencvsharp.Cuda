@@ -58,16 +58,40 @@ $sourceDir   = "$RepoRoot/src/OpenCvSharpExtern"
 $buildDir    = "$RepoRoot/src/build"
 $opencvDir   = "$RepoRoot/opencv_artifacts"
 
+$vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
+if (-not $vcpkgRoot) {
+    $vcpkgCmd = Get-Command vcpkg -ErrorAction SilentlyContinue
+    if ($vcpkgCmd) { $vcpkgRoot = Split-Path $vcpkgCmd.Source }
+}
+if (-not $vcpkgRoot) {
+    Write-Error @"
+vcpkg was not found.
+
+Install vcpkg and add it to PATH:
+  git clone https://github.com/microsoft/vcpkg C:\vcpkg
+  C:\vcpkg\bootstrap-vcpkg.bat
+  # Then add C:\vcpkg to PATH, or set:
+  #   `$env:VCPKG_INSTALLATION_ROOT = 'C:\vcpkg'
+"@
+    exit 1
+}
+$vcpkgToolchain = "$vcpkgRoot/scripts/buildsystems/vcpkg.cmake"
+$vcpkgInstalledDir = "$RepoRoot/vcpkg_installed"
+Write-Host "Using vcpkg toolchain: $vcpkgToolchain"
+
 
 
 # --- 3. CONFIGURE ---
 Write-Host "Configuring OpenCvSharpExtern..." -ForegroundColor Cyan
-cmake `
-    -S "$sourceDir" `
-    -B "$buildDir" `
-    -G "$vsGenerator" -A x64 `
-    -D "CMAKE_GENERATOR_INSTANCE=$vsInstallPath" `
-    -D "OpenCV_DIR=$opencvDir" `
-    -D "ENABLED_CUDA=1"
 
+cmake -S src -B src\build -G "$vsGenerator" -A x64 `
+      -D "ENABLED_CUDA=ON" `
+      -D "CMAKE_PREFIX_PATH=$PWD\opencv_artifacts" `
+      -D "CMAKE_TOOLCHAIN_FILE=$vcpkgToolchain" `
+      -D "VCPKG_TARGET_TRIPLET=x64-windows-static" `
+      -D "VCPKG_INSTALLED_DIR=$vcpkgInstalledDir" `
+      -D "VCPKG_OVERLAY_TRIPLETS=$RepoRoot/cmake/triplets"
+cmake --build src\build --config Release
+      
 
+      
