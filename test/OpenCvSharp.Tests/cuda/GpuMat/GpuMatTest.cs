@@ -303,5 +303,107 @@ public class GpuMatTest : CudaTestBase
         Assert.Equal(5, ofs.Y);
     }
 
-    
+    [Fact]
+    public void AsyncStreamUploadAndDownload()
+    {
+        if (!HasCuda()) return;
+
+        // 1. Prepare data on CPU
+        using var source = new Mat(100, 100, MatType.CV_8UC1, Scalar.All(50));
+        using var destination = new Mat();
+        using var gpuMat = new Cuda.GpuMat();
+
+        // 2. Create the stream
+        using var stream = new Cuda.Stream();
+
+        // 3. Upload asynchronously
+        gpuMat.Upload(source, stream);
+
+        // 4. Download asynchronously
+        gpuMat.Download(destination, stream);
+
+        // At this point, the CPU might be faster than the GPU. 
+        // If we check 'destination' immediately, it might be empty or partial.
+
+        // 5. Block CPU until GPU is finished
+        stream.WaitForCompletion();
+
+        // 6. Verify
+        Assert.Equal(50, destination.At<byte>(0, 0));
+        Assert.Equal(source.Size(), destination.Size());
+    }
+
+    [Fact]
+    public void AsyncStreamCopyTo()
+    {
+        if (!HasCuda()) return;
+
+        using var source = new Mat(100, 100, MatType.CV_8UC1, Scalar.All(100));
+        using var gpuSource = new Cuda.GpuMat();
+        using var gpuDest = new Cuda.GpuMat();
+        using var result = new Mat();
+        using var stream = new Cuda.Stream();
+
+        // Upload sync (to set up)
+        gpuSource.Upload(source);
+
+        // Copy async: Source -> Dest
+        gpuSource.CopyTo(gpuDest, stream);
+
+        // Download result async
+        gpuDest.Download(result, stream);
+
+        stream.WaitForCompletion();
+
+        Assert.Equal(100, result.At<byte>(0, 0));
+    }
+
+    [Fact]
+    public void StreamQuery()
+    {
+        if (!HasCuda()) return;
+
+        // Use a very large matrix to give the GPU "work" to do
+        using var largeMat = new Mat(5000, 5000, MatType.CV_32FC1, Scalar.All(1.0));
+        using var gpuMat = new Cuda.GpuMat();
+        using var stream = new Cuda.Stream();
+
+        // Start a large upload
+        gpuMat.Upload(largeMat, stream);
+
+        // Query returns true if all steps in the stream are finished.
+        // Note: On very fast GPUs, this might already be true.
+        bool isFinished = stream.QueryIfComplete();
+
+        stream.WaitForCompletion();
+
+        Assert.True(stream.QueryIfComplete(), "Stream should be finished after WaitForCompletion");
+    }
+
+    [Fact]
+    public void AsyncStreamSetTo()
+    {
+        if (!HasCuda()) return;
+
+        // Create a black image
+        using var gpuMat = new Cuda.GpuMat(10, 10, MatType.CV_8UC1, Scalar.All(0));
+        // Create a mask (only fill the first 5 rows)
+        using var mask = new Mat(10, 10, MatType.CV_8UC1, Scalar.All(0));
+        mask.RowRange(0, 5).SetTo(Scalar.All(255));
+        using var gpuMask = new Cuda.GpuMat();
+        gpuMask.Upload(mask);
+
+        using var stream = new Cuda.Stream();
+        using var result = new Mat();
+
+        // Fill with 255 where mask is non-zero
+        gpuMat.SetTo(Scalar.All(255), gpuMask, stream);
+        gpuMat.Download(result, stream);
+
+        stream.WaitForCompletion();
+
+        Assert.Equal(255, result.At<byte>(0, 0)); // Inside mask
+        Assert.Equal(0, result.At<byte>(6, 0));   // Outside mask
+    }
 }
+

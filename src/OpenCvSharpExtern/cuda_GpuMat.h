@@ -396,6 +396,54 @@ CVAPI(ExceptionStatus) cuda_ensureSizeIsEnough(int rows, int cols, int type, cv:
     cv::cuda::ensureSizeIsEnough(rows, cols, type, *m);
     END_WRAP
 }
+#pragma region GpuMat Stream Overloads
 
+CVAPI(ExceptionStatus) cuda_GpuMat_upload_stream(cv::cuda::GpuMat *obj, cv::Mat *m, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->upload(*m, *stream);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_download_stream(cv::cuda::GpuMat *obj, cv::Mat *m, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->download(*m, *stream);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo1_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->copyTo(*dst, *stream);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo2_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, cv::cuda::GpuMat *mask, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->copyTo(*dst, *mask, *stream);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_convertTo_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, int rtype, double alpha, double beta, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->convertTo(*dst, rtype, alpha, beta, *stream);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_setTo_stream(cv::cuda::GpuMat *obj, MyCvScalar s, cv::cuda::GpuMat *mask, cv::cuda::Stream *stream, cv::cuda::GpuMat **returnValue)
+{
+    BEGIN_WRAP
+    if (mask == nullptr)
+        obj->setTo(cpp(s), *stream);
+    else
+        obj->setTo(cpp(s), *mask, *stream);
+    *returnValue = obj; // Returning the same pointer as per setTo pattern
+    END_WRAP
+}
+
+#pragma endregion
 
 #endif

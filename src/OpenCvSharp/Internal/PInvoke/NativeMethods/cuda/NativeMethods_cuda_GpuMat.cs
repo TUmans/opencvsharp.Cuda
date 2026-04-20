@@ -193,6 +193,24 @@ namespace OpenCvSharp.Internal
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_ensureSizeIsEnough(int rows, int cols, int type, IntPtr m);
+
+        #region Streams
+
+        // GpuMat Stream Overloads
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_upload_stream(IntPtr handle, IntPtr arr, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_download_stream(IntPtr handle, IntPtr dst, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_copyTo1_stream(IntPtr handle, IntPtr dst, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_copyTo2_stream(IntPtr handle, IntPtr dst, IntPtr mask, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_convertTo_stream(IntPtr handle, IntPtr dst, int rtype, double alpha, double beta, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_setTo_stream(IntPtr handle, Scalar s, IntPtr mask, IntPtr stream, out IntPtr returnValue);
+
+        #endregion
     }
 }
 

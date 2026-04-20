@@ -8,6 +8,7 @@ using OpenCvSharp.Internal;
 
 namespace OpenCvSharp.Cuda
 {
+    //https://docs.opencv.org/3.4/d0/d60/classcv_1_1cuda_1_1GpuMat.html
     /// <summary>
     /// Smart pointer for GPU memory with reference counting. Its interface is mostly similar with cv::Mat.
     /// </summary>
@@ -476,96 +477,7 @@ namespace OpenCvSharp.Cuda
             }
         }
 #endregion
-
-#region Element Indexer
-
-        /// <summary>
-        /// GpuMat Indexer
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        public sealed class Indexer<T> : GpuMatIndexer<T> where T : struct
-        {
-            private readonly long ptrVal;
-
-            internal Indexer(GpuMat parent)
-                : base(parent)
-            {
-                ptrVal = parent.Data.ToInt64();
-            }
-
-            /// <summary>
-            /// 2-dimensional indexer
-            /// </summary>
-            /// <param name="i0">Index along the dimension 0</param>
-            /// <param name="i1">Index along the dimension 1</param>
-            /// <returns>A value to the specified array element.</returns>
-            public override T this[int i0, int i1]
-            {
-                get
-                {
-                    var p = new IntPtr(ptrVal + (step*i0) + (sizeOfT*i1));
-                    return Marshal.PtrToStructure<T>(p);
-                }
-                set
-                {
-                    var p = new IntPtr(ptrVal + (step*i0) + (sizeOfT*i1));
-                    Marshal.StructureToPtr(value, p, false);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets a type-specific indexer. The indexer has getters/setters to access each matrix element.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public Indexer<T> GetGenericIndexer<T>() where T : struct
-        {
-            return new Indexer<T>(this);
-        }
-
-#endregion
-
-#region Get/Set
-
-        /// <summary>
-        /// Returns a value to the specified array element.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="i0">Index along the dimension 0</param>
-        /// <param name="i1">Index along the dimension 1</param>
-        /// <returns>A value to the specified array element.</returns>
-        public T Get<T>(int i0, int i1) where T : struct
-        {
-            return new Indexer<T>(this)[i0, i1];
-        }
-
-        /// <summary>
-        /// Returns a value to the specified array element.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="i0">Index along the dimension 0</param>
-        /// <param name="i1">Index along the dimension 1</param>
-        /// <returns>A value to the specified array element.</returns>
-        public T At<T>(int i0, int i1) where T : struct
-        {
-            return new Indexer<T>(this)[i0, i1];
-        }
-
-        /// <summary>
-        /// Set a value to the specified array element.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="i0">Index along the dimension 0</param>
-        /// <param name="i1">Index along the dimension 1</param>
-        /// <param name="value"></param>
-        public void Set<T>(int i0, int i1, T value) where T : struct
-        {
-            (new Indexer<T>(this))[i0, i1] = value;
-        }
-
-#endregion
-        
+       
 #region Col/ColRange
 
         /// <summary>
@@ -1164,6 +1076,97 @@ namespace OpenCvSharp.Cuda
             if (Cv2.GetCudaEnabledDeviceCount() < 1)
                 throw new OpenCvSharpException("GPU module cannot be used.");
         }
+
+        #region Streams
+        /// <summary>
+        /// Performs non-blocking upload data to GpuMat.
+        /// </summary>
+        public void Upload(Mat m, Cuda.Stream stream)
+        {
+            if (m == null) throw new ArgumentNullException(nameof(m));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            ThrowIfDisposed();
+            // Use m.CvPtr instead of arr.CvPtr
+            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_upload_stream(CvPtr, m.CvPtr, stream.CvPtr));
+            GC.KeepAlive(this);
+            GC.KeepAlive(m);
+            GC.KeepAlive(stream);
+        }
+
+        /// <summary>
+        /// Performs non-blocking download data from GpuMat.
+        /// </summary>
+        public void Download(Mat m, Cuda.Stream stream)
+        {
+            if (m == null) throw new ArgumentNullException(nameof(m));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_download_stream(CvPtr, m.CvPtr, stream.CvPtr));
+            GC.KeepAlive(this);
+            GC.KeepAlive(m);
+            GC.KeepAlive(stream);
+        }
+
+        /// <summary>
+        /// copies the GpuMat content to device memory (Non-Blocking call)
+        /// </summary>
+        public void CopyTo(GpuMat dst, Stream stream)
+        {
+            if (dst == null) throw new ArgumentNullException(nameof(dst));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            ThrowIfDisposed();
+            // Use dst.CvPtr directly. Since dst is a GpuMat, this is a cv::cuda::GpuMat*
+            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_copyTo1_stream(CvPtr, dst.CvPtr, stream.CvPtr));
+            GC.KeepAlive(this);
+            GC.KeepAlive(dst);
+            GC.KeepAlive(stream);
+        }
+
+        /// <summary>
+        /// copies those GpuMat elements to "m" that are marked with non-zero mask elements (Non-Blocking call)
+        /// </summary>
+        public void CopyTo(GpuMat dst, GpuMat mask, Stream stream)
+        {
+            if (dst == null) throw new ArgumentNullException(nameof(dst));
+            if (mask == null) throw new ArgumentNullException(nameof(mask));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_copyTo2_stream(CvPtr, dst.CvPtr, mask.CvPtr, stream.CvPtr));
+            GC.KeepAlive(this);
+            GC.KeepAlive(dst);
+            GC.KeepAlive(mask);
+            GC.KeepAlive(stream);
+        }
+
+        /// <summary>
+        /// converts GpuMat to another datatype with optional scaling (Non-Blocking call)
+        /// </summary>
+        public void ConvertTo(GpuMat dst, MatType rtype, double alpha, double beta, Stream stream)
+        {
+            if (dst == null) throw new ArgumentNullException(nameof(dst));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_convertTo_stream(CvPtr, dst.CvPtr, (int)rtype, alpha, beta, stream.CvPtr));
+            GC.KeepAlive(this);
+            GC.KeepAlive(dst);
+            GC.KeepAlive(stream);
+        }
+
+        /// <summary>
+        /// sets some of the GpuMat elements to s, according to the mask (Non-Blocking call)
+        /// </summary>
+        public void SetTo(Scalar s, GpuMat mask, Stream stream)
+        {
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            ThrowIfDisposed();
+            // We use Cv2.ToPtr helper to handle the case where mask might be null
+            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_setTo_stream(CvPtr, s, Cv2.ToPtr(mask), stream.CvPtr, out _));
+            GC.KeepAlive(this);
+            GC.KeepAlive(mask);
+            GC.KeepAlive(stream);
+        }
+
+        #endregion
     }
 }
 
