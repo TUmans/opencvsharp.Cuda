@@ -19,7 +19,8 @@ namespace OpenCvSharp
         /// <returns></returns>
         public static int GetCudaEnabledDeviceCount()
         {
-            return NativeMethods.cuda_getCudaEnabledDeviceCount();
+            NativeMethods.HandleException(NativeMethods.cuda_getCudaEnabledDeviceCount(out int res));
+            return res;
         }
 
         /// <summary>
@@ -29,7 +30,8 @@ namespace OpenCvSharp
         public static int GetDevice()
         {
             ThrowIfGpuNotAvailable();
-            return NativeMethods.cuda_getDevice();
+            NativeMethods.HandleException(NativeMethods.cuda_getDevice(out int res));
+            return res;
         }
 
         /// <summary>
@@ -40,7 +42,8 @@ namespace OpenCvSharp
         public static int SetDevice(int device)
         {
             ThrowIfGpuNotAvailable();
-            return NativeMethods.cuda_getDevice();
+            NativeMethods.HandleException(NativeMethods.cuda_getDevice(out int res));
+            return res;
         }
 
         /// <summary>
@@ -133,7 +136,7 @@ namespace OpenCvSharp
         public static GpuMat CreateContinuous(int rows, int cols, MatType type)
         {
             ThrowIfGpuNotAvailable();
-            IntPtr ret = NativeMethods.cuda_createContinuous2(rows, cols, (int)type);
+            NativeMethods.HandleException(NativeMethods.cuda_createContinuous2(rows, cols, (int)type, out IntPtr ret));
             return new GpuMat(ret);
         }
 

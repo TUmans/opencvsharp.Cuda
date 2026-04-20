@@ -47,7 +47,7 @@ namespace OpenCvSharp.Cuda
         public Stream()
         {
             ThrowIfNotAvailable();
-            var p = NativeMethods.cuda_Stream_new1();
+            NativeMethods.HandleException(NativeMethods.cuda_Stream_new1(out IntPtr p));
             InitSafeHandle(p);
         }
 
@@ -60,7 +60,7 @@ namespace OpenCvSharp.Cuda
             ThrowIfNotAvailable();
             if (m is null)
                 throw new ArgumentNullException(nameof(m));
-            var p = NativeMethods.cuda_Stream_new2(m.CvPtr);
+            NativeMethods.HandleException(NativeMethods.cuda_Stream_new2(m.CvPtr, out IntPtr p));
             GC.KeepAlive(m);
             InitSafeHandle(p);
         }
@@ -103,7 +103,7 @@ namespace OpenCvSharp.Cuda
             {
                 if (nullObject is null)
                 {
-                    IntPtr ret = NativeMethods.cuda_Stream_Null();
+                    NativeMethods.HandleException(NativeMethods.cuda_Stream_Null(out IntPtr ret));
                     nullObject = new Stream(ret) {IsEnabledDispose = false};
                 }
                 return nullObject;
@@ -119,9 +119,9 @@ namespace OpenCvSharp.Cuda
         public static explicit operator bool(Stream self)
         {
             self.ThrowIfDisposed();
-            var res = NativeMethods.cuda_Stream_bool(self.ptr) != 0;
+            NativeMethods.HandleException(NativeMethods.cuda_Stream_bool(self.ptr, out int res));
             GC.KeepAlive(self);
-            return res;
+            return res != 0;
         }
 
         /// <summary>
@@ -131,9 +131,9 @@ namespace OpenCvSharp.Cuda
         public bool QueryIfComplete()
         {
             ThrowIfDisposed();
-            var res = NativeMethods.cuda_Stream_queryIfComplete(CvPtr) != 0;
+            NativeMethods.HandleException(NativeMethods.cuda_Stream_queryIfComplete(CvPtr, out int res));
             GC.KeepAlive(this);
-            return res;
+            return res != 0;
         }
 
         /// <summary>
