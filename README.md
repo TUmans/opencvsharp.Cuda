@@ -50,6 +50,14 @@ Normally you should only make sure your deployment target has a nvidia driver th
 
 The current build is made to be compatible with RTX30xx series. Update the architecture in cmake/opencv_build_options_cuda.cmake to target other devices.
 
+# Guides
+
+I highly recommend to look at the cuda tests to get a feel of how everything works. 
+
+# Development notes
+
+Using regulary OpenCVSharp functions use CPU processes. If you call a CPU process on a GpuMat it will fail silently. Don't do that. WIP
+
 # OpenCVSharp
 
 [The original OpenCv Readme](README.original.md)
