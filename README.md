@@ -20,9 +20,9 @@ In time, I will submit a merge request with opencvsharp.
 We also need the relevant DLL's. You can download them at:
 
 * Windows
-	* Nvidia CUDA Dlls. [Download](https://developer.nvidia.com/cuda-12-8-0-download-archive)
-	* Nvidia CuDnn Dlls. [Download](https://developer.nvidia.com/cudnn-9-2-0-download-archive)
-	* Nvidia video codex. [Download](https://developer.nvidia.com/video-codec-sdk#section-get-started)
+	* Nvidia CUDA 12.8 Dlls. [Download](https://developer.nvidia.com/cuda-12-8-0-download-archive)
+	* Nvidia CuDnn 9.20 Dlls. [Download](https://developer.nvidia.com/cudnn-9-2-0-download-archive)
+	* Nvidia video codex 13.0.37.  [Download](https://developer.nvidia.com/video-codec-sdk#section-get-started)
 * Linux
 	* WIP
 
