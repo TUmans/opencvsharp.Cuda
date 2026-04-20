@@ -15,7 +15,9 @@
 #   git submodule update --init --recursive
 
 param(
-    [int]$Jobs = 4
+    [int]$Jobs = 4,
+    [ValidateSet("Release", "Debug")]
+    [string]$Config = "Release"
 )
 
 $ErrorActionPreference = "Stop"
@@ -134,9 +136,13 @@ cmake `
 # ---------------------------------------------------------------------------
 # Build + Install
 # ---------------------------------------------------------------------------
+
+
+
+
 Write-Host "Building OpenCV (this takes 30-60 minutes on first run) ..."
-cmake --build "$buildDir" --config Release -j $Jobs
-cmake --install "$buildDir" --config Release
+cmake --build "$buildDir" --config $Config -j $Jobs
+cmake --install "$buildDir" --config $Config
 
 Write-Host ""
 Write-Host "Done. OpenCV installed to: $installDir"

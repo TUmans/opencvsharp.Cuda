@@ -40,6 +40,10 @@
 			<Link>%(FileName)%(Extension)</Link>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+	
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<None Include="..\..\src\build\Release\*">
 			<Link>%(FileName)%(Extension)</Link>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -49,8 +53,18 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<None Include="..\..\src\build\Debug\*">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\src\OpenCvSharp\bin\Debug\netstandard2.1\*">
+			<Link>%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>

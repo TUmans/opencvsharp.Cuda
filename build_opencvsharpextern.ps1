@@ -1,5 +1,7 @@
 param(
-    [int]$Jobs = 4
+    [int]$Jobs = 4,
+    [ValidateSet("Release", "Debug")]
+    [string]$Config = "Release"
 )
 
 $ErrorActionPreference = "Stop"
@@ -91,7 +93,5 @@ cmake -S src -B src\build -G "$vsGenerator" -A x64 `
       -D "VCPKG_TARGET_TRIPLET=x64-windows-static" `
       -D "VCPKG_INSTALLED_DIR=$vcpkgInstalledDir" `
       -D "VCPKG_OVERLAY_TRIPLETS=$RepoRoot/cmake/triplets"
-cmake --build src\build --config Release
-      
-
-      
+cmake --build src\build --config $Config
+     
