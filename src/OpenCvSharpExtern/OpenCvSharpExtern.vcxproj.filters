@@ -103,6 +103,9 @@
     <ClCompile Include="barcode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cudaarithm.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgsegm.h">

@@ -1,12 +1,12 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using OpenCvSharp.Cuda;
+using System.Text;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Internal.Vectors;
 
-#pragma warning disable CA1002 // Do not expose generic lists
-
-namespace OpenCvSharp;
+namespace OpenCvSharp.Cuda;
 
 /// <summary>
 /// Proxy data type for passing Mat's and vector&lt;&gt;'s as input parameters
@@ -308,6 +308,16 @@ public class InputArray : CvObject
     public static InputArray Create(double val) => new(val);
 
     /// <summary>
+    /// Creates a proxy class of the specified GpuMat
+    /// </summary>
+    /// <param name="mat"></param>
+    /// <returns></returns>
+    public static InputArray Create(GpuMat mat)
+    {
+        return new InputArray(mat);
+    }
+
+    /// <summary>
     /// Creates a proxy class of the specified array of Mat 
     /// </summary>
     /// <param name="matVector"></param>
@@ -589,7 +599,13 @@ public class InputArray : CvObject
     public static implicit operator InputArray(Scalar val) => Create(val);
 
     public static implicit operator InputArray(double val) => Create(val);
-        
+
+    public static implicit operator InputArray(GpuMat mat)
+    {
+        return Create(mat);
+    }
+
+
     public static explicit operator InputArray(List<Mat> mats) => Create(mats);
 
     public static explicit operator InputArray(Mat[] mats) => Create(mats);
@@ -638,7 +654,7 @@ public class InputArray : CvObject
         GC.KeepAlive(this);
         return new Mat(ret);
     }
-        
+
     /// <summary>
     /// 
     /// </summary>
@@ -1069,3 +1085,4 @@ public class InputArray : CvObject
 
     #endregion
 }
+
