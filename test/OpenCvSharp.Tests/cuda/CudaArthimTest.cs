@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿using Xunit;
+using OpenCvSharp.Cuda;
 
-namespace OpenCvSharp.Tests.cuda;
+namespace OpenCvSharp.Tests.Cuda;
 
-public class CudaArthim : CudaTestBase
+public class CudaArthimTest : CudaTestBase
 {
     // -----------------------------------------------------------------------
     // Helpers
@@ -15,40 +13,36 @@ public class CudaArthim : CudaTestBase
     /// Skips the test when no CUDA-capable device is present.
     /// Call at the top of every test.
     /// </summary>
-    private static void SkipIfNoCuda()
-    {
-          if (Cv2.GetCudaEnabledDeviceCount() == 0) return;
-            throw new SkipException("No CUDA device available.");
-    }
+    
 
-    /// <summary>Creates a single-channel float Cuda.GpuMat filled with <paramref name="value"/>.</summary>
-    private static Cuda.GpuMat MakeFloat(int rows, int cols, float value)
+    /// <summary>Creates a single-channel float GpuMat filled with <paramref name="value"/>.</summary>
+    private static GpuMat MakeFloat(int rows, int cols, float value)
     {
         using var cpu = new Mat(rows, cols, MatType.CV_32FC1, new Scalar(value));
-        var gpu = new Cuda.GpuMat();
+        var gpu = new GpuMat();
         gpu.Upload(cpu);
         return gpu;
     }
 
-    /// <summary>Creates a single-channel byte Cuda.GpuMat filled with <paramref name="value"/>.</summary>
-    private static Cuda.GpuMat MakeByte(int rows, int cols, byte value)
+    /// <summary>Creates a single-channel byte GpuMat filled with <paramref name="value"/>.</summary>
+    private static GpuMat MakeByte(int rows, int cols, byte value)
     {
         using var cpu = new Mat(rows, cols, MatType.CV_8UC1, new Scalar(value));
-        var gpu = new Cuda.GpuMat();
+        var gpu = new GpuMat();
         gpu.Upload(cpu);
         return gpu;
     }
 
-    /// <summary>Downloads a Cuda.GpuMat and returns the value of pixel (0,0) as float.</summary>
-    private static float PixelF(Cuda.GpuMat gpu)
+    /// <summary>Downloads a GpuMat and returns the value of pixel (0,0) as float.</summary>
+    private static float PixelF(GpuMat gpu)
     {
         using var cpu = new Mat();
         gpu.Download(cpu);
         return cpu.At<float>(0, 0);
     }
 
-    /// <summary>Downloads a Cuda.GpuMat and returns the value of pixel (0,0) as byte.</summary>
-    private static byte PixelB(Cuda.GpuMat gpu)
+    /// <summary>Downloads a GpuMat and returns the value of pixel (0,0) as byte.</summary>
+    private static byte PixelB(GpuMat gpu)
     {
         using var cpu = new Mat();
         gpu.Download(cpu);
@@ -68,12 +62,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Abs_NegativeValues_ReturnsAbsolute()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, -7f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Abs(src, dst);
+        Cv2.Cuda.Abs(src, dst);
 
         Assert.Equal(7f, PixelF(dst), 3);
     }
@@ -81,12 +75,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Abs_PositiveValues_Unchanged()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 5f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Abs(src, dst);
+        Cv2.Cuda.Abs(src, dst);
 
         Assert.Equal(5f, PixelF(dst), 3);
     }
@@ -94,15 +88,15 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Abs_NullSrc_Throws() =>
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Abs(null!, new Cuda.GpuMat()));
+            Cv2.Cuda.Abs(null!, new GpuMat()));
 
     [Fact]
     public void Abs_NullDst_Throws()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
         using var src = MakeFloat(Rows, Cols, 1f);
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Abs(src, null!));
+            Cv2.Cuda.Abs(src, null!));
     }
 
     // -----------------------------------------------------------------------
@@ -112,13 +106,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Absdiff_TwoMatrices_ReturnsCorrectDifference()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 10f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Absdiff(src1, src2, dst);
+        Cv2.Cuda.Absdiff(src1, src2, dst);
 
         Assert.Equal(7f, PixelF(dst), 3);
     }
@@ -126,13 +120,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Absdiff_ReversedOrder_StillPositive()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 3f);
         using var src2 = MakeFloat(Rows, Cols, 10f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Absdiff(src1, src2, dst);
+        Cv2.Cuda.Absdiff(src1, src2, dst);
 
         Assert.Equal(7f, PixelF(dst), 3);
     }
@@ -144,13 +138,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Add_TwoMatrices_ReturnsSum()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 4f);
         using var src2 = MakeFloat(Rows, Cols, 6f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Add(src1, src2, dst);
+        Cv2.Cuda.Add(src1, src2, dst);
 
         Assert.Equal(10f, PixelF(dst), 3);
     }
@@ -158,16 +152,16 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Add_WithStream_DoesNotThrow()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 1f);
         using var src2 = MakeFloat(Rows, Cols, 2f);
-        using var dst = new Cuda.GpuMat();
-        using var stream = new Cuda.Stream();
+        using var dst = new GpuMat();
+        using var stream = new OpenCvSharp.Cuda.Stream();
 
         var ex = Record.Exception(() =>
         {
-            Cv2.Add(src1, src2, dst, stream: stream);
+            Cv2.Cuda.Add(src1, src2, dst, stream: stream);
             stream.WaitForCompletion();
         });
 
@@ -181,14 +175,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void AddWeighted_ComputesCorrectResult()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // dst = 2*3 + 3*4 + 1 = 19
         using var src1 = MakeFloat(Rows, Cols, 3f);
         using var src2 = MakeFloat(Rows, Cols, 4f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.AddWeighted(src1, 2.0, src2, 3.0, 1.0, dst);
+        Cv2.Cuda.AddWeighted(src1, 2.0, src2, 3.0, 1.0, dst);
 
         Assert.Equal(19f, PixelF(dst), 2);
     }
@@ -200,14 +194,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void BitwiseAnd_ByteMatrices_ReturnsCorrectBits()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 0b1111_0000 & 0b1010_1010 = 0b1010_0000 = 160
         using var src1 = MakeByte(Rows, Cols, 0b1111_0000);
         using var src2 = MakeByte(Rows, Cols, 0b1010_1010);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.BitwiseAnd(src1, src2, dst);
+        Cv2.Cuda.BitwiseAnd(src1, src2, dst);
 
         Assert.Equal((byte)0b1010_0000, PixelB(dst));
     }
@@ -219,13 +213,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void BitwiseNot_ByteMatrix_ReturnsComplement()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // ~0b0000_1111 = 0b1111_0000 = 240
         using var src = MakeByte(Rows, Cols, 0b0000_1111);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.BitwiseNot(src, dst);
+        Cv2.Cuda.BitwiseNot(src, dst);
 
         Assert.Equal((byte)0b1111_0000, PixelB(dst));
     }
@@ -237,14 +231,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void BitwiseOr_ByteMatrices_ReturnsCorrectBits()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 0b1100_0000 | 0b0000_1100 = 0b1100_1100 = 204
         using var src1 = MakeByte(Rows, Cols, 0b1100_0000);
         using var src2 = MakeByte(Rows, Cols, 0b0000_1100);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.BitwiseOr(src1, src2, dst);
+        Cv2.Cuda.BitwiseOr(src1, src2, dst);
 
         Assert.Equal((byte)0b1100_1100, PixelB(dst));
     }
@@ -256,14 +250,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void BitwiseXor_ByteMatrices_ReturnsCorrectBits()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 0b1111_0000 ^ 0b1010_1010 = 0b0101_1010 = 90
         using var src1 = MakeByte(Rows, Cols, 0b1111_0000);
         using var src2 = MakeByte(Rows, Cols, 0b1010_1010);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.BitwiseXor(src1, src2, dst);
+        Cv2.Cuda.BitwiseXor(src1, src2, dst);
 
         Assert.Equal((byte)0b0101_1010, PixelB(dst));
     }
@@ -275,15 +269,15 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void CartToPolar_UnitVector_MagnitudeIsOne()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // x=1, y=0 → magnitude=1, angle=0°
         using var x = MakeFloat(Rows, Cols, 1f);
         using var y = MakeFloat(Rows, Cols, 0f);
-        using var mag = new Cuda.GpuMat();
-        using var ang = new Cuda.GpuMat();
+        using var mag = new GpuMat();
+        using var ang = new GpuMat();
 
-        Cv2.CartToPolar(x, y, mag, ang, angleInDegrees: true);
+        Cv2.Cuda.CartToPolar(x, y, mag, ang, angleInDegrees: true);
 
         Assert.Equal(1f, PixelF(mag), 3);
         Assert.Equal(0f, PixelF(ang), 3);
@@ -292,14 +286,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void CartToPolar_DiagonalVector_Magnitude_IsRootTwo()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var x = MakeFloat(Rows, Cols, 1f);
         using var y = MakeFloat(Rows, Cols, 1f);
-        using var mag = new Cuda.GpuMat();
-        using var ang = new Cuda.GpuMat();
+        using var mag = new GpuMat();
+        using var ang = new GpuMat();
 
-        Cv2.CartToPolar(x, y, mag, ang);
+        Cv2.Cuda.CartToPolar(x, y, mag, ang);
 
         Assert.Equal(Math.Sqrt(2f), PixelF(mag), 2);
     }
@@ -311,13 +305,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Compare_EqualMatrices_AllPixelsNonZero()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 5f);
         using var src2 = MakeFloat(Rows, Cols, 5f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Compare(src1, src2, dst, CmpTypes.EQ);
+        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.EQ);
 
         // OpenCV returns 255 for true comparisons
         using var cpu = new Mat();
@@ -328,13 +322,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Compare_NotEqual_AllPixelsZero()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 5f);
         using var src2 = MakeFloat(Rows, Cols, 6f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Compare(src1, src2, dst, CmpTypes.EQ);
+        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.EQ);
 
         using var cpu = new Mat();
         dst.Download(cpu);
@@ -348,13 +342,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Divide_TwoMatrices_ReturnsQuotient()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 10f);
         using var src2 = MakeFloat(Rows, Cols, 4f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Divide(src1, src2, dst);
+        Cv2.Cuda.Divide(src1, src2, dst);
 
         Assert.Equal(2.5f, PixelF(dst), 3);
     }
@@ -362,14 +356,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Divide_WithScale_ReturnsScaledQuotient()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // (10 / 2) * 3 = 15
         using var src1 = MakeFloat(Rows, Cols, 10f);
         using var src2 = MakeFloat(Rows, Cols, 2f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Divide(src1, src2, dst, scale: 3.0);
+        Cv2.Cuda.Divide(src1, src2, dst, scale: 3.0);
 
         Assert.Equal(15f, PixelF(dst), 2);
     }
@@ -381,12 +375,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Exp_Zero_ReturnsOne()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 0f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Exp(src, dst);
+        Cv2.Cuda.Exp(src, dst);
 
         Assert.Equal(1f, PixelF(dst), 3);
     }
@@ -394,12 +388,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Exp_One_ReturnsE()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 1f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Exp(src, dst);
+        Cv2.Cuda.Exp(src, dst);
 
         Assert.Equal(Math.E, PixelF(dst), 2);
     }
@@ -411,12 +405,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Log_One_ReturnsZero()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 1f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Log(src, dst);
+        Cv2.Cuda.Log(src, dst);
 
         Assert.Equal(0f, PixelF(dst), 3);
     }
@@ -424,12 +418,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Log_E_ReturnsOne()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, (float) Math.E);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Log(src, dst);
+        Cv2.Cuda.Log(src, dst);
 
         Assert.Equal(1f, PixelF(dst), 3);
     }
@@ -441,13 +435,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Lshift_ByteMatrix_ShiftsByGivenAmount()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 1 << 3 = 8
         using var src = MakeByte(Rows, Cols, 1);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Lshift(src, new Vec4i(3, 0, 0, 0), dst);
+        Cv2.Cuda.Lshift(src, new Vec4i(3, 0, 0, 0), dst);
 
         Assert.Equal((byte)8, PixelB(dst));
     }
@@ -455,13 +449,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Rshift_ByteMatrix_ShiftsByGivenAmount()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 16 >> 2 = 4
         using var src = MakeByte(Rows, Cols, 16);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Rshift(src, new Vec4i(2, 0, 0, 0), dst);
+        Cv2.Cuda.Rshift(src, new Vec4i(2, 0, 0, 0), dst);
 
         Assert.Equal((byte)4, PixelB(dst));
     }
@@ -473,14 +467,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Magnitude_SeparatePlanes_Returns345Hypotenuse()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 3-4-5 right triangle
         using var x = MakeFloat(Rows, Cols, 3f);
         using var y = MakeFloat(Rows, Cols, 4f);
-        using var mag = new Cuda.GpuMat();
+        using var mag = new GpuMat();
 
-        Cv2.Magnitude(x, y, mag);
+        Cv2.Cuda.Magnitude(x, y, mag);
 
         Assert.Equal(5f, PixelF(mag), 2);
     }
@@ -492,14 +486,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void MagnitudeSqr_SeparatePlanes_ReturnsSquaredMagnitude()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // sqrt(3² + 4²) = 5, so sqr = 25
         using var x = MakeFloat(Rows, Cols, 3f);
         using var y = MakeFloat(Rows, Cols, 4f);
-        using var mag = new Cuda.GpuMat();
+        using var mag = new GpuMat();
 
-        Cv2.MagnitudeSqr(x, y, mag);
+        Cv2.Cuda.MagnitudeSqr(x, y, mag);
 
         Assert.Equal(25f, PixelF(mag), 2);
     }
@@ -511,13 +505,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Max_TwoMatrices_ReturnsLarger()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 7f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Max(src1, src2, dst);
+        Cv2.Cuda.Max(src1, src2, dst);
 
         Assert.Equal(7f, PixelF(dst), 3);
     }
@@ -529,13 +523,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Min_TwoMatrices_ReturnsSmaller()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 7f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Min(src1, src2, dst);
+        Cv2.Cuda.Min(src1, src2, dst);
 
         Assert.Equal(3f, PixelF(dst), 3);
     }
@@ -547,13 +541,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Multiply_TwoMatrices_ReturnsProduct()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 6f);
         using var src2 = MakeFloat(Rows, Cols, 7f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Multiply(src1, src2, dst);
+        Cv2.Cuda.Multiply(src1, src2, dst);
 
         Assert.Equal(42f, PixelF(dst), 3);
     }
@@ -561,14 +555,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Multiply_WithScale_ReturnsScaledProduct()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // (2 * 3) * 0.5 = 3
         using var src1 = MakeFloat(Rows, Cols, 2f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Multiply(src1, src2, dst, scale: 0.5);
+        Cv2.Cuda.Multiply(src1, src2, dst, scale: 0.5);
 
         Assert.Equal(3f, PixelF(dst), 3);
     }
@@ -580,13 +574,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Phase_PositiveXZeroY_AngleIsZero()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var x = MakeFloat(Rows, Cols, 1f);
         using var y = MakeFloat(Rows, Cols, 0f);
-        using var ang = new Cuda.GpuMat();
+        using var ang = new GpuMat();
 
-        Cv2.Phase(x, y, ang, angleInDegrees: true);
+        Cv2.Cuda.Phase(x, y, ang, angleInDegrees: true);
 
         Assert.Equal(0f, PixelF(ang), 2);
     }
@@ -594,13 +588,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Phase_EqualXY_AngleIs45Degrees()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var x = MakeFloat(Rows, Cols, 1f);
         using var y = MakeFloat(Rows, Cols, 1f);
-        using var ang = new Cuda.GpuMat();
+        using var ang = new GpuMat();
 
-        Cv2.Phase(x, y, ang, angleInDegrees: true);
+        Cv2.Cuda.Phase(x, y, ang, angleInDegrees: true);
 
         Assert.Equal(45f, PixelF(ang), 1);
     }
@@ -612,14 +606,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void PolarToCart_UnitMagnitudeZeroAngle_XIsOneYIsZero()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var mag = MakeFloat(Rows, Cols, 1f);
         using var ang = MakeFloat(Rows, Cols, 0f);
-        using var x = new Cuda.GpuMat();
-        using var y = new Cuda.GpuMat();
+        using var x = new GpuMat();
+        using var y = new GpuMat();
 
-        Cv2.PolarToCart(mag, ang, x, y, angleInDegrees: true);
+        Cv2.Cuda.PolarToCart(mag, ang, x, y, angleInDegrees: true);
 
         Assert.Equal(1f, PixelF(x), 3);
         Assert.Equal(0f, PixelF(y), 3);
@@ -632,13 +626,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Pow_BaseAndExponent_ReturnsCorrectPower()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 3^4 = 81
         using var src = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Pow(src, 4.0, dst);
+        Cv2.Cuda.Pow(src, 4.0, dst);
 
         Assert.Equal(81f, PixelF(dst), 1);
     }
@@ -646,12 +640,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Pow_ExponentZero_ReturnsOne()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 99f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Pow(src, 0.0, dst);
+        Cv2.Cuda.Pow(src, 0.0, dst);
 
         Assert.Equal(1f, PixelF(dst), 3);
     }
@@ -663,14 +657,14 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void ScaleAdd_ComputesAlphaSrc1PlusSrc2()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         // 2.5 * 4 + 3 = 13
         using var src1 = MakeFloat(Rows, Cols, 4f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.ScaleAdd(src1, 2.5, src2, dst);
+        Cv2.Cuda.ScaleAdd(src1, 2.5, src2, dst);
 
         Assert.Equal(13f, PixelF(dst), 2);
     }
@@ -682,12 +676,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Sqr_PositiveValue_ReturnsSquare()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 9f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Sqr(src, dst);
+        Cv2.Cuda.Sqr(src, dst);
 
         Assert.Equal(81f, PixelF(dst), 2);
     }
@@ -699,12 +693,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Sqrt_PerfectSquare_ReturnsRoot()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 144f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Sqrt(src, dst);
+        Cv2.Cuda.Sqrt(src, dst);
 
         Assert.Equal(12f, PixelF(dst), 3);
     }
@@ -716,13 +710,13 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Subtract_TwoMatrices_ReturnsDifference()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src1 = MakeFloat(Rows, Cols, 10f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Subtract(src1, src2, dst);
+        Cv2.Cuda.Subtract(src1, src2, dst);
 
         Assert.Equal(7f, PixelF(dst), 3);
     }
@@ -734,12 +728,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Threshold_BinaryType_PixelsAboveThresholdBecome255()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 200f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Threshold(src, dst, thresh: 100.0, maxval: 255.0,
+        Cv2.Cuda.Threshold(src, dst, thresh: 100.0, maxval: 255.0,
             ThresholdTypes.Binary);
 
         Assert.Equal(255f, PixelF(dst), 0);
@@ -748,12 +742,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Threshold_BinaryType_PixelsBelowThresholdBecomeZero()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 50f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        Cv2.Threshold(src, dst, thresh: 100.0, maxval: 255.0,
+        Cv2.Cuda.Threshold(src, dst, thresh: 100.0, maxval: 255.0,
             ThresholdTypes.Binary);
 
         Assert.Equal(0f, PixelF(dst), 0);
@@ -762,12 +756,12 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Threshold_ReturnsThresholdValue()
     {
-        SkipIfNoCuda();
+        VerifyCudaSupport();
 
         using var src = MakeFloat(Rows, Cols, 50f);
-        using var dst = new Cuda.GpuMat();
+        using var dst = new GpuMat();
 
-        double returned = Cv2.Threshold(src, dst,
+        double returned = Cv2.Cuda.Threshold(src, dst,
             thresh: 128.0, maxval: 255.0, ThresholdTypes.Binary);
 
         Assert.Equal(128.0, returned, 3);
@@ -780,36 +774,36 @@ public class CudaArthim : CudaTestBase
     [Fact]
     public void Add_NullSrc1_Throws() =>
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Add(null!, new Cuda.GpuMat(), new Cuda.GpuMat()));
+            Cv2.Cuda.Add(null!, new GpuMat(), new GpuMat()));
 
     [Fact]
     public void Add_NullSrc2_Throws()
     {
-        using var src1 = new Cuda.GpuMat();
+        using var src1 = new GpuMat();
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Add(src1, null!, new Cuda.GpuMat()));
+            Cv2.Cuda.Add(src1, null!, new GpuMat()));
     }
 
     [Fact]
     public void Add_NullDst_Throws()
     {
-        using var src1 = new Cuda.GpuMat();
-        using var src2 = new Cuda.GpuMat();
+        using var src1 = new GpuMat();
+        using var src2 = new GpuMat();
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Add(src1, src2, null!));
+            Cv2.Cuda.Add(src1, src2, null!));
     }
 
     [Fact]
     public void Threshold_NullSrc_Throws() =>
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Threshold(null!, new Cuda.GpuMat(), 0, 255, ThresholdTypes.Binary));
+            Cv2.Cuda.Threshold(null!, new GpuMat(), 0, 255, ThresholdTypes.Binary));
 
     [Fact]
     public void Threshold_NullDst_Throws()
     {
-        using var src = new Cuda.GpuMat();
+        using var src = new GpuMat();
         Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Threshold(src, null!, 0, 255, ThresholdTypes.Binary));
+            Cv2.Cuda.Threshold(src, null!, 0, 255, ThresholdTypes.Binary));
     }
 }
 

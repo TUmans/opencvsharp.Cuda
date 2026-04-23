@@ -52,7 +52,7 @@ namespace OpenCvSharp.Cuda
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(GetType().Name);
-            if (Cv2.GetCudaEnabledDeviceCount() < 1)
+            if (Cv2.Cuda.GetCudaEnabledDeviceCount() < 1)
                 throw new OpenCvSharpException("Your OpenCV DLL does not support GPU module.");
 
             if (!IsGpuCompatible)
@@ -68,8 +68,8 @@ namespace OpenCvSharp.Cuda
             {
                 if (!isGpuAvailable.HasValue)
                 {
-                    isGpuAvailable = (Cv2.GetCudaEnabledDeviceCount() >= 1) &&
-                                     new DeviceInfo(Cv2.GetDevice()).IsCompatible;
+                    isGpuAvailable = (Cv2.Cuda.GetCudaEnabledDeviceCount() >= 1) &&
+                                     new DeviceInfo(Cv2.Cuda.GetDevice()).IsCompatible;
                 }
                 return isGpuAvailable.Value;
             }

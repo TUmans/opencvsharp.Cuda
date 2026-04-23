@@ -16,9 +16,7 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_absdiff(IntPtr src1, IntPtr src2, IntPtr dst, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_add(
-        IntPtr src1, IntPtr src2, IntPtr dst,
-        IntPtr mask, int dtype, IntPtr stream);
+    public static extern ExceptionStatus cuda_add(IntPtr src1, IntPtr src2, IntPtr dst, IntPtr mask, int dtype, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_addWeighted(

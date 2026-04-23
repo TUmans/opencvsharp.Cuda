@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
-using OpenCvSharp;
+using OpenCvSharp.Cuda;
 
-namespace OpenCvSharp.Tests.cuda.GpuMat;
+namespace OpenCvSharp.Tests.Cuda;
 
 public class GpuMatTest : CudaTestBase
 {
     [Fact]
     public void GpuMatUploadAndDownloadTest()
     {
-        EnsureCuda();
+        VerifyCudaSupport();
 
         using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(128));
 
-        using var gpuMat = new OpenCvSharp.Cuda.GpuMat();
+        using var gpuMat = new GpuMat();
         gpuMat.Upload(cpuSrc);
 
         Assert.False(gpuMat.Empty());
@@ -28,25 +28,12 @@ public class GpuMatTest : CudaTestBase
         ImageEquals(cpuSrc, cpuDst);
     }
 
-   
-    private static bool HasCuda()
-    {
-        try
-        {
-            return Cv2.GetCudaEnabledDeviceCount() > 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     [Fact]
     public void EmptyConstructor()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var gpuMat = new Cuda.GpuMat();
+        using var gpuMat = new GpuMat();
         Assert.True(gpuMat.Empty());
         Assert.Equal(0, gpuMat.Rows);
         Assert.Equal(0, gpuMat.Cols);
@@ -55,11 +42,11 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void SizeAndTypeConstructor()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         int rows = 10;
         int cols = 20;
-        using var gpuMat = new Cuda.GpuMat(rows, cols, MatType.CV_8UC3);
+        using var gpuMat = new GpuMat(rows, cols, MatType.CV_8UC3);
 
         Assert.False(gpuMat.Empty());
         Assert.Equal(rows, gpuMat.Rows);
@@ -72,9 +59,9 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void ScalarConstructor()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var gpuMat = new Cuda.GpuMat(5, 5, MatType.CV_8UC1, new Scalar(42));
+        using var gpuMat = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(42));
         using var hostMat = new Mat();
 
         // Download to host to safely verify values
@@ -87,10 +74,10 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void UploadDownload()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         using var hostMat = new Mat(15, 15, MatType.CV_32FC1, new Scalar(3.14f));
-        using var gpuMat = new Cuda.GpuMat();
+        using var gpuMat = new GpuMat();
 
         // Upload
         gpuMat.Upload(hostMat);
@@ -109,10 +96,10 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void MatToGpuMatCast()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         using var hostMat = new Mat(10, 10, MatType.CV_8UC1, new Scalar(100));
-        using var gpuMat = new Cuda.GpuMat(hostMat);
+        using var gpuMat = new GpuMat(hostMat);
 
         Assert.Equal(10, gpuMat.Rows);
         Assert.Equal(MatType.CV_8UC1, gpuMat.Type());
@@ -125,9 +112,9 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void Clone()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var gpuMat1 = new Cuda.GpuMat(10, 10, MatType.CV_8UC1, new Scalar(50));
+        using var gpuMat1 = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(50));
         using var gpuMat2 = gpuMat1.Clone();
 
         Assert.Equal(gpuMat1.Rows, gpuMat2.Rows);
@@ -142,10 +129,10 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void CopyTo()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var src = new Cuda.GpuMat(5, 5, MatType.CV_8UC1, new Scalar(100));
-        using var dst = new Cuda.GpuMat();
+        using var src = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(100));
+        using var dst = new GpuMat();
 
         src.CopyTo(dst);
 
@@ -160,10 +147,10 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void ConvertTo()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var src = new Cuda.GpuMat(5, 5, MatType.CV_8UC1, new Scalar(10));
-        using var dst = new Cuda.GpuMat();
+        using var src = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(10));
+        using var dst = new GpuMat();
 
         // Convert byte to float, and scale by 2.5
         src.ConvertTo(dst, MatType.CV_32FC1, 2.5, 0);
@@ -178,9 +165,9 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void SetTo()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var gpuMat = new Cuda.GpuMat(5, 5, MatType.CV_8UC1, new Scalar(0));
+        using var gpuMat = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(0));
         gpuMat.SetTo(new Scalar(255));
 
         using var hostMat = new Mat();
@@ -192,10 +179,10 @@ public class GpuMatTest : CudaTestBase
     // https://github.com/opencv/opencv/issues/4728
     //public void Reshape()
     //{
-    //    if (!HasCuda()) return;
+    //    CheckCuda();
 
     //    // 10x10, 1 channel
-    //    using var gpuMat = new Cuda.GpuMat(10, 10, MatType.CV_8UC1);
+    //    using var gpuMat = new GpuMat(10, 10, MatType.CV_8UC1);
 
     //    // Reshape to 2 channels, calculate rows automatically (0 means keep same if possible, or calculate based on channels)
     //    // 100 elements / 2 channels = 50 elements. If we say rows = 5, cols will be 10.
@@ -209,17 +196,17 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void SubMatrixROI()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         using var hostMat = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
         // Set a 2x2 block in the middle to 255
         hostMat.SubMat(new Rect(4, 4, 2, 2)).SetTo(new Scalar(255));
 
-        using var gpuMat = new Cuda.GpuMat();
+        using var gpuMat = new GpuMat();
         gpuMat.Upload(hostMat);
 
         // Extract ROI on GPU
-        using var roiGpu = new Cuda.GpuMat(gpuMat, new Rect(4, 4, 2, 2));
+        using var roiGpu = new GpuMat(gpuMat, new Rect(4, 4, 2, 2));
 
         Assert.Equal(2, roiGpu.Rows);
         Assert.Equal(2, roiGpu.Cols);
@@ -234,9 +221,9 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void RowAndColRange()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var gpuMat = new Cuda.GpuMat(10, 10, MatType.CV_8UC1);
+        using var gpuMat = new GpuMat(10, 10, MatType.CV_8UC1);
 
         using var rowRange = gpuMat.RowRange(2, 5);
         Assert.Equal(3, rowRange.Rows);
@@ -250,10 +237,10 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void Swap()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var m1 = new Cuda.GpuMat(5, 5, MatType.CV_8UC1);
-        using var m2 = new Cuda.GpuMat(10, 10, MatType.CV_32FC1);
+        using var m1 = new GpuMat(5, 5, MatType.CV_8UC1);
+        using var m2 = new GpuMat(10, 10, MatType.CV_32FC1);
 
         m1.Swap(m2);
 
@@ -267,9 +254,9 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void PropertiesTest()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var m = new Cuda.GpuMat(10, 20, MatType.CV_32FC3);
+        using var m = new GpuMat(10, 20, MatType.CV_32FC3);
 
         Assert.Equal(10, m.Rows);
         Assert.Equal(20, m.Cols);
@@ -290,10 +277,10 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void LocateROI()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
-        using var gpuMat = new Cuda.GpuMat(20, 20, MatType.CV_8UC1);
-        using var roi = new Cuda.GpuMat(gpuMat, new Rect(5, 5, 10, 10));
+        using var gpuMat = new GpuMat(20, 20, MatType.CV_8UC1);
+        using var roi = new GpuMat(gpuMat, new Rect(5, 5, 10, 10));
 
         roi.LocateROI(out Size wholeSize, out Point ofs);
 
@@ -306,15 +293,15 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void AsyncStreamUploadAndDownload()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         // 1. Prepare data on CPU
         using var source = new Mat(100, 100, MatType.CV_8UC1, Scalar.All(50));
         using var destination = new Mat();
-        using var gpuMat = new Cuda.GpuMat();
+        using var gpuMat = new GpuMat();
 
         // 2. Create the stream
-        using var stream = new Cuda.Stream();
+        using var stream = new OpenCvSharp.Cuda.Stream();
 
         // 3. Upload asynchronously
         gpuMat.Upload(source, stream);
@@ -336,13 +323,13 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void AsyncStreamCopyTo()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         using var source = new Mat(100, 100, MatType.CV_8UC1, Scalar.All(100));
-        using var gpuSource = new Cuda.GpuMat();
-        using var gpuDest = new Cuda.GpuMat();
+        using var gpuSource = new GpuMat();
+        using var gpuDest = new GpuMat();
         using var result = new Mat();
-        using var stream = new Cuda.Stream();
+        using var stream = new OpenCvSharp.Cuda.Stream();
 
         // Upload sync (to set up)
         gpuSource.Upload(source);
@@ -361,12 +348,12 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void StreamQuery()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         // Use a very large matrix to give the GPU "work" to do
         using var largeMat = new Mat(5000, 5000, MatType.CV_32FC1, Scalar.All(1.0));
-        using var gpuMat = new Cuda.GpuMat();
-        using var stream = new Cuda.Stream();
+        using var gpuMat = new GpuMat();
+        using var stream = new OpenCvSharp.Cuda.Stream();
 
         // Start a large upload
         gpuMat.Upload(largeMat, stream);
@@ -383,17 +370,17 @@ public class GpuMatTest : CudaTestBase
     [Fact]
     public void AsyncStreamSetTo()
     {
-        if (!HasCuda()) return;
+        VerifyCudaSupport();
 
         // Create a black image
-        using var gpuMat = new Cuda.GpuMat(10, 10, MatType.CV_8UC1, Scalar.All(0));
+        using var gpuMat = new GpuMat(10, 10, MatType.CV_8UC1, Scalar.All(0));
         // Create a mask (only fill the first 5 rows)
         using var mask = new Mat(10, 10, MatType.CV_8UC1, Scalar.All(0));
         mask.RowRange(0, 5).SetTo(Scalar.All(255));
-        using var gpuMask = new Cuda.GpuMat();
+        using var gpuMask = new GpuMat();
         gpuMask.Upload(mask);
 
-        using var stream = new Cuda.Stream();
+        using var stream = new OpenCvSharp.Cuda.Stream();
         using var result = new Mat();
 
         // Fill with 255 where mask is non-zero

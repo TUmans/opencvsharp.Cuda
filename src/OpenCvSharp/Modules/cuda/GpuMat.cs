@@ -1073,7 +1073,7 @@ namespace OpenCvSharp.Cuda
         private void ThrowIfNotAvailable()
         {
             ThrowIfDisposed();
-            if (Cv2.GetCudaEnabledDeviceCount() < 1)
+            if (Cv2.Cuda.GetCudaEnabledDeviceCount() < 1)
                 throw new OpenCvSharpException("GPU module cannot be used.");
         }
 
@@ -1081,7 +1081,7 @@ namespace OpenCvSharp.Cuda
         /// <summary>
         /// Performs non-blocking upload data to GpuMat.
         /// </summary>
-        public void Upload(Mat m, Cuda.Stream stream)
+        public void Upload(Mat m, Stream stream)
         {
             if (m == null) throw new ArgumentNullException(nameof(m));
             if (stream == null) throw new ArgumentNullException(nameof(stream));
@@ -1096,7 +1096,7 @@ namespace OpenCvSharp.Cuda
         /// <summary>
         /// Performs non-blocking download data from GpuMat.
         /// </summary>
-        public void Download(Mat m, Cuda.Stream stream)
+        public void Download(Mat m, Stream stream)
         {
             if (m == null) throw new ArgumentNullException(nameof(m));
             if (stream == null) throw new ArgumentNullException(nameof(stream));

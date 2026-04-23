@@ -17,7 +17,7 @@ namespace OpenCvSharp.Cuda
         /// </summary>
         public DeviceInfo()
         {
-            Cv2.ThrowIfGpuNotAvailable();
+            Cv2.Cuda.ThrowIfGpuNotAvailable();
             NativeMethods.HandleException(NativeMethods.cuda_DeviceInfo_new1(out IntPtr p));
             InitSafeHandle(p);
         }
@@ -28,7 +28,7 @@ namespace OpenCvSharp.Cuda
         /// <param name="deviceId"></param>
         public DeviceInfo(int deviceId)
         {
-            Cv2.ThrowIfGpuNotAvailable();
+            Cv2.Cuda.ThrowIfGpuNotAvailable();
             NativeMethods.HandleException(NativeMethods.cuda_DeviceInfo_new2(deviceId, out IntPtr p));
             InitSafeHandle(p);
         }
