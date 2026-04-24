@@ -58,6 +58,21 @@ I highly recommend to look at the cuda tests to get a feel of how everything wor
 
 Using regulary OpenCVSharp functions use CPU processes. If you call a CPU process on a GpuMat it will fail silently. Don't do that. WIP
 
+# OpenCV Cuda Notes
+
+## Stream
+
+[see OpenCV docs](https://docs.opencv.org/4.x/d9/df3/classcv_1_1cuda_1_1Stream.html)
+> [!WARNING] 
+>
+>   Currently, you may face problems if an operation is enqueued twice with different data. Some functions use the constant GPU memory, and next call may update the memory before the previous one has been finished. But calling different operations asynchronously is safe because each operation has its own constant buffer. Memory copy/upload/download/set operations to the buffers you hold are also safe.
+>   The Stream class is not thread-safe. Please use different Stream objects for different CPU threads.
+
+> [!WARNING] 
+>
+>   By default all CUDA routines are launched in Stream::Null() object, if the stream is not specified by user. In multi-threading environment the stream objects must be passed explicitly (see previous note). 
+
+
 # OpenCVSharp
 
 [The original OpenCv Readme](README.original.md)
