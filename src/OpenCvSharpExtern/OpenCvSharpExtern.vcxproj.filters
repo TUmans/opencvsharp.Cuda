@@ -103,7 +103,7 @@
     <ClCompile Include="barcode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cudaarithm.h">
+    <ClCompile Include="cuda_Arithm.h">
       <Filter>Header Files\cuda</Filter>
     </ClCompile>
   </ItemGroup>

@@ -57,7 +57,7 @@
     <ClCompile Include="calib3d.cpp" />
     <ClCompile Include="core.cpp" />
     <ClCompile Include="cuda.cpp" />
-    <ClCompile Include="cudaarithm.h" />
+    <ClCompile Include="cuda_Arithm.h" />
     <ClCompile Include="dnn.cpp" />
     <ClCompile Include="dnn_superres.cpp" />
     <ClCompile Include="face.cpp" />

@@ -805,6 +805,196 @@ public class CudaArthimTest : CudaTestBase
         Assert.Throws<ArgumentNullException>(() =>
             Cv2.Cuda.Threshold(src, null!, 0, 255, ThresholdTypes.Binary));
     }
+
+    // -----------------------------------------------------------------------
+    // Stream Tests (Verifying actual results, not just execution)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Subtract_WithStream_VerifiesResult()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 20f);
+        using var src2 = MakeFloat(Rows, Cols, 5f);
+        using var dst = new GpuMat();
+        using var stream = new OpenCvSharp.Cuda.Stream();
+
+        Cv2.Cuda.Subtract(src1, src2, dst, stream: stream);
+
+        // Wait for the GPU to finish before checking the result
+        stream.WaitForCompletion();
+
+        Assert.Equal(15f, PixelF(dst), 3);
+    }
+
+    [Fact]
+    public void CartToPolar_WithStream_VerifiesResult()
+    {
+        VerifyCudaSupport();
+
+        using var x = MakeFloat(Rows, Cols, 3f);
+        using var y = MakeFloat(Rows, Cols, 4f);
+        using var mag = new GpuMat();
+        using var ang = new GpuMat();
+        using var stream = new OpenCvSharp.Cuda.Stream();
+
+        Cv2.Cuda.CartToPolar(x, y, mag, ang, stream: stream);
+        stream.WaitForCompletion();
+
+        Assert.Equal(5f, PixelF(mag), 2);
+    }
+
+    // -----------------------------------------------------------------------
+    // Mask Tests
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Add_WithEmptyMask_LeavesDestinationUntouched()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 4f);
+        using var src2 = MakeFloat(Rows, Cols, 6f);
+        using var mask = MakeByte(Rows, Cols, 0); // 0 = Do not process
+        using var dst = MakeFloat(Rows, Cols, 99f); // Pre-fill with known value
+
+        Cv2.Cuda.Add(src1, src2, dst, mask: mask);
+
+        // Because the mask is 0 everywhere, dst should remain 99f, not 10f
+        Assert.Equal(99f, PixelF(dst), 3);
+    }
+
+    [Fact]
+    public void Add_WithFullMask_UpdatesDestination()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 4f);
+        using var src2 = MakeFloat(Rows, Cols, 6f);
+        using var mask = MakeByte(Rows, Cols, 255); // 255 = Process everywhere
+        using var dst = MakeFloat(Rows, Cols, 99f);
+
+        Cv2.Cuda.Add(src1, src2, dst, mask: mask);
+
+        // Because the mask is 255 everywhere, dst should be updated to 10f
+        Assert.Equal(10f, PixelF(dst), 3);
+    }
+
+    [Fact]
+    public void BitwiseNot_WithEmptyMask_LeavesDestinationUntouched()
+    {
+        VerifyCudaSupport();
+
+        using var src = MakeByte(Rows, Cols, 0b0000_1111);
+        using var mask = MakeByte(Rows, Cols, 0);
+        using var dst = MakeByte(Rows, Cols, 0b1010_1010); // Known background
+
+        Cv2.Cuda.BitwiseNot(src, dst, mask: mask);
+
+        Assert.Equal((byte)0b1010_1010, PixelB(dst));
+    }
+
+    // -----------------------------------------------------------------------
+    // In-Place Operation Tests (src == dst)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Add_InPlace_UpdatesSourceCorrectly()
+    {
+        VerifyCudaSupport();
+
+        // We use the same matrix for src1 and dst
+        using var srcDst = MakeFloat(Rows, Cols, 5f);
+        using var src2 = MakeFloat(Rows, Cols, 2f);
+
+        Cv2.Cuda.Add(srcDst, src2, srcDst);
+
+        Assert.Equal(7f, PixelF(srcDst), 3);
+    }
+
+    [Fact]
+    public void BitwiseXor_InPlace_ZerosOutMatrix()
+    {
+        VerifyCudaSupport();
+
+        using var srcDst = MakeByte(Rows, Cols, 0b1100_1100);
+
+        // XORing a matrix with itself should result in 0
+        Cv2.Cuda.BitwiseXor(srcDst, srcDst, srcDst);
+
+        Assert.Equal((byte)0, PixelB(srcDst));
+    }
+
+    // -----------------------------------------------------------------------
+    // Compare Edge Cases
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Compare_GreaterThan_ReturnsTrueCorrectly()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 10f);
+        using var src2 = MakeFloat(Rows, Cols, 5f);
+        using var dst = new GpuMat();
+
+        // 10 > 5 is True (255)
+        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.GT);
+
+        Assert.Equal((byte)255, PixelB(dst));
+    }
+
+    [Fact]
+    public void Compare_LessThan_ReturnsFalseCorrectly()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 10f);
+        using var src2 = MakeFloat(Rows, Cols, 5f);
+        using var dst = new GpuMat();
+
+        // 10 < 5 is False (0)
+        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.LT);
+
+        Assert.Equal((byte)0, PixelB(dst));
+    }
+
+    // -----------------------------------------------------------------------
+    // Advanced Parameter Tests (dtype, scale, radians vs degrees)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Multiply_WithDtype_CastsOutputProperly()
+    {
+        VerifyCudaSupport();
+
+        // Input is byte (CV_8UC1)
+        using var src1 = MakeByte(Rows, Cols, 100);
+        using var src2 = MakeByte(Rows, Cols, 2);
+        using var dst = new GpuMat();
+
+        // Multiply to 200, but output as Float (MatType.CV_32FC1 == 5)
+        Cv2.Cuda.Multiply(src1, src2, dst, dtype: (int)MatType.CV_32FC1);
+
+        Assert.Equal(MatType.CV_32FC1, dst.Type());
+        Assert.Equal(200f, PixelF(dst), 2);
+    }
+
+    [Fact]
+    public void Phase_Radians_ReturnsCorrectAngle()
+    {
+        VerifyCudaSupport();
+
+        using var x = MakeFloat(Rows, Cols, 1f);
+        using var y = MakeFloat(Rows, Cols, 1f);
+        using var ang = new GpuMat();
+
+        // angleInDegrees = false -> Should return Pi/4 (approx 0.785)
+        Cv2.Cuda.Phase(x, y, ang, angleInDegrees: false);
+
+        Assert.Equal((float)(Math.PI / 4.0), PixelF(ang), 3);
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -258,6 +258,20 @@ public class InputArray : CvObject
                 releaseAction: ptr => NativeMethods.core_InputArray_delete(ptr)));
     }
 
+    internal InputArray(GpuMat? gpuMat)
+    {
+        obj = gpuMat;
+        if (gpuMat is null)
+            return;
+
+        NativeMethods.HandleException(
+            NativeMethods.core_InputArray_new_byGpuMat(gpuMat.CvPtr, out var p));
+
+        GC.KeepAlive(gpuMat);
+        SetSafeHandle(new OpenCvPtrSafeHandle(p, ownsHandle: true,
+            releaseAction: ptr => NativeMethods.core_InputArray_delete(ptr)));
+    }
+
     /// <summary>
     /// Releases managed resources
     /// </summary>
