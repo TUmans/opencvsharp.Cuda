@@ -38,56 +38,6 @@ public class InputArray : CvObject
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="mat"></param>
-    // ReSharper disable once SuggestBaseTypeForParameter
-    internal InputArray(Mat? mat)
-    {
-        obj = mat;
-        if (mat is null)
-            return;
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_new_byMat(mat.CvPtr, out var p));
-        GC.KeepAlive(mat);
-        SetSafeHandle(new OpenCvPtrSafeHandle(p, ownsHandle: true,
-            releaseAction: ptr => NativeMethods.core_InputArray_delete(ptr)));
-    }
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mat"></param>
-    // ReSharper disable once SuggestBaseTypeForParameter
-    internal InputArray(UMat? mat)
-    {
-        obj = mat;
-        if (mat is null)
-            return;
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_new_byUMat(mat.CvPtr, out var p));
-        GC.KeepAlive(mat);
-        SetSafeHandle(new OpenCvPtrSafeHandle(p, ownsHandle: true,
-            releaseAction: ptr => NativeMethods.core_InputArray_delete(ptr)));
-    }
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="expr"></param>
-    // ReSharper disable once SuggestBaseTypeForParameter
-    internal InputArray(MatExpr? expr)
-    {
-        if (expr is null)
-            return;
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_new_byMatExpr(expr.CvPtr, out var p));
-        GC.KeepAlive(expr);
-        SetSafeHandle(new OpenCvPtrSafeHandle(p, ownsHandle: true,
-            releaseAction: ptr => NativeMethods.core_InputArray_delete(ptr)));
-    }
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
     /// <param name="val"></param>
     internal InputArray(Scalar val)
     {
@@ -241,23 +191,6 @@ public class InputArray : CvObject
             }));
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="mat"></param>
-    internal InputArray(IEnumerable<Mat> mat)
-    {
-        if (mat is null)
-            throw new ArgumentNullException(nameof(mat));
-        using var matVector = new VectorOfMat(mat);
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_new_byVectorOfMat(matVector.CvPtr, out var p));
-        obj = mat;
-        if (p != IntPtr.Zero)
-            SetSafeHandle(new OpenCvPtrSafeHandle(p, ownsHandle: true,
-                releaseAction: ptr => NativeMethods.core_InputArray_delete(ptr)));
-    }
-
     internal InputArray(GpuMat? gpuMat)
     {
         obj = gpuMat;
@@ -287,27 +220,6 @@ public class InputArray : CvObject
     #region Create
 
     /// <summary>
-    /// Creates a proxy class of the specified Mat
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
-    public static InputArray Create(Mat mat) => new(mat);
-
-    /// <summary>
-    /// Creates a proxy class of the specified Mat
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
-    public static InputArray Create(UMat mat) => new(mat);
-
-    /// <summary>
-    /// Creates a proxy class of the specified MatExpr
-    /// </summary>
-    /// <param name="expr"></param>
-    /// <returns></returns>
-    public static InputArray Create(MatExpr expr) => new(expr);
-
-    /// <summary>
     /// Creates a proxy class of the specified Scalar
     /// </summary>
     /// <param name="val"></param>
@@ -330,13 +242,6 @@ public class InputArray : CvObject
     {
         return new InputArray(mat);
     }
-
-    /// <summary>
-    /// Creates a proxy class of the specified array of Mat 
-    /// </summary>
-    /// <param name="matVector"></param>
-    /// <returns></returns>
-    public static InputArray Create(IEnumerable<Mat> matVector) => new(matVector);
 
     /// <summary>
     /// Creates a proxy class of the specified list
@@ -377,58 +282,6 @@ public class InputArray : CvObject
     {
         var type = EstimateType(typeof(T));
         return Create(array, type);
-    }
-
-    /// <summary>
-    /// Creates a proxy class of the specified list
-    /// </summary>
-    /// <param name="array">Array object</param>
-    /// <param name="type">Matrix depth and channels for converting array to cv::Mat</param>
-    /// <returns></returns>
-    public static InputArray Create<T>(T[] array, MatType type)
-        where T : struct
-    {
-        if (array is null)
-            throw new ArgumentNullException(nameof(array));
-        if (array.Length == 0)
-            throw new ArgumentException("array.Length == 0");
-
-        var rows = array.Length;
-        var mat = Mat.FromPixelData(rows, 1, type, array);
-        return new InputArray(mat);
-    }
-
-    /// <summary>
-    /// Creates a proxy class of the specified list
-    /// </summary>
-    /// <param name="array">Array object</param>
-    /// <returns></returns>
-    public static InputArray Create<T>(T[,] array)
-        where T : struct
-    {
-        var type = EstimateType(typeof(T));
-        return Create(array, type);
-    }
-
-    /// <summary>
-    /// Creates a proxy class of the specified list
-    /// </summary>
-    /// <param name="array">Array object</param>
-    /// <param name="type">Matrix depth and channels for converting array to cv::Mat</param>
-    /// <returns></returns>
-    public static InputArray Create<T>(T[,] array, MatType type)
-        where T : struct
-    {
-        if (array is null)
-            throw new ArgumentNullException(nameof(array));
-        var rows = array.GetLength(0);
-        var cols = array.GetLength(1);
-        if (rows == 0)
-            throw new ArgumentException("array.GetLength(0) == 0");
-        if (cols == 0)
-            throw new ArgumentException("array.GetLength(1) == 0");
-        var mat = Mat.FromPixelData(rows, cols, type, array);
-        return new InputArray(mat);
     }
 
     /// <summary>
@@ -604,25 +457,9 @@ public class InputArray : CvObject
 #pragma warning disable 1591
 #pragma warning disable CA2225
 
-    public static implicit operator InputArray(Mat mat) => Create(mat);
-
-    public static implicit operator InputArray(UMat mat) => Create(mat);
-
-    public static implicit operator InputArray(MatExpr expr) => Create(expr);
-
     public static implicit operator InputArray(Scalar val) => Create(val);
-
     public static implicit operator InputArray(double val) => Create(val);
-
-    public static implicit operator InputArray(GpuMat mat)
-    {
-        return Create(mat);
-    }
-
-
-    public static explicit operator InputArray(List<Mat> mats) => Create(mats);
-
-    public static explicit operator InputArray(Mat[] mats) => Create(mats);
+    public static implicit operator InputArray(GpuMat mat) => Create(mat);
 
     public static implicit operator InputArray(Vec2b vec) => Create(vec);
     public static implicit operator InputArray(Vec3b vec) => Create(vec);
@@ -654,48 +491,6 @@ public class InputArray : CvObject
     #endregion
 
     #region Methods
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="i"></param>
-    /// <returns></returns>
-    public Mat GetMat(int i = -1)
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_getMat(CvPtr, i, out var ret));
-        GC.KeepAlive(this);
-        return new Mat(ret);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public Mat[] GetMatVector()
-    {
-        ThrowIfDisposed();
-        using var vec = new VectorOfMat();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_getMatVector(CvPtr, vec.CvPtr));
-        GC.KeepAlive(this);
-        return vec.ToArray();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="i"></param>
-    /// <returns></returns>
-    public UMat GetUMat(int i = -1)
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_getUMat(CvPtr, i, out var ret));
-        GC.KeepAlive(this);
-        return new UMat(ret);
-    }
 
     /// <summary>
     /// 
@@ -1004,58 +799,6 @@ public class InputArray : CvObject
             NativeMethods.core_InputArray_step(CvPtr, i, out var ret));
         GC.KeepAlive(this);
         return ret.ToInt64();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public bool IsMat()
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_isMat(CvPtr, out var ret));
-        GC.KeepAlive(this);
-        return ret != 0;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public bool IsUMat()
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_isUMat(CvPtr, out var ret));
-        GC.KeepAlive(this);
-        return ret != 0;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public bool IsMatVector()
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_isMatVector(CvPtr, out var ret));
-        GC.KeepAlive(this);
-        return ret != 0;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public bool IsUMatVector()
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(
-            NativeMethods.core_InputArray_isUMatVector(CvPtr, out var ret));
-        GC.KeepAlive(this);
-        return ret != 0;
     }
 
     /// <summary>

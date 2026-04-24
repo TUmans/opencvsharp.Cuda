@@ -14,37 +14,6 @@ public class OutputArray : CvObject
     #region Init & Disposal
 
     /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mat"></param>
-    internal OutputArray(Mat mat)
-    {
-        if (mat is null)
-            throw new ArgumentNullException(nameof(mat));
-        NativeMethods.HandleException(
-            NativeMethods.core_OutputArray_new_byMat(mat.CvPtr, out var p));
-        GC.KeepAlive(mat);
-        obj = mat;
-        InitSafeHandle(p);
-    }
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mat"></param>
-    internal OutputArray(UMat mat)
-    {
-        if (mat is null)
-            throw new ArgumentNullException(nameof(mat));
-        NativeMethods.HandleException(
-            NativeMethods.core_OutputArray_new_byUMat(mat.CvPtr, out var p));
-        GC.KeepAlive(mat);
-        obj = mat;
-        InitSafeHandle(p);
-    }
-
-#if ENABLED_CUDA
-    /// <summary>
     /// 
     /// </summary>
     /// <param name="mat"></param>
@@ -54,25 +23,6 @@ public class OutputArray : CvObject
             throw new ArgumentNullException(nameof(mat));
         NativeMethods.HandleException(NativeMethods.core_OutputArray_new_byGpuMat(mat.CvPtr, out var p));
         GC.KeepAlive(mat);
-        obj = mat;
-        InitSafeHandle(p);
-    }
-#endif
-
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mat"></param>
-    internal OutputArray(IEnumerable<Mat> mat)
-    {
-        if (mat is null)
-            throw new ArgumentNullException(nameof(mat));
-        IntPtr p;
-        using (var matVector = new VectorOfMat(mat))
-        {
-            NativeMethods.HandleException(
-                NativeMethods.core_OutputArray_new_byVectorOfMat(matVector.CvPtr, out p));
-        }
         obj = mat;
         InitSafeHandle(p);
     }
@@ -96,34 +46,11 @@ public class OutputArray : CvObject
     /// </summary>
     /// <param name="mat"></param>
     /// <returns></returns>
-    [SuppressMessage("Microsoft.Design", "CA2225: Operator overloads have named alternates")]
-    public static implicit operator OutputArray(Mat mat)
-    {
-        return new(mat);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="umat"></param>
-    /// <returns></returns>
-    [SuppressMessage("Microsoft.Design", "CA2225: Operator overloads have named alternates")]
-    public static implicit operator OutputArray(UMat umat)
-    {
-        return new(umat);
-    }
-
-#if ENABLED_CUDA
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
     public static implicit operator OutputArray(GpuMat mat)
     {
         return new OutputArray(mat);
     }
-#endif
+
 
     #endregion
 
@@ -133,41 +60,11 @@ public class OutputArray : CvObject
     /// 
     /// </summary>
     /// <returns></returns>
-    public bool IsMat()
-    {
-        return obj is Mat;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public bool IsUMat()
-    {
-        return obj is UMat;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public virtual Mat? GetMat()
-    {
-        return obj as Mat;
-    }
-
-#if ENABLED_CUDA
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     public bool IsGpuMat()
     {
         return obj is GpuMat;
     }
-#endif
 
-#if ENABLED_CUDA
     /// <summary>
     /// 
     /// </summary>
@@ -175,25 +72,6 @@ public class OutputArray : CvObject
     public virtual Mat GetGpuMat()
     {
         return obj as GpuMat;
-    }
-#endif
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public bool IsVectorOfMat()
-    {
-        return obj is IEnumerable<Mat>;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public virtual IEnumerable<Mat>? GetVectorOfMat()
-    {
-        return obj as IEnumerable<Mat>;
     }
 
     /// <summary>
@@ -222,12 +100,8 @@ public class OutputArray : CvObject
     {
         return
             ptr != IntPtr.Zero &&
-            !IsDisposed &&
-#if ENABLED_CUDA
-                (IsMat() || IsGpuMat());
-#else
-            IsMat() || IsUMat();
-#endif
+            !IsDisposed && IsGpuMat();
+
     }
     /// <summary>
     /// 
@@ -244,57 +118,9 @@ public class OutputArray : CvObject
     /// </summary>
     /// <param name="mat"></param>
     /// <returns></returns>
-    public static OutputArray Create(Mat mat)
-    {
-        return new(mat);
-    }
-
-    /// <summary>
-    /// Creates a proxy class of the specified matrix
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
-    public static OutputArray Create(UMat mat)
-    {
-        return new(mat);
-    }
-
-#if ENABLED_CUDA
-    /// <summary>
-    /// Creates a proxy class of the specified matrix
-    /// </summary>
-    /// <param name="mat"></param>
-    /// <returns></returns>
     public static OutputArray Create(GpuMat mat)
     {
         return new OutputArray(mat);
-    }
-#endif
-
-    /// <summary>
-    /// Creates a proxy class of the specified list
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="list"></param>
-    /// <returns></returns>
-    public static OutputArrayOfStructList<T> Create<T>(List<T> list)
-        where T : unmanaged
-    {
-        if (list is null)
-            throw new ArgumentNullException(nameof(list));
-        return new OutputArrayOfStructList<T>(list);
-    }
-
-    /// <summary>
-    /// Creates a proxy class of the specified list
-    /// </summary>
-    /// <param name="list"></param>
-    /// <returns></returns>
-    public static OutputArrayOfMatList Create(List<Mat> list)
-    {
-        if (list is null)
-            throw new ArgumentNullException(nameof(list));
-        return new OutputArrayOfMatList(list);
     }
 
     #endregion

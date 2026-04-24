@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Internal.Vectors;
 
@@ -45,23 +44,6 @@ public class OutputArray : CvObject
         obj = mat;
         InitSafeHandle(p);
     }
-
-#if ENABLED_CUDA
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mat"></param>
-        internal OutputArray(GpuMat mat)
-        {
-            if (mat is null)
-                throw new ArgumentNullException(nameof(mat));
-            NativeMethods.HandleException(
-            NativeMethods.core_OutputArray_new_byUMat(mat.CvPtr, out var p));
-            GC.KeepAlive(mat);
-            obj = mat;
-            InitSafeHandle(p);
-    }
-#endif
 
     /// <summary>
     /// Constructor
@@ -117,18 +99,6 @@ public class OutputArray : CvObject
         return new(umat);
     }
 
-#if ENABLED_CUDA
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="mat"></param>
-        /// <returns></returns>
-        public static implicit operator OutputArray(GpuMat mat)
-        {
-            return new OutputArray(mat);
-        }
-#endif
-
     #endregion
 
     #region Methods
@@ -159,28 +129,6 @@ public class OutputArray : CvObject
     {
         return obj as Mat;
     }
-
-#if ENABLED_CUDA
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool IsGpuMat()
-        {
-            return obj is GpuMat;
-        }
-#endif
-
-#if ENABLED_CUDA
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public virtual Mat GetGpuMat()
-        {
-            return obj as GpuMat;
-        }
-#endif
 
     /// <summary>
     /// 
@@ -226,12 +174,8 @@ public class OutputArray : CvObject
     {
         return
             ptr != IntPtr.Zero &&
-            !IsDisposed &&
-#if ENABLED_CUDA
-                (IsMat() || IsGpuMat());
-#else
-            IsMat() || IsUMat();
-#endif
+            !IsDisposed && IsMat() || IsUMat();
+
     }
     /// <summary>
     /// 
@@ -262,18 +206,6 @@ public class OutputArray : CvObject
     {
         return new (mat);
     }
-
-#if ENABLED_CUDA
-        /// <summary>
-        /// Creates a proxy class of the specified matrix
-        /// </summary>
-        /// <param name="mat"></param>
-        /// <returns></returns>
-        public static OutputArray Create(GpuMat mat)
-        {
-            return new OutputArray(mat);
-        }
-#endif
 
     /// <summary>
     /// Creates a proxy class of the specified list
