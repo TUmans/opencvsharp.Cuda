@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
@@ -29,8 +30,11 @@ public static partial class Cv2
 
             NativeMethods.HandleException(NativeMethods.cuda_abs(src.CvPtr, dst.CvPtr,ToPtr(stream)));
 
+            GC.KeepAlive(src);
+            GC.KeepAlive(dst);
             dst.Fix();
         }
+
 
         // -----------------------------------------------------------------------
         // absdiff
@@ -50,11 +54,50 @@ public static partial class Cv2
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
-                NativeMethods.cuda_absdiff(
-                    src1.CvPtr, src2.CvPtr, dst.CvPtr,
-                   ToPtr(stream)));
+                NativeMethods.cuda_absdiff( src1.CvPtr, src2.CvPtr, dst.CvPtr, ToPtr(stream)));
 
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            GC.KeepAlive(dst);
             dst.Fix();
+        }
+
+        /// <summary>
+        /// Computes per-element absolute difference of a matrix and scalar. 
+        /// </summary>
+        public static void AbsdiffWithScalar(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) throw new ArgumentNullException(nameof(src1));
+            if (dst is null) throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_absdiffWithScalar(src1.CvPtr, src2, dst.CvPtr, ToPtr(stream)));
+
+            
+            GC.KeepAlive(src1);
+            GC.KeepAlive(dst);
+            dst.Fix();
+        }
+        // -----------------------------------------------------------------------
+        // absSum
+        // -----------------------------------------------------------------------
+
+        public static Scalar AbsSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.InputArray? mask = null)
+        {
+            if (src is null) throw new ArgumentNullException(nameof(src));
+            src.ThrowIfDisposed();
+            mask?.ThrowIfDisposed();
+
+            // If mask is null, pass IntPtr.Zero. The C++ side will convert this to cv::noArray()
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+
+            NativeMethods.HandleException(NativeMethods.cuda_absSum(src.CvPtr, maskPtr, out var ret));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            return ret;
         }
 
         // -----------------------------------------------------------------------
@@ -66,11 +109,19 @@ public static partial class Cv2
         /// </summary>
         public static void Add(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src1 is null) throw new ArgumentNullException(nameof(src1));
-            if (src2 is null) throw new ArgumentNullException(nameof(src2));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
-            src1.ThrowIfDisposed(); src2.ThrowIfDisposed(); dst.ThrowIfNotReady();
-            NativeMethods.HandleException(NativeMethods.cuda_add(src1.CvPtr, src2.CvPtr, dst.CvPtr, ToPtr(mask), dtype, ToPtr(stream)));
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+            src1.ThrowIfDisposed(); 
+            src2.ThrowIfDisposed(); 
+            dst.ThrowIfNotReady();
+            NativeMethods.HandleException(NativeMethods.cuda_add(src1.CvPtr, src2.CvPtr, dst.CvPtr, mask?.CvPtr ?? IntPtr.Zero, dtype, ToPtr(stream)));
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            GC.KeepAlive(mask);
             dst.Fix();
         }
 
@@ -83,17 +134,14 @@ public static partial class Cv2
         /// Computes the weighted sum of two arrays:
         /// dst = alpha * src1 + beta * src2 + gamma.
         /// </summary>
-        public static void AddWeighted(
-            OpenCvSharp.Cuda.InputArray src1, double alpha,
-            OpenCvSharp.Cuda.InputArray src2, double beta,
-            double gamma,
-            OpenCvSharp.Cuda.OutputArray dst,
-            int dtype = -1,
-            OpenCvSharp.Cuda.Stream? stream = null)
+        public static void AddWeighted(OpenCvSharp.Cuda.InputArray src1, double alpha, OpenCvSharp.Cuda.InputArray src2, double beta, double gamma, OpenCvSharp.Cuda.OutputArray dst, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src1 is null) throw new ArgumentNullException(nameof(src1));
-            if (src2 is null) throw new ArgumentNullException(nameof(src2));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
             src1.ThrowIfDisposed();
             src2.ThrowIfDisposed();
             dst.ThrowIfNotReady();
@@ -105,7 +153,37 @@ public static partial class Cv2
                     gamma, dst.CvPtr,
                     dtype,ToPtr(stream)));
 
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
             dst.Fix();
+        }
+
+        // -----------------------------------------------------------------------
+        // addWeighted
+        // -----------------------------------------------------------------------
+
+        /// <summary>
+        /// Computes a matrix-scalar sum. 
+        /// </summary>
+        public static void Add( OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst,OpenCvSharp.Cuda.InputArray? mask = null, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_addWithScalar(src1.CvPtr, src2, dst.CvPtr, maskPtr, dtype, ToPtr(stream)));
+
+            GC.KeepAlive(src1);
+            GC.KeepAlive(mask);
+            dst.Fix();
+
         }
 
         // -----------------------------------------------------------------------
@@ -116,14 +194,14 @@ public static partial class Cv2
         /// Performs a per-element bitwise conjunction of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseAnd(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2,
-            OpenCvSharp.Cuda.OutputArray dst,
-            OpenCvSharp.Cuda.InputArray? mask = null,
-            OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseAnd(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src1 is null) throw new ArgumentNullException(nameof(src1));
-            if (src2 is null) throw new ArgumentNullException(nameof(src2));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
             src1.ThrowIfDisposed();
             src2.ThrowIfDisposed();
             dst.ThrowIfNotReady();
@@ -131,8 +209,35 @@ public static partial class Cv2
             NativeMethods.HandleException(
                 NativeMethods.cuda_bitwise_and(
                     src1.CvPtr, src2.CvPtr, dst.CvPtr,
-                    ToPtr(mask), ToPtr(stream)));
+                    mask?.CvPtr ?? IntPtr.Zero, ToPtr(stream)));
 
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
+
+        /// <summary>
+        /// Performs a per-element bitwise conjunction of two matrices (or of a
+        /// matrix and a scalar).
+        /// </summary>
+        public static void BitwiseAnd( OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_bitwise_and_with_scalar(src1.CvPtr, src2, dst.CvPtr, maskPtr, ToPtr(stream)));
+
+            GC.KeepAlive(src1); 
+            GC.KeepAlive(mask);
             dst.Fix();
         }
 
@@ -143,20 +248,23 @@ public static partial class Cv2
         /// <summary>
         /// Performs a per-element bitwise inversion.
         /// </summary>
-        public static void BitwiseNot(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,
-            OpenCvSharp.Cuda.InputArray? mask = null,
-            OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseNot(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,  OpenCvSharp.Cuda.InputArray? mask = null,  OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src is null) throw new ArgumentNullException(nameof(src));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
             src.ThrowIfDisposed();
             dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
 
             NativeMethods.HandleException(
                 NativeMethods.cuda_bitwise_not(
                     src.CvPtr, dst.CvPtr,
-                    ToPtr(mask), ToPtr(stream)));
+                    mask?.CvPtr ?? IntPtr.Zero, ToPtr(stream)));
 
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
             dst.Fix();
         }
 
@@ -168,25 +276,54 @@ public static partial class Cv2
         /// Performs a per-element bitwise disjunction of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2,
-            OpenCvSharp.Cuda.OutputArray dst,
-            OpenCvSharp.Cuda.InputArray? mask = null,
-            OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src1 is null) throw new ArgumentNullException(nameof(src1));
-            if (src2 is null) throw new ArgumentNullException(nameof(src2));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
             src1.ThrowIfDisposed();
             src2.ThrowIfDisposed();
+            mask?.ThrowIfDisposed();
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
                 NativeMethods.cuda_bitwise_or(
                     src1.CvPtr, src2.CvPtr, dst.CvPtr,
-                    ToPtr(mask),ToPtr(stream)));
+                    mask?.CvPtr ?? IntPtr.Zero,ToPtr(stream)));
 
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            GC.KeepAlive(mask);
             dst.Fix();
         }
+
+        /// <summary>
+        /// Performs a per-element bitwise disjunction (OR) of a matrix and scalar.
+        /// </summary>
+        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_bitwise_or_with_scalar(src1.CvPtr, src2, dst.CvPtr, maskPtr, ToPtr(stream)));
+
+            GC.KeepAlive(src1);
+            GC.KeepAlive(mask);
+            dst.Fix();
+         
+        }
+
 
         // -----------------------------------------------------------------------
         // bitwise_xor
@@ -196,26 +333,178 @@ public static partial class Cv2
         /// Performs a per-element bitwise exclusive-or of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseXor(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2,
-            OpenCvSharp.Cuda.OutputArray dst,
-            OpenCvSharp.Cuda.InputArray? mask = null,
-            OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseXor(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src1 is null) throw new ArgumentNullException(nameof(src1));
-            if (src2 is null) throw new ArgumentNullException(nameof(src2));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
             src1.ThrowIfDisposed();
             src2.ThrowIfDisposed();
+            mask?.ThrowIfDisposed();    
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
                 NativeMethods.cuda_bitwise_xor(
                     src1.CvPtr, src2.CvPtr, dst.CvPtr,
-                    ToPtr(mask),ToPtr(stream)));
+                    mask?.CvPtr ?? IntPtr.Zero,ToPtr(stream)));
 
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            GC.KeepAlive(mask);
             dst.Fix();
         }
 
+        /// <summary>
+        /// Performs a per-element bitwise exclusive or (XOR) operation of a matrix and a scalar.
+        /// </summary>
+        public static void BitwiseXor( OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_bitwise_xor_with_scalar(src1.CvPtr, src2, dst.CvPtr, maskPtr, ToPtr(stream)));
+
+            GC.KeepAlive(src1);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
+
+        // -----------------------------------------------------------------------
+        // CalcAbsSum
+        // -----------------------------------------------------------------------
+
+        /// <summary>
+        /// This is an overloaded member function, provided for convenience. It differs from the absSum() function only in what argument(s) it accepts. 
+        /// </summary>
+
+        public static void CalcAbsSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+            NativeMethods.HandleException(NativeMethods.cuda_calcAbsSum(src.CvPtr, dst.CvPtr, maskPtr, ToPtr(stream)));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
+
+       
+
+        /// <summary>
+        /// This is an overloaded member function, provided for convenience. It differs from the Hist() function only in what argument(s) it accepts. 
+        /// </summary>
+        public static void CalcHist(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (hist is null)
+                throw new ArgumentNullException(nameof(hist));
+            src.ThrowIfDisposed();
+            hist.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+            NativeMethods.HandleException(NativeMethods.cuda_calcHist(src.CvPtr, maskPtr, hist.CvPtr, ToPtr(stream)));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            hist.Fix();
+        }
+
+        /// <summary>
+        /// This is an overloaded member function, provided for convenience. It differs from the Norm() function only in what argument(s) it accepts. 
+        /// </summary>
+        public static void CalcNorm(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, NormTypes normType, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+            NativeMethods.HandleException(NativeMethods.cuda_calcNorm(src.CvPtr, dst.CvPtr, (int)normType, maskPtr, ToPtr(stream)));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
+
+        /// <summary>
+        /// This is an overloaded member function, provided for convenience. It differs from the NormDiff() function only in what argument(s) it accepts. 
+        /// </summary>
+        public static void CalcNormDiff(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, NormTypes normType = NormTypes.L2, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null)
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null)
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+            src1.ThrowIfDisposed();
+            src2.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(NativeMethods.cuda_calcNormDiff(src1.CvPtr, src2.CvPtr, dst.CvPtr, (int)normType, ToPtr(stream)));
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            dst.Fix();
+        }
+
+        /// <summary>
+        /// This is an overloaded member function, provided for convenience. It differs from the SqrSum() function only in what argument(s) it accepts. 
+        /// </summary>
+        public static void CalcSqrSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+            NativeMethods.HandleException(NativeMethods.cuda_calcSqrSum(src.CvPtr, dst.CvPtr, maskPtr, ToPtr(stream)));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
+
+        /// <summary>
+        /// This is an overloaded member function, provided for convenience. It differs from the Sum() function only in what argument(s) it accepts. 
+        /// </summary>
+        public static void CalcSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask?.ThrowIfDisposed();
+
+            IntPtr maskPtr = mask?.CvPtr ?? IntPtr.Zero;
+            NativeMethods.HandleException(NativeMethods.cuda_calcSum(src.CvPtr, dst.CvPtr, maskPtr, ToPtr(stream)));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
         // -----------------------------------------------------------------------
         // cartToPolar
         // -----------------------------------------------------------------------
@@ -731,7 +1020,7 @@ public static partial class Cv2
             NativeMethods.HandleException(
                 NativeMethods.cuda_subtract(
                     src1.CvPtr, src2.CvPtr, dst.CvPtr,
-                    ToPtr(mask), dtype,
+                    mask?.CvPtr ?? IntPtr.Zero , dtype,
                    ToPtr(stream)));
 
             dst.Fix();
@@ -766,15 +1055,6 @@ public static partial class Cv2
             return retVal;
         }
 
-        // -----------------------------------------------------------------------
-        // helpers
-        // -----------------------------------------------------------------------
-
-        private static IntPtr ToPtr(OpenCvSharp.Cuda.InputArray? arr) =>
-            arr?.CvPtr ?? IntPtr.Zero;
-
-        private static IntPtr ToPtr(OpenCvSharp.Cuda.Stream? arr) =>
-           arr?.CvPtr ?? IntPtr.Zero;
     }
         #endregion
 }

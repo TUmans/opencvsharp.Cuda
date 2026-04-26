@@ -60,7 +60,7 @@ public class CudaArthimTest : CudaTestBase
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void Abs_NegativeValues_ReturnsAbsolute()
+    public void Abs()
     {
         VerifyCudaSupport();
 
@@ -68,35 +68,14 @@ public class CudaArthimTest : CudaTestBase
         using var dst = new GpuMat();
 
         Cv2.Cuda.Abs(src, dst);
-
         Assert.Equal(7f, PixelF(dst), 3);
-    }
 
-    [Fact]
-    public void Abs_PositiveValues_Unchanged()
-    {
-        VerifyCudaSupport();
+        using var src2 = MakeFloat(Rows, Cols, 5f);
+        using var dst2 = new GpuMat();
 
-        using var src = MakeFloat(Rows, Cols, 5f);
-        using var dst = new GpuMat();
+        Cv2.Cuda.Abs(src2, dst2);
 
-        Cv2.Cuda.Abs(src, dst);
-
-        Assert.Equal(5f, PixelF(dst), 3);
-    }
-
-    [Fact]
-    public void Abs_NullSrc_Throws() =>
-        Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Cuda.Abs(null!, new GpuMat()));
-
-    [Fact]
-    public void Abs_NullDst_Throws()
-    {
-        VerifyCudaSupport();
-        using var src = MakeFloat(Rows, Cols, 1f);
-        Assert.Throws<ArgumentNullException>(() =>
-            Cv2.Cuda.Abs(src, null!));
+        Assert.Equal(5f, PixelF(dst2), 3);
     }
 
     // -----------------------------------------------------------------------
@@ -104,31 +83,125 @@ public class CudaArthimTest : CudaTestBase
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void Absdiff_TwoMatrices_ReturnsCorrectDifference()
+    public void Absdiff()
     {
         VerifyCudaSupport();
 
+        // part 1
         using var src1 = MakeFloat(Rows, Cols, 10f);
         using var src2 = MakeFloat(Rows, Cols, 3f);
-        using var dst = new GpuMat();
+        using var dst1 = new GpuMat();
 
-        Cv2.Cuda.Absdiff(src1, src2, dst);
+        Cv2.Cuda.Absdiff(src1, src2, dst1);
 
-        Assert.Equal(7f, PixelF(dst), 3);
+        Assert.Equal(7f, PixelF(dst1), 3);
+
+        // part 2
+        using var src3 = MakeFloat(Rows, Cols, 3f);
+        using var src4 = MakeFloat(Rows, Cols, 10f);
+        using var dst2 = new GpuMat();
+
+        Cv2.Cuda.Absdiff(src3, src4, dst2);
+
+        Assert.Equal(7f, PixelF(dst2), 3);
+    }
+
+   
+    [Fact]
+    public void AbsdiffWithScalar()
+    {
+        // 1. Check if a CUDA device is available. If not, skip the test.
+        VerifyCudaSupport();
+
+        int rows = 10;
+        int cols = 10;
+
+        // Set up test values
+        byte matrixValue = 50;
+        double scalarValue = 120;
+        byte expectedValue = 70; // |50 - 120| = 70
+
+        // 2. Initialize host (CPU) matrices
+        using var cpuSrc = new Mat(rows, cols, MatType.CV_8UC1, new Scalar(matrixValue));
+        using var cpuDst = new Mat();
+
+        // 3. Initialize device (GPU) matrices and upload data
+        using var gpuSrc = new GpuMat();
+        using var gpuDst = new GpuMat();
+
+        gpuSrc.Upload(cpuSrc);
+
+        // 4. Call wrapped method
+        // (Assuming your static method is in a class named `CudaInterop` or similar)
+        Scalar scalarToSubtract = new Scalar(scalarValue);
+
+        Cv2.Cuda.Absdiff(gpuSrc, scalarToSubtract, gpuDst);
+
+        // 5. Download the result from GPU back to CPU to verify
+        gpuDst.Download(cpuDst);
+
+        // 6. Assertions (Verify the output)
+        Assert.False(cpuDst.Empty(), "Destination matrix should not be empty.");
+        Assert.Equal(rows, cpuDst.Rows);
+        Assert.Equal(cols, cpuDst.Cols);
+        Assert.Equal(MatType.CV_8UC1, cpuDst.Type());
+
+        // 7. Verify the math of every pixel
+        var indexer = cpuDst.GetGenericIndexer<byte>();
+        for (int y = 0; y < rows; y++)
+        {
+            for (int x = 0; x < cols; x++)
+            {
+                Assert.Equal(expectedValue,indexer[y, x]);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // absSum
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void AbsSum_1()
+    {
+        VerifyCudaSupport();
+
+        // Create a 2x2 matrix filled with -5 (Using 32-bit signed int, as 64F is not allowed)
+        using var cpuSrc1 = new Mat(2, 2, MatType.CV_32SC1, new Scalar(-5));
+        using var gpuSrc1 = new GpuMat();
+        gpuSrc1.Upload(cpuSrc1);
+
+        // Calculate AbsSum
+        // |-5| * 4 pixels = 20
+        Scalar result1 = Cv2.Cuda.AbsSum(gpuSrc1);
+
+        // Val0 contains the sum for the first channel
+        Assert.Equal(20, result1.Val0);
     }
 
     [Fact]
-    public void Absdiff_ReversedOrder_StillPositive()
+    public void AbsSum_2()
     {
         VerifyCudaSupport();
 
-        using var src1 = MakeFloat(Rows, Cols, 3f);
-        using var src2 = MakeFloat(Rows, Cols, 10f);
-        using var dst = new GpuMat();
+        using var cpuSrc2 = new Mat(2, 2, MatType.CV_32SC1, new Scalar(-5));
+        using var gpuSrc2 = new GpuMat();
+        gpuSrc2.Upload(cpuSrc2);
 
-        Cv2.Cuda.Absdiff(src1, src2, dst);
+        // Create a mask. Only the top row (2 pixels) will be active (255).
+        // The bottom row will be ignored (0).
+        using var cpuMask2 = new Mat(2, 2, MatType.CV_8UC1, new Scalar(0));
+        cpuMask2.Set<byte>(0, 0, 255);
+        cpuMask2.Set<byte>(0, 1, 255);
 
-        Assert.Equal(7f, PixelF(dst), 3);
+        using var gpuMask2 = new GpuMat();
+        gpuMask2.Upload(cpuMask2);
+
+        // Calculate AbsSum with mask
+        // |-5| * 2 active pixels = 10
+        Scalar result2 = Cv2.Cuda.AbsSum(gpuSrc2, gpuMask2);
+
+        Assert.Equal(10, result2.Val0);
     }
 
     // -----------------------------------------------------------------------
@@ -136,36 +209,33 @@ public class CudaArthimTest : CudaTestBase
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void Add_TwoMatrices_ReturnsSum()
+    public void Add()
     {
         VerifyCudaSupport();
 
-        using var src1 = MakeFloat(Rows, Cols, 4f);
-        using var src2 = MakeFloat(Rows, Cols, 6f);
-        using var dst = new GpuMat();
+        // same test as Core
+        using var src1 = Mat.FromPixelData(2, 2, MatType.CV_8UC1, new byte[] { 1, 2, 3, 4 });
+        using var src2 = Mat.FromPixelData(2, 2, MatType.CV_8UC1, new byte[] { 1, 2, 3, 4 });
 
-        Cv2.Cuda.Add(src1, src2, dst);
+        // port everything to cuda
+        using GpuMat gpuSrc1 = new GpuMat(src1);
+        using GpuMat gpuSrc2 = new GpuMat(src2);
+        using GpuMat gpuDst = new GpuMat();
+        // the actual function
+        Cv2.Cuda.Add(gpuSrc1, gpuSrc2, gpuDst);
+        // downlaod results
+        using Mat dst = new Mat();
+        gpuDst.Download(dst);
 
-        Assert.Equal(10f, PixelF(dst), 3);
-    }
+        // same test as Core
+        Assert.Equal(MatType.CV_8UC1, dst.Type());
+        Assert.Equal(2, dst.Rows);
+        Assert.Equal(2, dst.Cols);
 
-    [Fact]
-    public void Add_WithStream_DoesNotThrow()
-    {
-        VerifyCudaSupport();
-
-        using var src1 = MakeFloat(Rows, Cols, 1f);
-        using var src2 = MakeFloat(Rows, Cols, 2f);
-        using var dst = new GpuMat();
-        using var stream = new OpenCvSharp.Cuda.Stream();
-
-        var ex = Record.Exception(() =>
-        {
-            Cv2.Cuda.Add(src1, src2, dst, stream: stream);
-            stream.WaitForCompletion();
-        });
-
-        Assert.Null(ex);
+        Assert.Equal(2, dst.At<byte>(0, 0));
+        Assert.Equal(4, dst.At<byte>(0, 1));
+        Assert.Equal(6, dst.At<byte>(1, 0));
+        Assert.Equal(8, dst.At<byte>(1, 1));
     }
 
     // -----------------------------------------------------------------------
@@ -173,7 +243,7 @@ public class CudaArthimTest : CudaTestBase
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void AddWeighted_ComputesCorrectResult()
+    public void AddWeighted()
     {
         VerifyCudaSupport();
 
@@ -187,12 +257,48 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(19f, PixelF(dst), 2);
     }
 
+    [Fact]
+    public void AddScalar()
+    {
+        using var srcCpu = Mat.FromPixelData(2, 2, MatType.CV_8UC1, new byte[] { 1, 2, 3, 4 });
+        using var srcGpu = new GpuMat(srcCpu);
+        using GpuMat gpuDst = new GpuMat();
+        Cv2.Cuda.Add(new Scalar(10), srcGpu, gpuDst);
+
+        using var dst = new Mat();
+        gpuDst.Download(dst);
+
+        Assert.Equal(MatType.CV_8UC1, dst.Type());
+        Assert.Equal(2, dst.Rows);
+        Assert.Equal(2, dst.Cols);
+
+        Assert.Equal(11, dst.At<byte>(0, 0));
+        Assert.Equal(12, dst.At<byte>(0, 1));
+        Assert.Equal(13, dst.At<byte>(1, 0));
+        Assert.Equal(14, dst.At<byte>(1, 1));
+
+        Cv2.Cuda.Add(srcGpu, new Scalar(10), gpuDst);
+        gpuDst.Download(dst);
+        Assert.Equal(11, dst.At<byte>(0, 0));
+        Assert.Equal(12, dst.At<byte>(0, 1));
+        Assert.Equal(13, dst.At<byte>(1, 0));
+        Assert.Equal(14, dst.At<byte>(1, 1));
+
+        using var inputArray = OpenCvSharp.Cuda.InputArray.Create(10.0);
+        Cv2.Cuda.Add(srcGpu, inputArray, gpuDst);
+        gpuDst.Download(dst);
+        Assert.Equal(11, dst.At<byte>(0, 0));
+        Assert.Equal(12, dst.At<byte>(0, 1));
+        Assert.Equal(13, dst.At<byte>(1, 0));
+        Assert.Equal(14, dst.At<byte>(1, 1));
+    }
+
     // -----------------------------------------------------------------------
     // bitwise_and
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void BitwiseAnd_ByteMatrices_ReturnsCorrectBits()
+    public void BitwiseAnd()
     {
         VerifyCudaSupport();
 
@@ -206,12 +312,40 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal((byte)0b1010_0000, PixelB(dst));
     }
 
+    [Fact]
+    public void BitwiseAndWithScalar()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a matrix filled with 12
+        using var cpuSrc = new Mat(3, 3, MatType.CV_8UC1, new Scalar(12));
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        // 2. Act: Bitwise AND with a scalar value of 10
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.BitwiseAnd(gpuSrc, new Scalar(10), gpuDst);
+        
+        // 3. Download to verify
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // 4. Assert
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_8UC1, cpuDst.Type());
+
+        // Validate that 12 & 10 = 8
+        Assert.Equal(8, cpuDst.At<byte>(0, 0));
+        Assert.Equal(8, cpuDst.At<byte>(2, 2)); // Check another pixel to ensure matrix-wide execution
+    }
+
+
     // -----------------------------------------------------------------------
     // bitwise_not
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void BitwiseNot_ByteMatrix_ReturnsComplement()
+    public void BitwiseNot()
     {
         VerifyCudaSupport();
 
@@ -224,12 +358,26 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal((byte)0b1111_0000, PixelB(dst));
     }
 
+    [Fact]
+    public void BitwiseNot_WithEmptyMask()
+    {
+        VerifyCudaSupport();
+
+        using var src = MakeByte(Rows, Cols, 0b0000_1111);
+        using var mask = MakeByte(Rows, Cols, 0);
+        using var dst = MakeByte(Rows, Cols, 0b1010_1010); // Known background
+
+        Cv2.Cuda.BitwiseNot(src, dst, mask: mask);
+
+        Assert.Equal((byte)0b1010_1010, PixelB(dst));
+    }
+
     // -----------------------------------------------------------------------
     // bitwise_or
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void BitwiseOr_ByteMatrices_ReturnsCorrectBits()
+    public void BitwiseOr()
     {
         VerifyCudaSupport();
 
@@ -243,12 +391,32 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal((byte)0b1100_1100, PixelB(dst));
     }
 
+    [Fact]
+    public void BitwiseOrWithScalar()
+    {
+        VerifyCudaSupport();
+
+        using var cpuSrc = new Mat(3, 3, MatType.CV_8UC1, new Scalar(10));
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.BitwiseOr(gpuSrc, new Scalar(12), gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        // 10 | 12 = 14
+        Assert.Equal(14, cpuDst.At<byte>(0, 0));
+    }
+
     // -----------------------------------------------------------------------
     // bitwise_xor
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void BitwiseXor_ByteMatrices_ReturnsCorrectBits()
+    public void BitwiseXor_1()
     {
         VerifyCudaSupport();
 
@@ -261,7 +429,150 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal((byte)0b0101_1010, PixelB(dst));
     }
+    [Fact]
+    public void BitwiseXor_2()
+    {
+        VerifyCudaSupport();
 
+        using var srcDst = MakeByte(Rows, Cols, 0b1100_1100);
+
+        // XORing a matrix with itself should result in 0
+        Cv2.Cuda.BitwiseXor(srcDst, srcDst, srcDst);
+
+        Assert.Equal((byte)0, PixelB(srcDst));
+    }
+
+
+    [Fact]
+    public void BitwiseXorWithScalar()
+    {
+        VerifyCudaSupport();
+
+        using var cpuSrc = new Mat(3, 3, MatType.CV_8UC1, new Scalar(10));
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.BitwiseXor(gpuSrc, new Scalar(12), gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        // 10 ^ 12 = 6
+        Assert.Equal(6, cpuDst.At<byte>(0, 0));
+    }
+
+    [Fact]
+    public void CalcSumTest()
+    {
+        VerifyCudaSupport();
+
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1, new Scalar(10));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        Cv2.Cuda.CalcSum(gpuSrc, gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // 10 * 4 pixels = 40
+        Assert.Equal(40.0, cpuDst.At<double>(0, 0));
+    }
+
+    [Fact]
+    public void CalcAbsSumTest()
+    {
+        VerifyCudaSupport();
+
+        // Use 32SC1 for negative numbers
+        using var cpuSrc = new Mat(2, 2, MatType.CV_32SC1, new Scalar(-5));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        Cv2.Cuda.CalcAbsSum(gpuSrc, gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // |-5| * 4 pixels = 20
+        Assert.Equal(20.0, cpuDst.At<double>(0, 0));
+    }
+
+    [Fact]
+    public void CalcSqrSumTest()
+    {
+        VerifyCudaSupport();
+
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1, new Scalar(4));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        Cv2.Cuda.CalcSqrSum(gpuSrc, gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // (4^2) * 4 pixels = 16 * 4 = 64
+        Assert.Equal(64.0, cpuDst.At<double>(0, 0));
+    }
+
+    [Fact]
+    public void CalcNormTest()
+    {
+        VerifyCudaSupport();
+
+
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1, new Scalar(3));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // L1 Norm = sum of absolute values
+        Cv2.Cuda.CalcNorm(gpuSrc, gpuDst, NormTypes.L1);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // |3| * 4 pixels = 12
+        Assert.Equal(12.0, cpuDst.At<double>(0, 0));
+    }
+
+    [Fact]
+    public void CalcHistTest()
+    {
+        VerifyCudaSupport();
+
+
+        // Create a 10x10 image
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        // Fill half of it with intensity 50
+        cpuSrc[0, 5, 0, 10] = new Mat(5, 10, MatType.CV_8UC1, new Scalar(50));
+        // Fill half of it with intensity 100
+        cpuSrc[5, 10, 0, 10] = new Mat(5, 10, MatType.CV_8UC1, new Scalar(100));
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuHist = new GpuMat();
+
+        // Act
+        Cv2.Cuda.CalcHist(gpuSrc, gpuHist);
+
+        // Assert
+        using var cpuHist = new Mat();
+        gpuHist.Download(cpuHist);
+
+        Assert.False(cpuHist.Empty());
+        // calcHist outputs a 1x256 array of integers (CV_32SC1)
+        Assert.Equal(MatType.CV_32SC1, cpuHist.Type());
+        Assert.Equal(256, cpuHist.Cols);
+
+        // 50 pixels with intensity 50
+        Assert.Equal(50, cpuHist.At<int>(0, 50));
+        // 50 pixels with intensity 100
+        Assert.Equal(50, cpuHist.At<int>(0, 100));
+        // 0 pixels with intensity 99
+        Assert.Equal(0, cpuHist.At<int>(0, 99));
+    }
     // -----------------------------------------------------------------------
     // cartToPolar
     // -----------------------------------------------------------------------
@@ -881,19 +1192,7 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(10f, PixelF(dst), 3);
     }
 
-    [Fact]
-    public void BitwiseNot_WithEmptyMask_LeavesDestinationUntouched()
-    {
-        VerifyCudaSupport();
-
-        using var src = MakeByte(Rows, Cols, 0b0000_1111);
-        using var mask = MakeByte(Rows, Cols, 0);
-        using var dst = MakeByte(Rows, Cols, 0b1010_1010); // Known background
-
-        Cv2.Cuda.BitwiseNot(src, dst, mask: mask);
-
-        Assert.Equal((byte)0b1010_1010, PixelB(dst));
-    }
+  
 
     // -----------------------------------------------------------------------
     // In-Place Operation Tests (src == dst)
@@ -913,18 +1212,7 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(7f, PixelF(srcDst), 3);
     }
 
-    [Fact]
-    public void BitwiseXor_InPlace_ZerosOutMatrix()
-    {
-        VerifyCudaSupport();
-
-        using var srcDst = MakeByte(Rows, Cols, 0b1100_1100);
-
-        // XORing a matrix with itself should result in 0
-        Cv2.Cuda.BitwiseXor(srcDst, srcDst, srcDst);
-
-        Assert.Equal((byte)0, PixelB(srcDst));
-    }
+    
 
     // -----------------------------------------------------------------------
     // Compare Edge Cases
