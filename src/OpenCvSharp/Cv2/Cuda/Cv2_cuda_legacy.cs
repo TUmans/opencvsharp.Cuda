@@ -15,6 +15,9 @@ public static partial class Cv2
         /// <summary>
         /// Calculates optical flow for 2 images using block matching algorithm.
         /// </summary>
+        /// <remarks>
+        /// Only works when opencv is build with legacy support
+        /// </remarks>
         public static void CalcOpticalFlowBM(
             GpuMat prev, GpuMat curr,
             Size blockSize, Size shiftSize, Size maxRange, bool usePrevious,
@@ -47,6 +50,29 @@ public static partial class Cv2
             GC.KeepAlive(velx);
             GC.KeepAlive(vely);
             GC.KeepAlive(buf);
+        }
+
+        /// <summary>
+        /// compute mask for Generalized Flood fill componetns labeling. 
+        /// </summary>
+        /// <remarks>
+        /// Only works when opencv is build with legacy support. Use InRange.
+        /// </remarks>
+        public static void ConnectivityMask(GpuMat image, GpuMat mask, Scalar lo, Scalar hi, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (image is null) 
+                throw new ArgumentNullException(nameof(image));
+            if (mask is null) 
+                throw new ArgumentNullException(nameof(mask));
+
+            image.ThrowIfDisposed();
+            mask.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_connectivityMask(image.CvPtr, mask.CvPtr, lo, hi, ToPtr(stream)));
+
+            GC.KeepAlive(image);
+            GC.KeepAlive(mask);
         }
     }
 }

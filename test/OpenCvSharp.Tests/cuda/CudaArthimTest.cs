@@ -55,10 +55,6 @@ public class CudaArthimTest : CudaTestBase
 
     public void Dispose() { }
 
-    // -----------------------------------------------------------------------
-    // abs
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Abs()
     {
@@ -77,10 +73,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(5f, PixelF(dst2), 3);
     }
-
-    // -----------------------------------------------------------------------
-    // absdiff
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Absdiff()
@@ -157,10 +149,6 @@ public class CudaArthimTest : CudaTestBase
         }
     }
 
-    // -----------------------------------------------------------------------
-    // absSum
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void AbsSum_1()
     {
@@ -204,10 +192,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(10, result2.Val0);
     }
 
-    // -----------------------------------------------------------------------
-    // add
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Add()
     {
@@ -237,10 +221,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(6, dst.At<byte>(1, 0));
         Assert.Equal(8, dst.At<byte>(1, 1));
     }
-
-    // -----------------------------------------------------------------------
-    // addWeighted
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void AddWeighted()
@@ -293,10 +273,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(14, dst.At<byte>(1, 1));
     }
 
-    // -----------------------------------------------------------------------
-    // bitwise_and
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void BitwiseAnd()
     {
@@ -339,11 +315,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(8, cpuDst.At<byte>(2, 2)); // Check another pixel to ensure matrix-wide execution
     }
 
-
-    // -----------------------------------------------------------------------
-    // bitwise_not
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void BitwiseNot()
     {
@@ -371,10 +342,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal((byte)0b1010_1010, PixelB(dst));
     }
-
-    // -----------------------------------------------------------------------
-    // bitwise_or
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void BitwiseOr()
@@ -410,10 +377,6 @@ public class CudaArthimTest : CudaTestBase
         // 10 | 12 = 14
         Assert.Equal(14, cpuDst.At<byte>(0, 0));
     }
-
-    // -----------------------------------------------------------------------
-    // bitwise_xor
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void BitwiseXor_1()
@@ -573,12 +536,9 @@ public class CudaArthimTest : CudaTestBase
         // 0 pixels with intensity 99
         Assert.Equal(0, cpuHist.At<int>(0, 99));
     }
-    // -----------------------------------------------------------------------
-    // cartToPolar
-    // -----------------------------------------------------------------------
 
     [Fact]
-    public void CartToPolar_UnitVector_MagnitudeIsOne()
+    public void CartToPolar_1()
     {
         VerifyCudaSupport();
 
@@ -595,7 +555,7 @@ public class CudaArthimTest : CudaTestBase
     }
 
     [Fact]
-    public void CartToPolar_DiagonalVector_Magnitude_IsRootTwo()
+    public void CartToPolar_2()
     {
         VerifyCudaSupport();
 
@@ -609,12 +569,8 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(Math.Sqrt(2f), PixelF(mag), 2);
     }
 
-    // -----------------------------------------------------------------------
-    // compare
-    // -----------------------------------------------------------------------
-
     [Fact]
-    public void Compare_EqualMatrices_AllPixelsNonZero()
+    public void Compare_1()
     {
         VerifyCudaSupport();
 
@@ -631,7 +587,7 @@ public class CudaArthimTest : CudaTestBase
     }
 
     [Fact]
-    public void Compare_NotEqual_AllPixelsZero()
+    public void Compare_2()
     {
         VerifyCudaSupport();
 
@@ -646,9 +602,125 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(0, cpu.At<byte>(0, 0));
     }
 
-    // -----------------------------------------------------------------------
-    // divide
-    // -----------------------------------------------------------------------
+    [Fact]
+    public void Compare_3()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 10f);
+        using var src2 = MakeFloat(Rows, Cols, 5f);
+        using var dst = new GpuMat();
+
+        // 10 > 5 is True (255)
+        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.GT);
+
+        Assert.Equal((byte)255, PixelB(dst));
+    }
+
+    [Fact]
+    public void Compare_4()
+    {
+        VerifyCudaSupport();
+
+        using var src1 = MakeFloat(Rows, Cols, 10f);
+        using var src2 = MakeFloat(Rows, Cols, 5f);
+        using var dst = new GpuMat();
+
+        // 10 < 5 is False (0)
+        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.LT);
+
+        Assert.Equal((byte)0, PixelB(dst));
+    }
+
+    [Fact]
+    public void CopyMakeBorder()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: 2x2 image filled with 100
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1, new Scalar(100));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // Act: Add a 1-pixel constant border of value 255 around it
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.CopyMakeBorder(
+            gpuSrc, gpuDst,
+            top: 1, bottom: 1, left: 1, right: 1,
+            borderType: BorderTypes.Constant,
+            value: new Scalar(255));
+
+        // Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Original was 2x2. Added 1 top/bottom (2) and 1 left/right (2) -> Now 4x4
+        Assert.Equal(4, cpuDst.Rows);
+        Assert.Equal(4, cpuDst.Cols);
+
+        // Check original pixel is still there in the new center
+        Assert.Equal(100, cpuDst.At<byte>(1, 1));
+
+        // Check that the border pixel is exactly what we specified (255)
+        Assert.Equal(255, cpuDst.At<byte>(0, 0));
+    }
+
+    [Fact]
+    public void CountNonZero_1()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: Create a 3x3 matrix initialized to ZEROS
+        using var cpuSrc = new Mat(3, 3, MatType.CV_8UC1, new Scalar(0));
+
+        // Set exactly 4 pixels to non-zero values
+        cpuSrc.Set<byte>(0, 0, 255);
+        cpuSrc.Set<byte>(1, 1, 100);
+        cpuSrc.Set<byte>(2, 2, 50);
+        cpuSrc.Set<byte>(0, 2, 1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // Act (Synchronous method)
+        int count = Cv2.Cuda.CountNonZero(gpuSrc);
+
+        // Assert
+        Assert.Equal(4, count);
+    }
+
+    [Fact]
+    public void CountNonZero_2()
+    {
+        VerifyCudaSupport();
+
+        // Arrange
+        using var cpuSrc = new Mat(3, 3, MatType.CV_8UC1, new Scalar(0));
+        cpuSrc.Set<byte>(0, 0, 255);
+        cpuSrc.Set<byte>(1, 1, 100);
+        cpuSrc.Set<byte>(2, 2, 50);
+        cpuSrc.Set<byte>(0, 2, 1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // Act (Asynchronous / GpuMat output method)
+        using var gpuDst = new GpuMat();
+            Cv2.Cuda.CountNonZero(gpuSrc,gpuDst);
+
+        // Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // OpenCV's CountNonZero kernel outputs a single 32-bit integer (CV_32SC1)
+        Assert.Equal(MatType.CV_32SC1, cpuDst.Type());
+        Assert.Equal(1, cpuDst.Rows);
+        Assert.Equal(1, cpuDst.Cols);
+
+        // Verify the count inside the matrix is correct
+        Assert.Equal(4, cpuDst.At<int>(0, 0));
+    }
 
     [Fact]
     public void Divide_TwoMatrices_ReturnsQuotient()
@@ -1212,41 +1284,7 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(7f, PixelF(srcDst), 3);
     }
 
-    
 
-    // -----------------------------------------------------------------------
-    // Compare Edge Cases
-    // -----------------------------------------------------------------------
-
-    [Fact]
-    public void Compare_GreaterThan_ReturnsTrueCorrectly()
-    {
-        VerifyCudaSupport();
-
-        using var src1 = MakeFloat(Rows, Cols, 10f);
-        using var src2 = MakeFloat(Rows, Cols, 5f);
-        using var dst = new GpuMat();
-
-        // 10 > 5 is True (255)
-        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.GT);
-
-        Assert.Equal((byte)255, PixelB(dst));
-    }
-
-    [Fact]
-    public void Compare_LessThan_ReturnsFalseCorrectly()
-    {
-        VerifyCudaSupport();
-
-        using var src1 = MakeFloat(Rows, Cols, 10f);
-        using var src2 = MakeFloat(Rows, Cols, 5f);
-        using var dst = new GpuMat();
-
-        // 10 < 5 is False (0)
-        Cv2.Cuda.Compare(src1, src2, dst, CmpTypes.LT);
-
-        Assert.Equal((byte)0, PixelB(dst));
-    }
 
     // -----------------------------------------------------------------------
     // Advanced Parameter Tests (dtype, scale, radians vs degrees)

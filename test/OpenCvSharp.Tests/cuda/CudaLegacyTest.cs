@@ -1,5 +1,6 @@
 ﻿using Xunit;
 using OpenCvSharp.Cuda;
+using Xunit.Sdk;
 
 namespace OpenCvSharp.Tests.Cuda;
 
@@ -11,13 +12,13 @@ public class CudaLegacyTest : CudaTestBase
     {
         VerifyCudaSupport();
 
-        // Optical flow BM needs two CV_8UC1 images
+        // Arrange
         using var cpuPrev = new Mat(64, 64, MatType.CV_8UC1, new Scalar(0));
         using var cpuCurr = new Mat(64, 64, MatType.CV_8UC1, new Scalar(0));
 
-        // Draw a white square and simulate motion
+        // Create a moving square (+2, +2)
         Cv2.Rectangle(cpuPrev, new Rect(10, 10, 15, 15), new Scalar(255), -1);
-        Cv2.Rectangle(cpuCurr, new Rect(12, 12, 15, 15), new Scalar(255), -1); // Moved +2, +2
+        Cv2.Rectangle(cpuCurr, new Rect(12, 12, 15, 15), new Scalar(255), -1);
 
         using var gpuPrev = new GpuMat(); gpuPrev.Upload(cpuPrev);
         using var gpuCurr = new GpuMat(); gpuCurr.Upload(cpuCurr);
@@ -35,11 +36,146 @@ public class CudaLegacyTest : CudaTestBase
             usePrevious: false,
             velx, vely, buf);
 
-        // Assert
+        // Basic assertions
         Assert.False(velx.Empty(), "X velocity matrix should not be empty.");
         Assert.False(vely.Empty(), "Y velocity matrix should not be empty.");
 
-        // The size of the output velocity fields depends on the block size and shift size,
-        // but we can confidently assert that execution succeeded and outputs were allocated.
+        // Download results
+        using var cpuVelX = new Mat();
+        using var cpuVelY = new Mat();
+        velx.Download(cpuVelX);
+        vely.Download(cpuVelY);
+
+        Assert.Equal(cpuVelX.Size(), cpuVelY.Size());
+
+        // ---- Detect scaling (BM often uses fixed-point, e.g. *16) ----
+        double rawMeanX = Cv2.Mean(cpuVelX).Val0;
+        double rawMeanY = Cv2.Mean(cpuVelY).Val0;
+
+        double scale = 1.0;
+
+        // Heuristic: if values are large, assume fixed-point scaling
+        if (Math.Abs(rawMeanX) > 10 || Math.Abs(rawMeanY) > 10)
+            scale = 16.0;
+
+        // ---- Focus on moving region ----
+        var roi = new Rect(12, 12, 10, 10); // inside moved square
+        using var subX = new Mat(cpuVelX, roi);
+        using var subY = new Mat(cpuVelY, roi);
+
+        double avgX = Cv2.Mean(subX).Val0 / scale;
+        double avgY = Cv2.Mean(subY).Val0 / scale;
+
+        // ---- Validate motion (should be approx +2, +2) ----
+        Assert.InRange(Math.Abs(avgX), 1.5, 2.5);
+        Assert.InRange(Math.Abs(avgY), 1.5, 2.5);
+
+        // ---- Validate background is ~0 ----
+        var bg = new Rect(0, 0, 10, 10);
+        using var bgX = new Mat(cpuVelX, bg);
+        using var bgY = new Mat(cpuVelY, bg);
+
+        double bgAvgX = Cv2.Mean(bgX).Val0 / scale;
+        double bgAvgY = Cv2.Mean(bgY).Val0 / scale;
+
+        Assert.InRange(bgAvgX, -2.5, 2.5);
+        Assert.InRange(bgAvgY, -2.5, 2.5);
+    }
+
+
+    [Fact]
+    public void ConnectivityMaskTest()
+    {
+        VerifyCudaSupport();
+
+        // Arrange
+        // Create a 5x5 image.
+        using var cpuImg = new Mat(5, 5, MatType.CV_8UC1, new Scalar(50));
+        // Add a "connected" shape with intensity 100 in the middle
+        cpuImg.Set<byte>(2, 2, 100);
+        cpuImg.Set<byte>(2, 3, 105);
+
+        using var gpuImg = new GpuMat(); gpuImg.Upload(cpuImg);
+        using var gpuMask = new GpuMat();
+
+        // Act: Find pixels between 90 and 110
+        try
+        {
+            // Act
+            Cv2.Cuda.ConnectivityMask(gpuImg, gpuMask, new Scalar(90), new Scalar(110));
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled for current build"))
+        {
+            // The cudalegacy module is often disabled in modern OpenCV binaries.
+            // If it's disabled, gracefully exit the test without failing it.
+            Assert.Skip("The called functionality is disabled for current build or platform");
+        }
+
+
+        // Assert
+        using var cpuMask = new Mat();
+        gpuMask.Download(cpuMask);
+
+        Assert.False(cpuMask.Empty());
+        Assert.Equal(MatType.CV_8UC1, cpuMask.Type());
+
+        // The background (50) should be 0 in the mask
+        Assert.Equal(0, cpuMask.At<byte>(0, 0));
+        // The pixels within the lo/hi range should be 255
+        Assert.Equal(255, cpuMask.At<byte>(2, 2));
+        Assert.Equal(255, cpuMask.At<byte>(2, 3));
+    }
+
+    [Fact]
+    public void BackgroundSubtractorGMG()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            // 1. Create GMG with exactly 1 initialization frame so it activates immediately.
+            using var gmg = OpenCvSharp.Cuda.BackgroundSubtractorGMG.Create(initializationFrames: 1);
+
+            using var cpuFrame = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+            using var gpuFrame = new GpuMat();
+            using var gpuFgMask = new GpuMat();
+
+            // 2. FRAME 1: Pure black background (Initialization phase)
+            gpuFrame.Upload(cpuFrame);
+
+            // Using our Stream overload (stream = null) 30 because we need to train our model
+            for (int i = 0; i < 30; i++)
+            {
+                gmg.Apply(gpuFrame, gpuFgMask, learningRate: 0.1);
+            }
+
+            // 3. FRAME 2: Introduce a moving object (white square)
+            Cv2.Rectangle(cpuFrame, new Rect(40, 40, 20, 20), new Scalar(255), -1);
+            gpuFrame.Upload(cpuFrame);
+
+            // Apply frame 2 to extract the foreground
+            gmg.Apply(gpuFrame, gpuFgMask, learningRate: 0.0);
+
+            // 4. Download and Assert
+            using var cpuFgMask = new Mat();
+            gpuFgMask.Download(cpuFgMask);
+
+            Assert.False(cpuFgMask.Empty(), "Foreground mask should not be empty.");
+            Assert.Equal(MatType.CV_8UC1, cpuFgMask.Type());
+
+            // Assert that the static background pixel is dark (0)
+            Assert.Equal(0, cpuFgMask.At<byte>(10, 10));
+
+            // Assert that the moving white square pixel is bright (255)
+            Assert.Equal(255, cpuFgMask.At<byte>(50, 50));
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
+        {
+            // Graceful exit: cudabgsegm is an extra module and not always compiled 
+            // into all OpenCV distribution binaries.
+            Assert.Skip("The called functionality is disabled for current build or platform");
+        }
     }
 }
+
+

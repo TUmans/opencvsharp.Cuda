@@ -202,6 +202,31 @@ CVAPI(ExceptionStatus) cuda_compare(cv::_InputArray *src1,cv::_InputArray *src2,
     END_WRAP
 }
 
+// ---------- copyMakeborder ------------------------------------------------------
+CVAPI(ExceptionStatus) cuda_copyMakeBorder(
+    cv::_InputArray *src, cv::_OutputArray *dst, int top, int bottom, int left, int right, int borderType, cv::Scalar value, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::copyMakeBorder(*src, *dst, top, bottom, left, right, borderType, value, streamRef);
+    END_WRAP
+}
+// ---------- copyMakeborder ------------------------------------------------------
+CVAPI(ExceptionStatus) cuda_countNonZero_int( cv::_InputArray *src, int *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::countNonZero(*src);
+    END_WRAP
+}
+
+// ---------- copyMakeborder ------------------------------------------------------
+CVAPI(ExceptionStatus) cuda_countNonZero_dst( cv::_InputArray *src, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::countNonZero(*src, *dst, streamRef);
+    END_WRAP
+}
 // ---------- divide -------------------------------------------------------
 CVAPI(ExceptionStatus) cuda_divide(cv::_InputArray *src1,cv::_InputArray *src2,cv::_OutputArray *dst,    double scale,    int dtype,cv::cuda::Stream *stream)
 {

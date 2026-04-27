@@ -109,6 +109,7 @@
     <ClInclude Include="core_SVD.h" />
     <ClInclude Include="core_UMat.h" />
     <ClInclude Include="cuda.h" />
+    <ClInclude Include="cuda_Core.h" />
     <ClInclude Include="cuda_GpuMat.h" />
     <ClInclude Include="cuda_Legacy.h" />
     <ClInclude Include="cuda_Warping.h" />

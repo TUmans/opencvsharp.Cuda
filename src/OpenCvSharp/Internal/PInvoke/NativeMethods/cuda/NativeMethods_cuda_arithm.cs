@@ -80,6 +80,27 @@ static partial class NativeMethods
         int cmpop, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_copyMakeBorder(IntPtr src, IntPtr dst, int top, int bottom, int left, int right, int borderType, Scalar value, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_countNonZero_int(IntPtr src, out int returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_countNonZero_dst(IntPtr src, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_createBackgroundSubtractorGMG(int initializationFrames, double decisionThreshold, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_get(IntPtr ptr, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_delete(IntPtr ptr);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_apply(IntPtr obj, IntPtr image, IntPtr fgmask, double learningRate, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_divide(
         IntPtr src1, IntPtr src2, IntPtr dst,
         double scale, int dtype, IntPtr stream);

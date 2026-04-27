@@ -10,4 +10,8 @@ static partial class NativeMethods
 {
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_calcOpticalFlowBM(IntPtr prev, IntPtr curr, Size blockSize, Size shiftSize, Size maxRange, int usePrevious, IntPtr velx, IntPtr vely, IntPtr buf, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_connectivityMask(
+    IntPtr image, IntPtr mask, Scalar lo, Scalar hi, IntPtr stream);
 }

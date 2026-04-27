@@ -23,3 +23,55 @@ CVAPI(ExceptionStatus) cuda_calcOpticalFlowBM(
                                 *velx, *vely, *buf, streamRef);
     END_WRAP
 }
+
+// ---------- connectivityMask --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_connectivityMask(cv::cuda::GpuMat *image, cv::cuda::GpuMat *mask, cv::Scalar lo, cv::Scalar hi, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::connectivityMask(*image, entity(mask), lo, hi, streamRef);
+    END_WRAP
+}
+
+// ---------- createBackgroundSubtractorGMG --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorGMG(int initializationFrames, double decisionThreshold,  cv::Ptr<cv::cuda::BackgroundSubtractorGMG> **returnValue)
+{
+    BEGIN_WRAP
+    auto ptr = cv::cuda::createBackgroundSubtractorGMG(initializationFrames, decisionThreshold);
+    *returnValue = new cv::Ptr<cv::cuda::BackgroundSubtractorGMG>(ptr);
+    END_WRAP
+}
+
+// ---------- BackgroundSubtractorGMG_get --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_get(cv::Ptr<cv::cuda::BackgroundSubtractorGMG> *ptr, cv::cuda::BackgroundSubtractorGMG **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = ptr->get();
+    END_WRAP
+}
+
+// ---------- BackgroundSubtractorGMG_delete --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_delete(cv::Ptr<cv::cuda::BackgroundSubtractorGMG> *ptr)
+{
+    BEGIN_WRAP
+    delete ptr;
+    END_WRAP
+}
+
+// ---------- BackgroundSubtractorGMG_apply --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_apply(cv::cuda::BackgroundSubtractorGMG *obj, cv::_InputArray *image, cv::_OutputArray *fgmask, double learningRate, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->apply(*image, *fgmask, learningRate, streamRef);
+    END_WRAP
+}
+
+// ---------- createBackgroundSubtractorFDG --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorFGD(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> **returnValue)
+{
+    BEGIN_WRAP
+    auto ptr = cv::cuda::createBackgroundSubtractorFGD(); 
+    *returnValue = new cv::Ptr<cv::cuda::BackgroundSubtractorFGD>(ptr);
+    END_WRAP
+}
