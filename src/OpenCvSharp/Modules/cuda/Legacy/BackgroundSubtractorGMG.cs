@@ -9,7 +9,7 @@ public class BackgroundSubtractorGMG : BackgroundSubtractor
     /// Internal constructor that satisfies the base class cv::Ptr requirements.
     /// </summary>
     protected BackgroundSubtractorGMG(IntPtr smartPtr, IntPtr rawPtr)
-        : base(smartPtr, rawPtr,p=> NativeMethods.cuda_BackgroundSubtractorGMG_delete(p))
+        : base(smartPtr, rawPtr,p => NativeMethods.HandleException(NativeMethods.cuda_BackgroundSubtractorGMG_delete(p)))
     {
     }
 

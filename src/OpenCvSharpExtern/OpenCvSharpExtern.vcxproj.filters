@@ -109,6 +109,9 @@
     <ClCompile Include="cuda_Imgproc.h">
       <Filter>Header Files\cuda</Filter>
     </ClCompile>
+    <ClCompile Include="cuda_Filters.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgsegm.h">
@@ -401,6 +404,9 @@
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
     <ClInclude Include="cuda_Core.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_Bgsegm.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
   </ItemGroup>

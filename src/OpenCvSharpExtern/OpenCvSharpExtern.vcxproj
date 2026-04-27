@@ -58,6 +58,7 @@
     <ClCompile Include="core.cpp" />
     <ClCompile Include="cuda.cpp" />
     <ClCompile Include="cuda_Arithm.h" />
+    <ClCompile Include="cuda_Filters.h" />
     <ClCompile Include="cuda_Imgproc.h" />
     <ClCompile Include="dnn.cpp" />
     <ClCompile Include="dnn_superres.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="core_SVD.h" />
     <ClInclude Include="core_UMat.h" />
     <ClInclude Include="cuda.h" />
+    <ClInclude Include="cuda_Bgsegm.h" />
     <ClInclude Include="cuda_Core.h" />
     <ClInclude Include="cuda_GpuMat.h" />
     <ClInclude Include="cuda_Legacy.h" />

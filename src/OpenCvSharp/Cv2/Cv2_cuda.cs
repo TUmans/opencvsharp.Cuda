@@ -119,7 +119,7 @@ namespace OpenCvSharp
             /// <param name="cols">Number of columns in a 2D array.</param>
             /// <param name="type">Array type.</param>
             /// <param name="m"></param>
-            public static void CreateContinuous(int rows, int cols, MatType type, GpuMat m)
+            public static void CreateContinuous(int rows, int cols, MatType type, OpenCvSharp.Cuda.OutputArray m)
             {
                 ThrowIfGpuNotAvailable();
                 if (m is null)
@@ -135,7 +135,7 @@ namespace OpenCvSharp
             /// <param name="cols">Number of columns in a 2D array.</param>
             /// <param name="type">Array type.</param>
             /// <returns></returns>
-            public static GpuMat CreateContinuous(int rows, int cols, MatType type)
+            public static OpenCvSharp.Cuda.OutputArray CreateContinuous(int rows, int cols, MatType type)
             {
                 ThrowIfGpuNotAvailable();
                 NativeMethods.HandleException(NativeMethods.cuda_createContinuous2(rows, cols, (int)type, out IntPtr ret));
@@ -148,7 +148,7 @@ namespace OpenCvSharp
             /// <param name="size">Number of rows and columns in a 2D array.</param>
             /// <param name="type">Array type.</param>
             /// <param name="m"></param>
-            public static void CreateContinuous(Size size, MatType type, GpuMat m)
+            public static void CreateContinuous(Size size, MatType type, OpenCvSharp.Cuda.OutputArray m)
             {
                 ThrowIfGpuNotAvailable();
                 CreateContinuous(size.Height, size.Width, type, m);
@@ -160,7 +160,7 @@ namespace OpenCvSharp
             /// <param name="size">Number of rows and columns in a 2D array.</param>
             /// <param name="type">Array type.</param>
             /// <returns></returns>
-            public static GpuMat CreateContinuous(Size size, MatType type)
+            public static OpenCvSharp.Cuda.OutputArray CreateContinuous(Size size, MatType type)
             {
                 ThrowIfGpuNotAvailable();
                 return CreateContinuous(size.Height, size.Width, type);

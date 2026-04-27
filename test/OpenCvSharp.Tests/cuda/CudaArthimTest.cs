@@ -1321,7 +1321,84 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal((float)(Math.PI / 4.0), PixelF(ang), 3);
     }
+
+    [Fact]
+    public void Convolution()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: 
+        // Image: 4x4 filled with 1.0f
+        using var cpuSrc = new Mat(4, 4, MatType.CV_32FC1, new Scalar(1.0f));
+        // Kernel: 2x2 filled with 1.0f
+        using var cpuTempl = new Mat(2, 2, MatType.CV_32FC1, new Scalar(1.0f));
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuTempl = new GpuMat(); gpuTempl.Upload(cpuTempl);
+        using var gpuDst = new GpuMat();
+
+        // Create Convolution algorithm
+        using var convolution = OpenCvSharp.Cuda.Convolution.Create();
+
+        // Act
+        // Convolving a 2x2 square of 1s over a region of 1s should result in 4.0 (1*1 + 1*1 + 1*1 + 1*1)
+        convolution.Convolve(gpuSrc, gpuTempl, gpuDst);
+
+        // Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_32FC1, cpuDst.Type());
+
+        // Check center pixel. Due to FFT padding, we check (1,1)
+        float resultVal = cpuDst.At<float>(1, 1);
+
+        // Convolution results can have slight float noise, so we use a range
+        Assert.InRange(resultVal, 3.99f, 4.01f);
+    }
+
+    [Fact]
+    public void DFT()
+    {
+        VerifyCudaSupport();
+
+        // 1. Create real input
+        using var cpuReal = new Mat(4, 4, MatType.CV_32FC1, new Scalar(1.0f));
+
+        // 2. Convert to complex: (real, imaginary=0)
+        using var cpuImag = Mat.Zeros(cpuReal.Size(), MatType.CV_32FC1);
+        using var cpuComplex = new Mat();
+        Cv2.Merge([cpuReal, cpuImag], cpuComplex);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuComplex);
+        using var gpuDst = new GpuMat();
+
+        // 3. Create DFT (no flags)
+        using var dft = OpenCvSharp.Cuda.DFT.Create(new Size(4, 4), 0);
+
+        // 4. Act
+        dft.Compute(gpuSrc, gpuDst);
+
+        // 5. Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_32FC2, cpuDst.Type());
+
+        // DC component (sum of all values = 16)
+        Vec2f dc = cpuDst.At<Vec2f>(0, 0);
+        Assert.InRange(dc.Item0, 15.9f, 16.1f);
+        Assert.InRange(dc.Item1, -0.1f, 0.1f);
+
+        // AC component should be ~0
+        Vec2f ac = cpuDst.At<Vec2f>(1, 1);
+        Assert.InRange(ac.Item0, -0.1f, 0.1f);
+        Assert.InRange(ac.Item1, -0.1f, 0.1f);
+    }
 }
+
 
 // ---------------------------------------------------------------------------
 // Minimal skip-test support (replace with xunit.skip NuGet if available)

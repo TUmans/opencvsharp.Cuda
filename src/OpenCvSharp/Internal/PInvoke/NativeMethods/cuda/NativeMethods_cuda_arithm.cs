@@ -88,19 +88,7 @@ static partial class NativeMethods
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_countNonZero_dst(IntPtr src, IntPtr dst, IntPtr stream);
 
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createBackgroundSubtractorGMG(int initializationFrames, double decisionThreshold, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_apply(IntPtr obj, IntPtr image, IntPtr fgmask, double learningRate, IntPtr stream);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    
     public static extern ExceptionStatus cuda_divide(
         IntPtr src1, IntPtr src2, IntPtr dst,
         double scale, int dtype, IntPtr stream);
@@ -184,6 +172,31 @@ static partial class NativeMethods
         double thresh, double maxval,
         int type, IntPtr stream,
         out double retVal);
+
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_createConvolution(Size userBlockSize, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_Convolution_get(IntPtr ptr, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_Convolution_delete(IntPtr ptr);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_Convolution_convolve(IntPtr obj, IntPtr image, IntPtr templ, IntPtr result, int conj, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_createDFT(Size dftSize, int flags, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_DFT_get(IntPtr ptr, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_DFT_delete(IntPtr ptr);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_DFT_compute( IntPtr obj, IntPtr src, IntPtr dst, IntPtr stream);
 }
 
 

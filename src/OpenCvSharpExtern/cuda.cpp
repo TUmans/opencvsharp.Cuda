@@ -8,4 +8,6 @@
 #include "cuda_Imgproc.h"
 #include "cuda_Warping.h"
 #include "cuda_Legacy.h"
+#include "cuda_Bgsegm.h"
+#include "cuda_Filters.h"
 #endif

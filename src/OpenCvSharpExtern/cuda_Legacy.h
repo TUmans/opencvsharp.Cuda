@@ -67,11 +67,35 @@ CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_apply(cv::cuda::BackgroundSu
     END_WRAP
 }
 
-// ---------- createBackgroundSubtractorFDG --------------------------------------------------
+// ---------- createBackgroundSubtractorFGD --------------------------------------------------
 CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorFGD(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> **returnValue)
 {
     BEGIN_WRAP
-    auto ptr = cv::cuda::createBackgroundSubtractorFGD(); 
+    auto ptr = cv::cuda::createBackgroundSubtractorFGD();
     *returnValue = new cv::Ptr<cv::cuda::BackgroundSubtractorFGD>(ptr);
+    END_WRAP
+}
+
+// ---------- BackgroundSubtractorFGD_get --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_get(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> *ptr, cv::cuda::BackgroundSubtractorFGD **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = ptr->get();
+    END_WRAP
+}
+
+// ---------- BackgroundSubtractorFGD_delete --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_delete( cv::Ptr<cv::cuda::BackgroundSubtractorFGD> *ptr)
+{
+    BEGIN_WRAP
+    delete ptr;
+    END_WRAP
+}
+
+// ---------- BackgroundSubtractorFGD_apply --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_apply(cv::cuda::BackgroundSubtractorFGD *obj, cv::_InputArray *image, cv::_OutputArray *fgmask, double learningRate)
+{
+    BEGIN_WRAP
+    obj->apply(*image, *fgmask, learningRate);
     END_WRAP
 }

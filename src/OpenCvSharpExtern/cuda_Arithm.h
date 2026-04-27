@@ -411,3 +411,73 @@ CVAPI(ExceptionStatus) cuda_threshold(cv::_InputArray *src,cv::_OutputArray *dst
     *retVal = cv::cuda::threshold(*src, *dst, thresh, maxval, type, streamRef);
     END_WRAP
 }
+
+// ---------- createConvolution ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_createConvolution(cv::Size user_block_size, cv::Ptr<cv::cuda::Convolution> **returnValue)
+{
+    BEGIN_WRAP
+    auto ptr = cv::cuda::createConvolution(user_block_size);
+    *returnValue = new cv::Ptr<cv::cuda::Convolution>(ptr);
+    END_WRAP
+}
+
+// ---------- Convolution_get ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_Convolution_get(cv::Ptr<cv::cuda::Convolution> *ptr, cv::cuda::Convolution **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue= ptr->get();
+    END_WRAP
+}
+
+// ---------- Convolution_delete ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_Convolution_delete(cv::Ptr<cv::cuda::Convolution> *ptr)
+{
+    BEGIN_WRAP
+    delete ptr;
+    END_WRAP
+}
+
+// ---------- Convolution_convolve ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_Convolution_convolve(cv::cuda::Convolution *obj, cv::_InputArray *image, cv::_InputArray *templ, cv::_OutputArray *result, int conj, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->convolve(*image, *templ, *result, conj != 0, streamRef);
+    END_WRAP
+}
+
+// ---------- createDFT ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_createDFT(
+    cv::Size dft_size, int flags, cv::Ptr<cv::cuda::DFT> **returnValue)
+{
+    BEGIN_WRAP
+    auto ptr = cv::cuda::createDFT(dft_size, flags);
+    *returnValue = new cv::Ptr<cv::cuda::DFT>(ptr);
+    END_WRAP
+}
+
+// ---------- DFT_get ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_DFT_get(cv::Ptr<cv::cuda::DFT> *ptr, cv::cuda::DFT **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = ptr->get();
+    END_WRAP
+}
+
+// ---------- FT_delete ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_DFT_delete(cv::Ptr<cv::cuda::DFT> *ptr)
+{
+    BEGIN_WRAP
+    delete ptr;
+    END_WRAP
+}
+
+// ---------- DFT_compute ----------------------------------------------------
+CVAPI(ExceptionStatus) cuda_DFT_compute(
+    cv::cuda::DFT *obj, cv::_InputArray *src, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->compute(*src, *dst, streamRef);
+    END_WRAP
+}

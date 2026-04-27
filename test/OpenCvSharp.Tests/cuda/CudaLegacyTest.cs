@@ -176,6 +176,50 @@ public class CudaLegacyTest : CudaTestBase
             Assert.Skip("The called functionality is disabled for current build or platform");
         }
     }
+
+
+    [Fact]
+    public void BackgroundSubtractorFGD()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            using var fgd = OpenCvSharp.Cuda.BackgroundSubtractorFGD.Create();
+
+            // FGD REQUIRES 3-channel images (BGR). It will crash if given 1-channel grayscale.
+            using var cpuFrame = new Mat(100, 100, MatType.CV_8UC3, new Scalar(0, 0, 0));
+            using var gpuFrame = new GpuMat();
+            using var gpuFgMask = new GpuMat();
+
+            // Frame 1: Train background
+            gpuFrame.Upload(cpuFrame);
+            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 1.0);
+
+            // Frame 2: Introduce foreground (A white square)
+            Cv2.Rectangle(cpuFrame, new Rect(40, 40, 20, 20), new Scalar(255, 255, 255), -1);
+            gpuFrame.Upload(cpuFrame);
+            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 0.0);
+
+            // Assert
+            using var cpuFgMask = new Mat();
+            gpuFgMask.Download(cpuFgMask);
+
+            Assert.False(cpuFgMask.Empty());
+            // The output mask is always a 1-channel binary image (CV_8UC1)
+            Assert.Equal(MatType.CV_8UC1, cpuFgMask.Type());
+
+            // Background should be black (0)
+            Assert.Equal(0, cpuFgMask.At<byte>(10, 10));
+            // Foreground should be white (255)
+            Assert.Equal(255, cpuFgMask.At<byte>(50, 50));
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
+        {
+            // Graceful exit if cudabgsegm is not compiled into the OpenCV binaries.
+            return;
+        }
+    }
 }
 
 
