@@ -1366,12 +1366,8 @@ public class CudaArthimTest : CudaTestBase
         // 1. Create real input
         using var cpuReal = new Mat(4, 4, MatType.CV_32FC1, new Scalar(1.0f));
 
-        // 2. Convert to complex: (real, imaginary=0)
-        using var cpuImag = Mat.Zeros(cpuReal.Size(), MatType.CV_32FC1);
-        using var cpuComplex = new Mat();
-        Cv2.Merge([cpuReal, cpuImag], cpuComplex);
-
-        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuComplex);
+        using var gpuSrc = new GpuMat(); 
+        gpuSrc.Upload(cpuReal);
         using var gpuDst = new GpuMat();
 
         // 3. Create DFT (no flags)
@@ -1396,6 +1392,75 @@ public class CudaArthimTest : CudaTestBase
         Vec2f ac = cpuDst.At<Vec2f>(1, 1);
         Assert.InRange(ac.Item0, -0.1f, 0.1f);
         Assert.InRange(ac.Item1, -0.1f, 0.1f);
+    }
+
+    [Fact]
+    public void LookUpTable_TransformTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create an inversion LUT (255 - i)
+        using var cpuLut = new Mat(1, 256, MatType.CV_8UC1);
+        var lutIndexer = cpuLut.GetGenericIndexer<byte>();
+        for (int i = 0; i < 256; i++)
+        {
+            cpuLut.Set<byte>(0, i, (byte)(255 - i));
+        }
+
+        // 2. Arrange: Create a 5x5 source image filled with value '50'
+        using var cpuSrc = new Mat(5, 5, MatType.CV_8UC1, new Scalar(50));
+        using var gpuSrc = new GpuMat(); 
+        gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 3. Act
+        using var lut = OpenCvSharp.Cuda.LookUpTable.Create(cpuLut);
+        lut.Transform(gpuSrc, gpuDst);
+
+        // 4. Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // The value 50 through an inversion LUT (255 - 50) should be 205.
+        Assert.Equal(205, cpuDst.At<byte>(0, 0));
+    }
+
+    [Fact]
+    public void MinEigenVal_ComputeTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 black image with a 40x40 white square
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Rectangle(cpuSrc, new Rect(30, 30, 40, 40), new Scalar(255), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        using var criteria = OpenCvSharp. Cuda.CornernessCriteria.CreateMinEigenValCorner(
+            MatType.CV_8UC1,
+            blockSize: 3,
+            ksize: 3);
+
+        criteria.Compute(gpuSrc, gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_32FC1, cpuDst.Type());
+
+        // A corner of the square (30, 30) should have a high positive eigenvalue score
+        float cornerScore = cpuDst.At<float>(30, 30);
+        Assert.True(cornerScore > 0, $"Expected positive score at corner, but got {cornerScore}");
+
+        // A pixel in the middle of a flat white area should have a score near 0
+        float flatScore = cpuDst.At<float>(50, 50);
+        Assert.InRange(flatScore, -0.1f, 0.1f);
     }
 }
 

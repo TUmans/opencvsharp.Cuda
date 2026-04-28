@@ -220,6 +220,60 @@ public class CudaLegacyTest : CudaTestBase
             return;
         }
     }
+
+    [Fact]
+    public void ImagePyramid_GetLayerTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 source image
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(128));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // 2. Act: Create pyramid
+        using var pyramid = OpenCvSharp.Cuda.ImagePyramid.Create(gpuSrc, nLayers: 3);
+
+        using var gpuLayer0 = new GpuMat();
+        using var gpuLayer1 = new GpuMat();
+
+        // Fetch the 100x100 layer
+        pyramid.GetLayer(gpuLayer0, new Size(100, 100));
+        // Fetch the 50x50 layer
+        pyramid.GetLayer(gpuLayer1, new Size(50, 50));
+
+        // 3. Assert
+        Assert.Equal(100, gpuLayer0.Rows);
+        Assert.Equal(50, gpuLayer1.Rows);
+        Assert.False(gpuLayer1.Empty());
+    }
+
+    [Fact]
+    public void CreateOpticalFlowNeedleMap_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create small flow components (u = horizontal, v = vertical)
+        using var u = new GpuMat(20, 20, MatType.CV_32FC1, new Scalar(1.0f));
+        using var v = new GpuMat(20, 20, MatType.CV_32FC1, new Scalar(1.0f));
+
+        using var vertex = new GpuMat();
+        using var colors = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.CreateOpticalFlowNeedleMap(u, v, vertex, colors);
+
+        Assert.False(vertex.Empty());
+        Assert.False(colors.Empty());
+
+        // Vertex is float vector field
+        Assert.Equal(MatType.CV_32FC3, vertex.Type());
+
+        // Colors may be float or 8-bit depending on backend
+        Assert.True(
+            colors.Type() == MatType.CV_32FC3 ||
+            colors.Type() == MatType.CV_8UC4
+        );
+    }
 }
 
 

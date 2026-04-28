@@ -199,6 +199,303 @@ public class CudaImgProcTest : CudaTestBase
         Assert.True(rangeAfter > rangeBefore,
             $"Expected expanded dynamic range, before={rangeBefore}, after={rangeAfter}");
     }
+
+    [Fact]
+    public void GoodFeaturesToTrack_DetectTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a black image with a white square
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        // Square from (30,30) to (70,70) -> 4 corners
+        Cv2.Rectangle(cpuSrc, new Rect(30, 30, 40, 40), new Scalar(255), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuCorners = new GpuMat();
+
+        // 2. Act
+        using var detector = OpenCvSharp.Cuda.CornersDetector.Create(
+      MatType.CV_8UC1,
+      maxCorners: 100,
+      qualityLevel: 0.01,
+      minDistance: 1,
+      blockSize: 3
+  );
+
+        detector.Detect(gpuSrc, gpuCorners);
+
+        // Important: check BEFORE download
+        Assert.False(gpuCorners.Empty());
+
+        using var cpuCorners = new Mat();
+        gpuCorners.Download(cpuCorners);
+
+        Assert.Equal(MatType.CV_32FC2, cpuCorners.Type());
+
+        // Count check
+        int count = cpuCorners.Rows * cpuCorners.Cols;
+        Assert.True(count >= 4);
+
+        // Find top-left
+        bool foundTopLeft = false;
+
+        for (int r = 0; r < cpuCorners.Rows; r++)
+        {
+            for (int c = 0; c < cpuCorners.Cols; c++)
+            {
+                Vec2f pt = cpuCorners.At<Vec2f>(r, c);
+
+                if (Math.Abs(pt.Item0 - 30) < 3 &&
+                    Math.Abs(pt.Item1 - 30) < 3)
+                {
+                    foundTopLeft = true;
+                }
+            }
+        }
+
+        Assert.True(foundTopLeft, "Could not find the top-left corner.");
+    }
+
+    [Fact]
+    public void HarrisCorner_ComputeTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 black image with a 40x40 white square
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Rectangle(cpuSrc, new Rect(30, 30, 40, 40), new Scalar(255), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        using var harris = OpenCvSharp.Cuda.CornernessCriteria.CreateHarrisCorner(MatType.CV_8UC1, blockSize: 3, ksize: 3, k: 0.04);
+        harris.Compute(gpuSrc, gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_32FC1, cpuDst.Type()); // Response map is always float
+
+        // Check corner response at (30, 30). It should be a large positive value.
+        float cornerResponse = cpuDst.At<float>(30, 30);
+        Assert.True(cornerResponse > 0);
+
+        // Check response in the middle of the square (flat area). It should be near 0.
+        float flatResponse = cpuDst.At<byte>(50, 50);
+        Assert.InRange(flatResponse, -0.1f, 0.1f);
+    }
+
+    [Fact]
+    public void HoughCircles_DetectTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 200x200 black image and draw a white circle
+        // Circle center: (100, 100), Radius: 50
+        using var cpuSrc = new Mat(200, 200, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Circle(cpuSrc, new Point(100, 100), 50, new Scalar(255), 2);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuCircles = new GpuMat();
+
+        // Create detector
+        // dp: 1, minDist: 50, cannyThreshold: 100, votesThreshold: 30, minRadius: 10, maxRadius: 100
+        using var detector = OpenCvSharp. Cuda.HoughCirclesDetector.Create(1.0f, 50.0f, 100, 30, 10, 100);
+
+        // 2. Act
+        detector.Detect(gpuSrc, gpuCircles);
+
+        // 3. Download and Assert
+        using var cpuCircles = new Mat();
+        gpuCircles.Download(cpuCircles);
+
+        Assert.False(cpuCircles.Empty());
+
+        // Output for CUDA HoughCircles is a 1-row (or 1-col) matrix of CV_32FC3 (x, y, radius)
+        Assert.Equal(MatType.CV_32FC3, cpuCircles.Type());
+
+        // Get the first detected circle
+        var circlesIndexer = cpuCircles.GetGenericIndexer<Vec3f>();
+        Vec3f circle = circlesIndexer[0];
+
+        // Validate that it found our circle approximately at (100, 100) with radius 50
+        Assert.InRange(circle.Item0, 95f, 105f); // X
+        Assert.InRange(circle.Item1, 95f, 105f); // Y
+        Assert.InRange(circle.Item2, 45f, 55f);  // Radius
+    }
+
+    [Fact]
+    public void HoughLines_DetectTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 100x100 black image and draw a white horizontal line
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        // Line at y=50
+        Cv2.Line(cpuSrc, new Point(0, 50), new Point(100, 50), new Scalar(255), 1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuLines = new GpuMat();
+
+        // Create detector: rho=1, theta=1 degree (PI/180), threshold=50
+        float theta = (float)Math.PI / 180.0f;
+        using var detector = OpenCvSharp.Cuda.HoughLinesDetector.Create(1.0f, theta, 50);
+
+        // 2. Act
+        detector.Detect(gpuSrc, gpuLines);
+
+        // 3. Download and Assert
+        using var cpuLines = new Mat();
+        gpuLines.Download(cpuLines);
+
+        Assert.False(cpuLines.Empty());
+
+        // Output for CUDA HoughLines is a 1-row (or 1-col) matrix of CV_32FC2 (rho, theta)
+        Assert.Equal(MatType.CV_32FC2, cpuLines.Type());
+
+        var linesIndexer = cpuLines.GetGenericIndexer<Vec2f>();
+        Vec2f line = linesIndexer[0];
+
+        // For a horizontal line at y=50:
+        // rho (distance from origin) should be ~50
+        // theta (angle) should be ~PI/2 (1.57 rad)
+        Assert.InRange(line.Item0, 48f, 52f);
+        Assert.InRange(line.Item1, 1.56f, 1.58f);
+    }
+
+    [Fact]
+    public void HoughSegments_DetectTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 100x100 black image and draw a white diagonal segment
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        Point p1 = new Point(10, 10);
+        Point p2 = new Point(80, 80);
+        Cv2.Line(cpuSrc, p1, p2, new Scalar(255), 3);
+
+        using var cpuEdges = new Mat();
+        Cv2.Canny(cpuSrc, cpuEdges, 50, 150);
+
+        
+
+        using var gpuSrc = new GpuMat(); 
+        gpuSrc.Upload(cpuEdges);
+        using var gpuLines = new GpuMat();
+
+        // Create detector: rho=1, theta=1 deg, minLength=30, maxGap=10
+        float theta = (float)Math.PI / 180.0f;
+        using var detector = OpenCvSharp.Cuda.HoughSegmentDetector.Create(
+       rho: 1.0f,
+       theta: theta,
+       minLineLength: 10,   
+       maxLineGap: 50       
+   );
+
+        // 2. Act
+        detector.Detect(gpuSrc, gpuLines);
+       
+        // 3. Download and Assert
+        using var cpuLines = new Mat();
+        gpuLines.Download(cpuLines);
+
+        Assert.False(cpuLines.Empty());
+
+        // Output for Segment Detector is a matrix of CV_32SC4 (x1, y1, x2, y2)
+        Assert.Equal(MatType.CV_32SC4, cpuLines.Type());
+
+        var linesIndexer = cpuLines.GetGenericIndexer<Vec4i>();
+        bool foundDiagonal = false;
+
+        int total = cpuLines.Rows * cpuLines.Cols;
+        for (int r = 0; r < cpuLines.Rows; r++)
+        {
+            for (int c = 0; c < cpuLines.Cols; c++)
+            {
+                Vec4i s = cpuLines.At<Vec4i>(r, c);
+
+                float dx = s.Item2 - s.Item0;
+                float dy = s.Item3 - s.Item1;
+
+                // slope ≈ 1
+                if (Math.Abs(Math.Abs(dx) - Math.Abs(dy)) < 5)
+                {
+                    // length large enough
+                    float length = (float)Math.Sqrt(dx * dx + dy * dy);
+
+                    if (length > 50)
+                    {
+                        foundDiagonal = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Assert.True(foundDiagonal, "No sufficiently long diagonal segment detected.");
+    }
+
+    [Fact]
+    public void TemplateMatching_MatchTest()
+    {
+        VerifyCudaSupport();
+
+        using var scene = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Rectangle(scene, new Rect(50, 50, 10, 10), new Scalar(255), -1);
+
+        using var templ = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Rectangle(templ, new Rect(2, 2, 6, 6), new Scalar(255), -1);
+
+        using var gpuScene = new GpuMat(); gpuScene.Upload(scene);
+        using var gpuTempl = new GpuMat(); gpuTempl.Upload(templ);
+        using var gpuResult = new GpuMat();
+
+        // 2. Act
+        using var matcher = OpenCvSharp.Cuda.TemplateMatching.Create(
+            MatType.CV_8UC1,
+            TemplateMatchModes.CCoeffNormed);
+        matcher.Match(gpuScene, gpuTempl, gpuResult);
+
+        // 3. Assert
+        using var cpuResult = new Mat();
+        gpuResult.Download(cpuResult);
+
+        Cv2.MinMaxLoc(cpuResult, out _, out _, out _, out var maxLoc);
+
+        // allow small tolerance (CUDA can shift peaks slightly)
+        Assert.InRange(maxLoc.X, 48, 52);
+        Assert.InRange(maxLoc.Y, 48, 52);
+    }
+
+    [Fact]
+    public void CvtColor_BGR2GRAYTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 3-channel BGR image (10x10)
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC3, new Scalar(255, 0, 0)); // Pure Blue
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Convert BGR to Gray
+        Cv2.Cuda.CvtColor(gpuSrc, gpuDst, ColorConversionCodes.BGR2GRAY);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Source was 3 channels, destination should be 1 channel
+        Assert.Equal(3, cpuSrc.Channels());
+        Assert.Equal(1, cpuDst.Channels());
+
+        // Check that it's no longer zero
+        Assert.NotEqual(0, cpuDst.At<byte>(0, 0));
+    }
 }
 
 

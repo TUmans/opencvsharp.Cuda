@@ -87,5 +87,26 @@ public static partial class Cv2
             GC.KeepAlive(weights2);
             result.Fix();
         }
+
+        /// <summary>
+        /// Converts an image from one color space to another.
+        /// </summary>
+        public static void CvtColor( OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, ColorConversionCodes code, int dcn = 0, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_cvtColor(src.CvPtr, dst.CvPtr, (int)code, dcn, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            dst.Fix();
+            
+        }
     }
 }

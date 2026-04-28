@@ -409,6 +409,9 @@
     <ClInclude Include="cuda_Bgsegm.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_Stereo.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

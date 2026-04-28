@@ -99,3 +99,47 @@ CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_apply(cv::cuda::BackgroundSu
     obj->apply(*image, *fgmask, learningRate);
     END_WRAP
 }
+
+// ---------- cuda_createImagePyramid --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_createImagePyramid(
+    cv::_InputArray *img, int nLayers, cv::cuda::Stream *stream,
+    cv::Ptr<cv::cuda::ImagePyramid> **returnValue)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    auto ptr = cv::cuda::createImagePyramid(*img, nLayers, streamRef);
+    *returnValue = new cv::Ptr<cv::cuda::ImagePyramid>(ptr);
+    END_WRAP
+}
+
+// ---------- cuda_ImagePyramid_get --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_ImagePyramid_get(cv::Ptr<cv::cuda::ImagePyramid> *ptr, cv::cuda::ImagePyramid **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = ptr->get();
+    END_WRAP
+}
+
+// ---------- cuda_ImagePyramid_delete --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_ImagePyramid_delete(cv::Ptr<cv::cuda::ImagePyramid> *ptr)
+{
+    BEGIN_WRAP
+    delete ptr;
+    END_WRAP
+}
+
+// ---------- cuda_ImagePyramid_getLayer --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_ImagePyramid_getLayer(cv::cuda::ImagePyramid *obj, cv::_OutputArray *outImg, cv::Size dsize, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->getLayer(*outImg, dsize, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_createOpticalFlowNeedleMap(cv::cuda::GpuMat *u, cv::cuda::GpuMat *v, cv::cuda::GpuMat *vertex, cv::cuda::GpuMat *colors)
+{
+    BEGIN_WRAP
+    cv::cuda::createOpticalFlowNeedleMap(*u, *v, *vertex, *colors);
+    END_WRAP
+}

@@ -10,4 +10,5 @@
 #include "cuda_Legacy.h"
 #include "cuda_Bgsegm.h"
 #include "cuda_Filters.h"
+#include "cuda_Stereo.h"
 #endif

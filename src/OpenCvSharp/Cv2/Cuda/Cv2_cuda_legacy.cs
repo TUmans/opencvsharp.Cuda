@@ -74,5 +74,33 @@ public static partial class Cv2
             GC.KeepAlive(image);
             GC.KeepAlive(mask);
         }
+
+        /// <summary>
+        /// Creates a needle map (vector field visualization) from optical flow components.
+        /// </summary>
+        public static void CreateOpticalFlowNeedleMap(GpuMat u, GpuMat v, GpuMat vertex, GpuMat colors)
+        {
+            if (u is null) 
+                throw new ArgumentNullException(nameof(u));
+            if (v is null) 
+                throw new ArgumentNullException(nameof(v));
+            if (vertex is null) 
+                throw new ArgumentNullException(nameof(vertex));
+            if (colors is null) 
+                throw new ArgumentNullException(nameof(colors));
+
+            u.ThrowIfDisposed();
+            v.ThrowIfDisposed();
+            vertex.ThrowIfDisposed();
+            colors.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_createOpticalFlowNeedleMap(u.CvPtr, v.CvPtr, vertex.CvPtr, colors.CvPtr));
+
+            GC.KeepAlive(u);
+            GC.KeepAlive(v);
+            GC.KeepAlive(vertex);
+            GC.KeepAlive(colors);
+        }
     }
 }
