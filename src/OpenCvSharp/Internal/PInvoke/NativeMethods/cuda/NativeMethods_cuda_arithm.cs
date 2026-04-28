@@ -209,6 +209,9 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_LookUpTable_transform(IntPtr obj, IntPtr src, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_dft(IntPtr src, IntPtr dst, Size dftSize, int flags, IntPtr stream);
 }
 
 

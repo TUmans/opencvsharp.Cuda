@@ -119,3 +119,12 @@ CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_delete(cv::Ptr<cv::cuda::Stere
     delete ptr;
     END_WRAP
 }
+
+// ---------- cuda_StereoConstantSpaceBP_delete --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_drawColorDisp(cv::_InputArray *src_disp, cv::_OutputArray *dst_disp, int ndisp, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::drawColorDisp(*src_disp, *dst_disp, ndisp, streamRef);
+    END_WRAP
+}

@@ -150,5 +150,33 @@ public class CudaStereoTest : CudaTestBase
         // We expect a disparity value greater than 0
         Assert.True(dispValue > 0, $"Disparity should be positive, but was {dispValue}");
     }
+
+    [Fact]
+    public void DrawColorDisp_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 1-channel disparity map (100x100)
+        using var cpuDisp = new Mat(100, 100, MatType.CV_8UC1, new Scalar(30));
+        using var gpuDisp = new GpuMat(); gpuDisp.Upload(cpuDisp);
+        using var gpuColor = new GpuMat();
+
+        // 2. Act: Draw colored disparity
+        Cv2.Cuda.DrawColorDisp(gpuDisp, gpuColor, ndisp: 64);
+
+        // 3. Download and Assert
+        using var cpuColor = new Mat();
+        gpuColor.Download(cpuColor);
+
+        Assert.False(cpuColor.Empty());
+
+        // The CUDA drawColorDisp implementation typically outputs CV_8UC4 (BGRA)
+        Assert.Equal(4, cpuColor.Channels());
+        Assert.Equal(MatType.CV_8UC4, cpuColor.Type());
+
+        // Ensure the rows/cols match
+        Assert.Equal(100, cpuColor.Rows);
+        Assert.Equal(100, cpuColor.Cols);
+    }
 }
 

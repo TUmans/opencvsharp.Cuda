@@ -108,5 +108,30 @@ public static partial class Cv2
             dst.Fix();
             
         }
+
+        /// <summary>
+        /// Converts an image from Bayer pattern to RGB or grayscale.
+        /// </summary>
+        /// <param name="src">Source image (Bayer pattern, 8-bit or 16-bit single channel).</param>
+        /// <param name="dst">Destination image.</param>
+        /// <param name="code">Demosaicing code (e.g. ColorConversionCodes.BayerRG2BGR).</param>
+        /// <param name="dcn">Number of channels in the destination image. -1 means derived automatically.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Demosaicing(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, ColorConversionCodes code, int dcn = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_demosaicing(src.CvPtr, dst.CvPtr, (int)code, dcn, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            dst.Fix();
+        }
     }
 }

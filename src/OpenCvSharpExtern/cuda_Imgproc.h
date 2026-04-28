@@ -365,3 +365,12 @@ CVAPI(ExceptionStatus) cuda_cvtColor(cv::_InputArray *src, cv::_OutputArray *dst
     cv::cuda::cvtColor(*src, *dst, code, dcn, streamRef);
     END_WRAP
 }
+
+// ---------- cuda_demosaicing --------------------------------------------------
+CVAPI(ExceptionStatus) cuda_demosaicing(cv::_InputArray *src, cv::_OutputArray *dst, int code, int dcn, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::demosaicing(*src, *dst, code, dcn, streamRef);
+    END_WRAP
+}

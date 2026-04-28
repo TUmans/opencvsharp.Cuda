@@ -129,4 +129,7 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_cvtColor(IntPtr src, IntPtr dst, int code, int dcn, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_demosaicing(IntPtr src, IntPtr dst, int code, int dcn, IntPtr stream);
 }

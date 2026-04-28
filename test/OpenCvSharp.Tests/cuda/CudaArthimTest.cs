@@ -1462,6 +1462,31 @@ public class CudaArthimTest : CudaTestBase
         float flatScore = cpuDst.At<float>(50, 50);
         Assert.InRange(flatScore, -0.1f, 0.1f);
     }
+
+    [Fact]
+    public void Dft_GlobalFuncTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 4x4 matrix of 1.0f
+        using var cpuSrc = new Mat(4, 4, MatType.CV_32FC1, new Scalar(1.0f));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Perform DFT with Complex Output
+        Cv2.Cuda.Dft(gpuSrc, gpuDst, new Size(4, 4), DftFlags.None);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_32FC2, cpuDst.Type());
+
+        // The DC component (0,0) Real part should be the sum (1.0 * 16 pixels = 16.0)
+        Vec2f dc = cpuDst.At<Vec2f>(0, 0);
+        Assert.InRange(dc.Item0, 15.9f, 16.1f);
+    }
 }
 
 

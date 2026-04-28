@@ -514,3 +514,11 @@ CVAPI(ExceptionStatus) cuda_LookUpTable_transform(cv::cuda::LookUpTable *obj, cv
     obj->transform(*src, *dst, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_dft(cv::_InputArray *src, cv::_OutputArray *dst, cv::Size dft_size, int flags, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::dft(*src, *dst, dft_size, flags, streamRef);
+    END_WRAP
+}

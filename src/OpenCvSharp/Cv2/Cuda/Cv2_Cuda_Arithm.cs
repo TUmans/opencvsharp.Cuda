@@ -561,22 +561,18 @@ public static partial class Cv2
 
         }
 
-        // -----------------------------------------------------------------------
-        // divide
-        // -----------------------------------------------------------------------
-
         /// <summary>
         /// Computes a matrix-matrix or matrix-scalar division.
         /// </summary>
-        public static void Divide(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2,
-            OpenCvSharp.Cuda.OutputArray dst,
-            double scale = 1.0,
-            int dtype = -1,
-            OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Divide(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, double scale = 1.0, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src1 is null) throw new ArgumentNullException(nameof(src1));
-            if (src2 is null) throw new ArgumentNullException(nameof(src2));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
             src1.ThrowIfDisposed();
             src2.ThrowIfDisposed();
             dst.ThrowIfNotReady();
@@ -586,6 +582,8 @@ public static partial class Cv2
                     src1.CvPtr, src2.CvPtr, dst.CvPtr,
                     scale, dtype, ToPtr(stream)));
 
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
             dst.Fix();
         }
 
@@ -1051,6 +1049,33 @@ public static partial class Cv2
 
             dst.Fix();
             return retVal;
+        }
+
+
+        /// <summary>
+        /// Performs a forward or inverse discrete Fourier transform (1D or 2D) of the floating point matrix.
+        /// </summary>
+        /// <param name="src">Source array. CV_32FC1 or CV_32FC2 are supported.</param>
+        /// <param name="dst">Destination array.</param>
+        /// <param name="dftSize">Size of the transform.</param>
+        /// <param name="flags">Transformation flags.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Dft(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, Size dftSize, DftFlags flags = 0, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_dft(src.CvPtr, dst.CvPtr, dftSize, (int)flags, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            dst.Fix();
+            
         }
 
     }

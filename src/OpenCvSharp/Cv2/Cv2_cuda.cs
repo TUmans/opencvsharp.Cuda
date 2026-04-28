@@ -78,6 +78,21 @@ namespace OpenCvSharp
                 NativeMethods.cuda_printShortCudaDeviceInfo(device);
             }
 
+            /// <summary>
+            /// Checks whether the current device supports the given feature.
+            /// </summary>
+            /// <param name="featureSet">Feature set to check.</param>
+            /// <returns>True if supported.</returns>
+            public static bool DeviceSupports(FeatureSet featureSet)
+            {
+                ThrowIfGpuNotAvailable();
+
+                NativeMethods.HandleException(
+                    NativeMethods.cuda_deviceSupports((int)featureSet, out var ret));
+
+                return ret != 0;
+            }
+
             #endregion
 
             #region CudaMem

@@ -46,4 +46,7 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_StereoConstantSpaceBP_delete(IntPtr ptr);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_drawColorDisp(IntPtr srcDisp, IntPtr dstDisp, int ndisp, IntPtr stream);
 }

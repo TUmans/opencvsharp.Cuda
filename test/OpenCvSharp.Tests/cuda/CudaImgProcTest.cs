@@ -496,6 +496,37 @@ public class CudaImgProcTest : CudaTestBase
         // Check that it's no longer zero
         Assert.NotEqual(0, cpuDst.At<byte>(0, 0));
     }
+
+    [Fact]
+    public void Demosaicing_BayerRG2BGRTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 4x4 Bayer RG pattern
+        // A very simple pattern where we set 'Red' and 'Blue' pixels
+        using var cpuSrc = new Mat(4, 4, MatType.CV_8UC1, new Scalar(0));
+        cpuSrc.Set<byte>(0, 0, 255); // Top-left is Red in BayerRG
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Convert Bayer RG to BGR (3 channels)
+        Cv2.Cuda.Demosaicing(gpuSrc, gpuDst, ColorConversionCodes.BayerRG2BGR);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Result should have 3 channels (BGR)
+        Assert.Equal(3, cpuDst.Channels());
+
+        // In BayerRG2BGR, the pixel at (0,0) in the source affects the 'Red' channel 
+        // of the output at (0,0). BGR Vec3b: Item0=B, Item1=G, Item2=R.
+        Vec3b pixel = cpuDst.At<Vec3b>(0, 0);
+        Assert.True(pixel.Item2 > 0, "Red channel should have been interpolated.");
+    }
 }
 
 

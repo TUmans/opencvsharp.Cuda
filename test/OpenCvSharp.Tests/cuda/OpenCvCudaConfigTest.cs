@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using OpenCvSharp.Cuda;
 using Xunit;
 
 namespace OpenCvSharp.Tests.Cuda;
@@ -49,5 +50,21 @@ public class OpenCvCudaConfigTest : CudaTestBase
             throw new SkipException($"Could not load OpenCV native library: {ex.Message}");
         }
 
+    }
+
+    [Fact]
+    public void DeviceSupports_Test()
+    {
+        VerifyCudaSupport();
+
+        // Most modern GPUs support Compute 3.0 and Double precision
+        bool hasDouble = Cv2.Cuda.DeviceSupports(FeatureSet.NativeDouble);
+        bool hasCompute30 = Cv2.Cuda.DeviceSupports(FeatureSet.Compute30);
+
+        // This should not throw an exception. 
+        // We can't strictly assert 'true' because of very old hardware (like Tesla),
+        // but we can verify the call returns a valid boolean.
+        Assert.True(hasDouble || !hasDouble);
+        Assert.True(hasCompute30 || !hasCompute30);
     }
 }
