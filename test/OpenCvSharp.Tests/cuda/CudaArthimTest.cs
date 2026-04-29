@@ -1487,6 +1487,160 @@ public class CudaArthimTest : CudaTestBase
         Vec2f dc = cpuDst.At<Vec2f>(0, 0);
         Assert.InRange(dc.Item0, 15.9f, 16.1f);
     }
+
+    [Fact]
+    public void FindMinMaxLoc_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(128));
+        cpuSrc.Set<byte>(5, 5, 10);
+        cpuSrc.Set<byte>(50, 50, 200);
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuMinMax = new GpuMat();
+        using var gpuLoc = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.FindMinMaxLoc(gpuSrc, gpuMinMax, gpuLoc);
+
+        // 3. Download
+        using var cpuMinMax = new Mat();
+        gpuMinMax.Download(cpuMinMax);
+
+        Assert.False(cpuMinMax.Empty());
+
+        // 4. Extract min/max safely
+        double minVal, maxVal;
+
+        // 1. Check if the results are packed into a single multi-channel pixel (1x1 CV_32FC2, etc.)
+        if (cpuMinMax.Channels() >= 2)
+        {
+            if (cpuMinMax.Type() == MatType.CV_32FC2)
+            {
+                var vec = cpuMinMax.At<Vec2f>(0, 0);
+                minVal = vec.Item0; maxVal = vec.Item1;
+            }
+            else
+            {
+                var vec = cpuMinMax.At<Vec2d>(0, 0);
+                minVal = vec.Item0; maxVal = vec.Item1;
+            }
+        }
+        // 2. Otherwise, they are in separate pixels (1x2 or 2x1)
+        else
+        {
+            // Use Get<T> or a flat indexer to avoid "Row vs Col" confusion
+            if (cpuMinMax.Type() == MatType.CV_32SC1)
+            {
+                // Use a flat loop or check dimensions
+                minVal = cpuMinMax.Get<int>(0); // Get element 0
+                maxVal = cpuMinMax.Get<int>(1); // Get element 1
+            }
+            else if (cpuMinMax.Type() == MatType.CV_32FC1)
+            {
+                minVal = cpuMinMax.Get<float>(0);
+                maxVal = cpuMinMax.Get<float>(1);
+            }
+            else
+            {
+                minVal = cpuMinMax.Get<double>(0);
+                maxVal = cpuMinMax.Get<double>(1);
+            }
+        }
+
+        Assert.Equal(10, minVal);
+        Assert.Equal(200, maxVal);
+
+    }
+
+    [Fact]
+    public void Flip_YAxisTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 10x10 black image with a white pixel at (0, 0)
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        cpuSrc.Set<byte>(0, 0, 255);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Flip around Y-axis (Vertical Flip)
+        Cv2.Cuda.Flip(gpuSrc, gpuDst, FlipMode.Y);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // The original pixel was at (Row 0, Col 0).
+        // After flipping around the Y-axis, it should be at (Row 0, Col 9).
+        Assert.Equal(0, cpuDst.At<byte>(0, 0));
+        Assert.Equal(255, cpuDst.At<byte>(0, 9));
+    }
+
+    [Fact]
+    public void Flip_XAxisTest()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: White pixel at (0, 0)
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        cpuSrc.Set<byte>(0, 0, 255);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // Act: Flip around X-axis (Horizontal Flip)
+        using var gpuDst = new GpuMat(); ;
+        Cv2.Cuda.Flip(gpuSrc, gpuDst, FlipMode.X);
+
+        // Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // The original pixel was at (Row 0, Col 0).
+        // After flipping around the X-axis, it should be at (Row 9, Col 0).
+        Assert.Equal(0, cpuDst.At<byte>(0, 0));
+        Assert.Equal(255, cpuDst.At<byte>(9, 0));
+    }
+
+    [Fact]
+    public void GammaCorrection_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: grayscale → convert to BGR
+        using var gray = new Mat(10, 10, MatType.CV_8UC1, new Scalar(128));
+        using var cpuSrc = new Mat();
+        Cv2.CvtColor(gray, cpuSrc, ColorConversionCodes.GRAY2BGR);
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.GammaCorrection(gpuSrc, gpuDst, forward: true);
+
+        // 3. Download
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_8UC3, cpuDst.Type());
+
+        // 4. Validate one channel (all channels are equal)
+        Vec3b pixel = cpuDst.At<Vec3b>(0, 0);
+        byte value = pixel.Item0;
+
+        Assert.NotEqual(128, value);
+        Assert.InRange(value, 180, 195);
+    }
 }
 
 

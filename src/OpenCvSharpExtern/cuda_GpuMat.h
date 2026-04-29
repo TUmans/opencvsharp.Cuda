@@ -390,7 +390,7 @@ CVAPI(ExceptionStatus) cuda_createContinuous2(int rows, int cols, int type, cv::
 
 //! Ensures that size of the given matrix is not less than (rows, cols) size
 //! and matrix type is match specified one too
-CVAPI(ExceptionStatus) cuda_ensureSizeIsEnough(int rows, int cols, int type, cv::cuda::GpuMat *m)
+CVAPI(ExceptionStatus) cuda_ensureSizeIsEnough(int rows, int cols, int type, cv::_OutputArray *m)
 {
     BEGIN_WRAP
     cv::cuda::ensureSizeIsEnough(rows, cols, type, *m);

@@ -34,4 +34,35 @@ public class CudaCoreTest : CudaTestBase
         Assert.Equal(3, cpuDst.Cols);
     }
 
+    [Fact]
+    public void EnsureSizeIsEnough_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Start with an empty GpuMat
+        using var gpuMat = new GpuMat();
+        Assert.True(gpuMat.Empty());
+
+        // 2. Ensure it is 100x100
+        Cv2.Cuda.EnsureSizeIsEnough(100, 100, MatType.CV_8UC1, gpuMat);
+
+        Assert.False(gpuMat.Empty());
+        Assert.Equal(100, gpuMat.Rows);
+        Assert.Equal(100, gpuMat.Cols);
+        Assert.Equal(MatType.CV_8UC1, gpuMat.Type());
+
+        // 3. Ensure it is 200x200
+        // This will trigger a reallocation
+        Cv2.Cuda.EnsureSizeIsEnough(200, 200, MatType.CV_8UC1, gpuMat);
+
+        Assert.Equal(200, gpuMat.Rows);
+        Assert.Equal(200, gpuMat.Cols);
+
+        // 4. Call it again with the same 200x200 size
+        // This should do nothing (no reallocation) and remain 200x200
+        Cv2.Cuda.EnsureSizeIsEnough(200, 200, MatType.CV_8UC1, gpuMat);
+
+        Assert.Equal(200, gpuMat.Rows);
+    }
+
 }

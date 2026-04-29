@@ -522,3 +522,28 @@ CVAPI(ExceptionStatus) cuda_dft(cv::_InputArray *src, cv::_OutputArray *dst, cv:
     cv::cuda::dft(*src, *dst, dft_size, flags, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_findMinMax(cv::_InputArray *src, cv::_OutputArray *dst, cv::_InputArray *mask, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::findMinMax(*src, *dst, mask ? *mask : cv::noArray(), streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_findMinMaxLoc(cv::_InputArray *src, cv::_OutputArray *minMaxVals, cv::_OutputArray *loc,
+    cv::_InputArray *mask, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::findMinMaxLoc(*src, *minMaxVals, *loc, mask ? *mask : cv::noArray(), streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_flip(cv::_InputArray *src, cv::_OutputArray *dst, int flipCode, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::flip(*src, *dst, flipCode, streamRef);
+    END_WRAP
+}

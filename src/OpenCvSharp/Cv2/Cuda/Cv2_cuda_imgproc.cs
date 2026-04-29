@@ -133,5 +133,100 @@ public static partial class Cv2
             GC.KeepAlive(src);
             dst.Fix();
         }
+
+        /// <summary>
+        /// Equalizes the histogram of a grayscale image.
+        /// </summary>
+        /// <param name="src">Source 8-bit single channel image.</param>
+        /// <param name="dst">Destination image.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void EqualizeHist(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (src.Type() != MatType.CV_8UC1)
+                throw new InvalidDataException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_equalizeHist(src.CvPtr, dst.CvPtr, ToPtr(stream)));
+            GC.KeepAlive(src);
+            dst.Fix();
+            
+        }
+
+        /// <summary>
+        /// Computes levels with even distribution.
+        /// </summary>
+        /// <param name="levels">Output 1D matrix of type CV_32SC1.</param>
+        /// <param name="nLevels">Number of levels to compute.</param>
+        /// <param name="lowerLevel">Lower bound of the levels.</param>
+        /// <param name="upperLevel">Upper bound of the levels.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void EvenLevels(OpenCvSharp.Cuda.OutputArray levels, int nLevels, int lowerLevel, int upperLevel,  OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (levels is null) 
+                throw new ArgumentNullException(nameof(levels));
+            levels.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_evenLevels(levels.CvPtr, nLevels, lowerLevel, upperLevel, ToPtr(stream)));
+
+            levels.Fix();
+        }
+
+        /// <summary>
+        /// Perform image denoising using Non-local Means Denoising algorithm.
+        /// </summary>
+        /// <param name="src">Input 8-bit single-channel image.</param>
+        /// <param name="dst">Destination image.</param>
+        /// <param name="h">Parameter regulating filter strength. Big h value perfectly removes noise but also removes image details.</param>
+        /// <param name="searchWindow">Size in pixels of window that is used to compute weights for pixel.</param>
+        /// <param name="blockSize">Size in pixels of template patch that is used to compute weights.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void FastNlMeansDenoising(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, float h, int searchWindow = 21, int blockSize = 7, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_fastNlMeansDenoising(src.CvPtr, dst.CvPtr, h, searchWindow, blockSize, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            dst.Fix();
+        }
+
+        /// <summary>
+        /// Routines for correcting image color gamma.
+        /// </summary>
+        /// <param name="src">Source image (8-bit 3-channel BGR/RGB or grayscale).</param>
+        /// <param name="dst">Destination image.</param>
+        /// <param name="forward">If true, forward gamma correction is performed (gamma=1/2.2). If false, inverse correction (gamma=2.2) is performed.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void GammaCorrection(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, bool forward = true, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_gammaCorrection(src.CvPtr, dst.CvPtr, forward ? 1 : 0, ToPtr(stream)));
+            
+            GC.KeepAlive(src);
+            dst.Fix();
+        }
     }
 }

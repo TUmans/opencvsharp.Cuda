@@ -10,7 +10,7 @@
 #include "include_opencv.h"
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
-#include <opencv2/cudaobjdetect.hpp>
+#include <opencv2/photo/cuda.hpp>
 
 // ---------- Alpha Composite --------------------------------------------------
 CVAPI(ExceptionStatus) cuda_alphaComp(cv::_InputArray *img1, cv::_InputArray *img2, cv::_OutputArray *dst, int alpha_op, cv::cuda::Stream *stream)
@@ -372,5 +372,37 @@ CVAPI(ExceptionStatus) cuda_demosaicing(cv::_InputArray *src, cv::_OutputArray *
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     cv::cuda::demosaicing(*src, *dst, code, dcn, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_equalizeHist(cv::_InputArray *src, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::equalizeHist(*src, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_evenLevels(cv::_OutputArray *levels, int nLevels, int lowerLevel, int upperLevel, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::evenLevels(*levels, nLevels, lowerLevel, upperLevel, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_fastNlMeansDenoising(cv::_InputArray *src, cv::_OutputArray *dst, float h, int search_window, int block_size, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::fastNlMeansDenoising(*src, *dst, h, search_window, block_size, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_gammaCorrection(cv::_InputArray *src, cv::_OutputArray *dst, int forward, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::gammaCorrection(*src, *dst, forward != 0, streamRef);
     END_WRAP
 }

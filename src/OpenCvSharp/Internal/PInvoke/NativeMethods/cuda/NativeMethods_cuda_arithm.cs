@@ -212,6 +212,15 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_dft(IntPtr src, IntPtr dst, Size dftSize, int flags, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_findMinMax(IntPtr src, IntPtr dst, IntPtr mask, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_findMinMaxLoc(IntPtr src, IntPtr minMaxVals, IntPtr loc, IntPtr mask, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_flip(IntPtr src, IntPtr dst, int flipCode, IntPtr stream);
 }
 
 

@@ -527,6 +527,99 @@ public class CudaImgProcTest : CudaTestBase
         Vec3b pixel = cpuDst.At<Vec3b>(0, 0);
         Assert.True(pixel.Item2 > 0, "Red channel should have been interpolated.");
     }
+
+    [Fact]
+    public void EqualizeHist_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 dark gray image (Value = 50)
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1);
+
+        for (int y = 0; y < 100; y++)
+        {
+            for (int x = 0; x < 100; x++)
+            {
+                cpuSrc.Set<byte>(y, x, (byte)(x));
+            }
+        }
+
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.EqualizeHist(gpuSrc, gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(cpuSrc.Size(), cpuDst.Size());
+        Assert.Equal(MatType.CV_8UC1, cpuDst.Type());
+
+        double minVal, maxVal;
+        Cv2.MinMaxLoc(cpuDst, out minVal, out maxVal);
+
+        Assert.True(maxVal - minVal > 0);
+    }
+
+    [Fact]
+    public void EvenLevels_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Act: Create 5 levels from 0 to 100
+        using var gpuLevels = new GpuMat();
+        Cv2.Cuda.EvenLevels(gpuLevels,nLevels: 5, lowerLevel: 0, upperLevel: 100);
+        // 2. Download and Assert
+        using var cpuLevels = new Mat();
+        gpuLevels.Download(cpuLevels);
+
+        Assert.False(cpuLevels.Empty());
+
+        // evenLevels outputs a 1D matrix of 32-bit integers (CV_32SC1)
+        Assert.Equal(MatType.CV_32SC1, cpuLevels.Type());
+        Assert.Equal(5, cpuLevels.Cols * cpuLevels.Rows);
+
+        // Verify the linear distribution
+        // (100 - 0) / (5 - 1) = 25 step size
+        Assert.Equal(0, cpuLevels.At<int>(0, 0));
+        Assert.Equal(25, cpuLevels.At<int>(0, 1));
+        Assert.Equal(50, cpuLevels.At<int>(0, 2));
+        Assert.Equal(75, cpuLevels.At<int>(0, 3));
+        Assert.Equal(100, cpuLevels.At<int>(0, 4));
+    }
+
+    [Fact]
+    public void FastNlMeansDenoising_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 50x50 gray image (Value 100) with a noise pixel (Value 200) at center
+        using var cpuSrc = new Mat(50, 50, MatType.CV_8UC1, new Scalar(100));
+        cpuSrc.Set<byte>(25, 25, 200);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Apply NL Means with a strong filter strength (h=50)
+        Cv2.Cuda.FastNlMeansDenoising(gpuSrc, gpuDst, h: 50.0f);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(MatType.CV_8UC1, cpuDst.Type());
+
+        byte originalNoise = 200;
+        byte denoisedPixel = cpuDst.At<byte>(25, 25);
+
+        // The denoising process should have pulled the value 200 much closer to 100
+        Assert.True(denoisedPixel < originalNoise, $"Expected noise to be reduced, but was {denoisedPixel}");
+    }
 }
 
 

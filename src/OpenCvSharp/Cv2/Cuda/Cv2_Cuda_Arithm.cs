@@ -349,8 +349,6 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
-
-
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the Hist() function only in what argument(s) it accepts. 
         /// </summary>
@@ -587,27 +585,104 @@ public static partial class Cv2
             dst.Fix();
         }
 
-        // -----------------------------------------------------------------------
-        // exp
-        // -----------------------------------------------------------------------
-
         /// <summary>
         /// Computes an exponent of each matrix element.
         /// </summary>
         public static void Exp(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,
             OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src is null) throw new ArgumentNullException(nameof(src));
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
             src.ThrowIfDisposed();
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
                 NativeMethods.cuda_exp(
                     src.CvPtr, dst.CvPtr, ToPtr(stream)));
-
+            GC.KeepAlive(src);
             dst.Fix();
         }
+
+        /// <summary>
+        /// Finds the minimum and maximum element values and returns them on the GPU.
+        /// </summary>
+        /// <param name="src">Single-channel source image.</param>
+        /// <param name="dst">Output 1x2 CV_64F matrix on GPU containing [min, max].</param>
+        /// <param name="mask">Optional mask.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void FindMinMax(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_findMinMax(src.CvPtr, dst.CvPtr, ToPtr(mask), ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            dst.Fix();
+        }
+
+        /// <summary>
+        /// Finds the minimum and maximum element values and their localities on the GPU.
+        /// </summary>
+        /// <param name="src">Single-channel source image.</param>
+        /// <param name="minMaxVals">Output 1x2 CV_64F matrix on GPU containing [min, max].</param>
+        /// <param name="loc">Output 1x4 CV_32S matrix on GPU containing [minX, minY, maxX, maxY].</param>
+        /// <param name="mask">Optional mask.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void FindMinMaxLoc(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray minMaxVals, OpenCvSharp.Cuda.OutputArray loc,  OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (minMaxVals is null) 
+                throw new ArgumentNullException(nameof(minMaxVals));
+            if (loc is null) 
+                throw new ArgumentNullException(nameof(loc));
+
+            src.ThrowIfDisposed();
+            minMaxVals.ThrowIfNotReady();
+            loc.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_findMinMaxLoc(src.CvPtr, minMaxVals.CvPtr, loc.CvPtr, ToPtr( mask), ToPtr(stream)));
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
+            minMaxVals.Fix();
+            loc.Fix();
+        }
+
+        /// <summary>
+        /// Flips a 2D matrix around vertical, horizontal, or both axes.
+        /// </summary>
+        /// <param name="src">Source image.</param>
+        /// <param name="dst">Destination image.</param>
+        /// <param name="flipCode">A flag to specify how to flip the array; 0 means flipping around the x-axis and positive value (for example, 1) means flipping around y-axis. Negative value (for example, -1) means flipping around both axes.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Flip(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, FlipMode flipCode, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_flip(src.CvPtr, dst.CvPtr, (int)flipCode, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            dst.Fix();
+        }
+
 
         // -----------------------------------------------------------------------
         // log

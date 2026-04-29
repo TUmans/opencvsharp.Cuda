@@ -132,4 +132,16 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_demosaicing(IntPtr src, IntPtr dst, int code, int dcn, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_equalizeHist( IntPtr src, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_evenLevels(IntPtr levels, int nLevels, int lowerLevel, int upperLevel, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_fastNlMeansDenoising(IntPtr src, IntPtr dst, float h, int searchWindow, int blockSize, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_gammaCorrection(IntPtr src, IntPtr dst, int forward, IntPtr stream);
 }

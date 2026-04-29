@@ -11,4 +11,5 @@ static partial class NativeMethods
 {
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_convertFp16(IntPtr src, IntPtr dst, IntPtr stream);
+
 }

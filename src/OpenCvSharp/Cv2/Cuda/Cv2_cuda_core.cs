@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Modules.core.Enum;
 
@@ -32,6 +33,36 @@ public static partial class Cv2
 
             GC.KeepAlive(src);
             dst.Fix();
+        }
+
+        /// <summary>
+        /// Ensures that size of the given matrix is not less than (rows, cols) size
+        /// and matrix type is match specified one too
+        /// </summary>
+        /// <param name="rows">Number of rows in a 2D array.</param>
+        /// <param name="cols">Number of columns in a 2D array.</param>
+        /// <param name="type">Array type.</param>
+        /// <param name="m"></param>
+        public static void EnsureSizeIsEnough(int rows, int cols, MatType type, OpenCvSharp.Cuda.OutputArray m)
+        {
+            ThrowIfGpuNotAvailable();
+            if (m is null)
+                throw new ArgumentNullException(nameof(m));
+            NativeMethods.cuda_ensureSizeIsEnough(rows, cols, (int)type, m.CvPtr);
+            GC.KeepAlive(m);
+        }
+
+        /// <summary>
+        /// Ensures that size of the given matrix is not less than (rows, cols) size
+        /// and matrix type is match specified one too
+        /// </summary>
+        /// <param name="size">Number of rows and columns in a 2D array.</param>
+        /// <param name="type">Array type.</param>
+        /// <param name="m"></param>
+        public static void EnsureSizeIsEnough(Size size, MatType type, OpenCvSharp.Cuda.OutputArray m)
+        {
+            ThrowIfGpuNotAvailable();
+            EnsureSizeIsEnough(size.Height, size.Width, type, m);
         }
     }
 }
