@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
 using OpenCvSharp.Modules.core.Enum;
 
@@ -227,6 +228,120 @@ public static partial class Cv2
             
             GC.KeepAlive(src);
             dst.Fix();
+        }
+
+        /// <summary>
+        /// Calculates a histogram with evenly distributed bins.
+        /// </summary>
+        /// <param name="src">Source 8-bit or 16-bit, single-channel image.</param>
+        /// <param name="hist">Destination histogram (CV_32SC1).</param>
+        /// <param name="histSize">Size of the histogram (number of bins).</param>
+        /// <param name="lowerLevel">Lower bound of the histogram.</param>
+        /// <param name="upperLevel">Upper bound of the histogram.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void HistEven(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, int histSize, int lowerLevel, int upperLevel, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (hist is null) 
+                throw new ArgumentNullException(nameof(hist));
+
+            src.ThrowIfDisposed();
+            hist.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_histEven(src.CvPtr, hist.CvPtr, histSize, lowerLevel, upperLevel, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            hist.Fix();
+        }
+
+        /// <summary>
+        /// Calculates a histogram with evenly distributed bins for each channel (up to 4).
+        /// </summary>
+        public static void HistEven(OpenCvSharp.Cuda.InputArray src, GpuMat[] hist,  int[] histSize, int[] lowerLevel, int[] upperLevel, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (hist is null) 
+                throw new ArgumentNullException(nameof(hist));
+            if (hist.Length != 4) 
+                throw new ArgumentException("hist array must have length 4");
+            if (histSize.Length != 4) 
+                throw new ArgumentException("histSize array must have length 4");
+            if (lowerLevel.Length != 4) 
+                throw new ArgumentException("lowerLevel array must have length 4");
+            if (upperLevel.Length != 4) 
+                throw new ArgumentException("upperLevel array must have length 4");
+
+            src.ThrowIfDisposed();
+            IntPtr[] histPtrs = new IntPtr[4];
+            for (int i = 0; i < 4; i++)
+            {
+                if (hist[i] == null) 
+                    throw new ArgumentNullException($"hist[{i}]");
+                histPtrs[i] = hist[i].CvPtr;
+            }
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_histEven_multi(src.CvPtr, histPtrs, histSize, lowerLevel, upperLevel, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            foreach (var h in hist)
+                GC.KeepAlive(h);
+        }
+
+        /// <summary>
+        /// Calculates a histogram with bins determined by the levels array.
+        /// </summary>
+        public static void HistRange(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, OpenCvSharp.Cuda.InputArray levels, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (hist is null) 
+                throw new ArgumentNullException(nameof(hist));
+            if (levels is null) 
+                throw new ArgumentNullException(nameof(levels));
+
+            src.ThrowIfDisposed();
+            hist.ThrowIfNotReady();
+            levels.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_histRange(src.CvPtr, hist.CvPtr, levels.CvPtr, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            GC.KeepAlive(levels);
+            hist.Fix();
+        }
+
+        /// <summary>
+        /// Calculates a histogram with bins determined by the levels array for each channel (up to 4).
+        /// </summary>
+        public static void HistRange(OpenCvSharp.Cuda.InputArray src, GpuMat[] hist, GpuMat[] levels, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (hist == null || hist.Length != 4) 
+                throw new ArgumentException("hist must be length 4");
+            if (levels == null || levels.Length != 4) 
+                throw new ArgumentException("levels must be length 4");
+
+            src.ThrowIfDisposed();
+            IntPtr[] histPtrs = new IntPtr[4];
+            IntPtr[] levelsPtrs = new IntPtr[4];
+            for (int i = 0; i < 4; i++)
+            {
+                histPtrs[i] = hist[i]?.CvPtr ?? IntPtr.Zero;
+                levelsPtrs[i] = levels[i]?.CvPtr ?? IntPtr.Zero;
+            }
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_histRange_multi(src.CvPtr, histPtrs, levelsPtrs, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            foreach (var h in hist) if (h != null) GC.KeepAlive(h);
+            foreach (var l in levels) if (l != null) GC.KeepAlive(l);
         }
     }
 }

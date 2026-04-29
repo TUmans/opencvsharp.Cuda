@@ -143,3 +143,19 @@ CVAPI(ExceptionStatus) cuda_createOpticalFlowNeedleMap(cv::cuda::GpuMat *u, cv::
     cv::cuda::createOpticalFlowNeedleMap(*u, *v, *vertex, *colors);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_graphcut(cv::cuda::GpuMat *terminals, cv::cuda::GpuMat *leftTransp, cv::cuda::GpuMat *rightTransp, cv::cuda::GpuMat *top, cv::cuda::GpuMat *bottom, cv::cuda::GpuMat *labels, cv::cuda::GpuMat *buf, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::graphcut(*terminals, *leftTransp, *rightTransp, *top, *bottom, *labels, *buf, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_graphcut8(cv::cuda::GpuMat *terminals, cv::cuda::GpuMat *leftTransp, cv::cuda::GpuMat *rightTransp, cv::cuda::GpuMat *top, cv::cuda::GpuMat *topLeft, cv::cuda::GpuMat *topRight, cv::cuda::GpuMat *bottom, cv::cuda::GpuMat *bottomLeft, cv::cuda::GpuMat *bottomRight, cv::cuda::GpuMat *labels, cv::cuda::GpuMat *buf, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::graphcut(*terminals, *leftTransp, *rightTransp, *top, *topLeft, *topRight, *bottom, *bottomLeft, *bottomRight, *labels, *buf, streamRef);
+    END_WRAP
+}

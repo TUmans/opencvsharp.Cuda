@@ -406,3 +406,65 @@ CVAPI(ExceptionStatus) cuda_gammaCorrection(cv::_InputArray *src, cv::_OutputArr
     cv::cuda::gammaCorrection(*src, *dst, forward != 0, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_histEven(cv::_InputArray *src, cv::_OutputArray *hist, int histSize, int lowerLevel, int upperLevel, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::histEven(*src, *hist, histSize, lowerLevel, upperLevel, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_histEven_multi(cv::_InputArray *src, cv::cuda::GpuMat **hist, int *histSize, int *lowerLevel, int *upperLevel, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::GpuMat histArr[4];
+    for (int i = 0; i < 4; i++)
+    {
+        if (hist[i])
+            histArr[i] = *hist[i];
+    }
+
+    cv::cuda::histEven(*src, histArr, histSize, lowerLevel, upperLevel, streamRef);
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (hist[i])
+            *hist[i] = histArr[i];
+    }
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_histRange(cv::_InputArray *src, cv::_OutputArray *hist, cv::_InputArray *levels, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::histRange(*src, *hist, *levels, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_histRange_multi(cv::_InputArray *src, cv::cuda::GpuMat **hist, cv::cuda::GpuMat **levels, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+
+    cv::cuda::GpuMat histArr[4];
+    cv::cuda::GpuMat levelsArr[4];
+    for (int i = 0; i < 4; i++)
+    {
+        if (hist[i])
+            histArr[i] = *hist[i];
+        if (levels[i])
+            levelsArr[i] = *levels[i];
+    }
+
+    cv::cuda::histRange(*src, histArr, levelsArr, streamRef);
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (hist[i])
+            *hist[i] = histArr[i];
+    }
+    END_WRAP
+}

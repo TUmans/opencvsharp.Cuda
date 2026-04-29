@@ -54,4 +54,9 @@ static partial class NativeMethods
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_createOpticalFlowNeedleMap(IntPtr u, IntPtr v, IntPtr vertex, IntPtr colors);
 
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_graphcut(IntPtr terminals, IntPtr leftTransp, IntPtr rightTransp, IntPtr top, IntPtr bottom, IntPtr labels, IntPtr buf, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_graphcut8(IntPtr terminals, IntPtr leftTransp, IntPtr rightTransp, IntPtr top, IntPtr topLeft, IntPtr topRight, IntPtr bottom, IntPtr bottomLeft, IntPtr bottomRight, IntPtr labels, IntPtr buf, IntPtr stream);
 }

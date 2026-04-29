@@ -620,6 +620,105 @@ public class CudaImgProcTest : CudaTestBase
         // The denoising process should have pulled the value 200 much closer to 100
         Assert.True(denoisedPixel < originalNoise, $"Expected noise to be reduced, but was {denoisedPixel}");
     }
+
+    [Fact]
+    public void HistEven_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 10x10 image (100 pixels total)
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        // Set 50 pixels to value '50'
+        cpuSrc[0, 5, 0, 10].SetTo(new Scalar(50));
+        // Set 50 pixels to value '150'
+        cpuSrc[5, 10, 0, 10].SetTo(new Scalar(150));
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuHist = new GpuMat();
+
+        // 2. Act: Calculate histogram with 2 bins across 0-200
+        // Bin 1: 0 to 100 (should contain the '50's)
+        // Bin 2: 100 to 200 (should contain the '150's)
+        Cv2.Cuda.HistEven(gpuSrc, gpuHist, histSize: 2, lowerLevel: 0, upperLevel: 200);
+
+        // 3. Download and Assert
+        using var cpuHist = new Mat();
+        gpuHist.Download(cpuHist);
+
+        Assert.False(cpuHist.Empty());
+
+        // Histogram should be 1x2 or 2x1 (CV_32SC1)
+        Assert.Equal(MatType.CV_32SC1, cpuHist.Type());
+
+        // Check the counts in the bins
+        int bin1Count = cpuHist.At<int>(0, 0);
+        int bin2Count = cpuHist.At<int>(0, 1);
+
+        Assert.Equal(50, bin1Count);
+        Assert.Equal(50, bin2Count);
+    }
+
+    [Fact]
+    public void HistEven_MultiChannelTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 10x10 2-channel image (CV_8UC2)
+        // Channel 0 (Blue): all 50
+        // Channel 1 (Green): all 150
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC4, new Scalar(50, 150));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // Must prepare 4 GpuMats even if we only have 2 channels
+        GpuMat[] hists = { new GpuMat(), new GpuMat(), new GpuMat(), new GpuMat() };
+        int[] sizes = { 1, 1, 1, 1 };
+        int[] lowers = { 0, 0, 0, 0 };
+        int[] uppers = { 255, 255, 255, 255 };
+
+        // 2. Act
+        Cv2.Cuda.HistEven(gpuSrc, hists, sizes, lowers, uppers);
+
+        // 3. Download and Assert
+        using var cpuHist0 = new Mat();
+        using var cpuHist1 = new Mat();
+        hists[0].Download(cpuHist0);
+        hists[1].Download(cpuHist1);
+
+        // 100 pixels in channel 0 had value 50 (which falls into our single bin)
+        Assert.Equal(100, cpuHist0.At<int>(0, 0));
+        // 100 pixels in channel 1 had value 150 (which falls into our single bin)
+        Assert.Equal(100, cpuHist1.At<int>(0, 0));
+
+        // Cleanup
+        foreach (var h in hists) h.Dispose();
+    }
+
+    [Fact]
+    public void HistRange_SingleChannelTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 10x10 image filled with 150
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC1, new Scalar(150));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // 2. Define custom levels: [0, 100, 255] -> creates 2 bins
+        using var cpuLevels =Mat.FromPixelData(1, 3, MatType.CV_32SC1, new int[] { 0, 100, 255 });
+        using var gpuLevels = new GpuMat(); gpuLevels.Upload(cpuLevels);
+        using var gpuHist = new GpuMat();
+
+        // 3. Act
+        Cv2.Cuda.HistRange(gpuSrc, gpuHist, gpuLevels);
+
+        // 4. Assert
+        using var cpuHist = new Mat();
+        gpuHist.Download(cpuHist);
+
+        // Bin 0 (0-100) should be 0
+        Assert.Equal(0, cpuHist.At<int>(0, 0));
+        // Bin 1 (100-255) should be 100
+        Assert.Equal(100, cpuHist.At<int>(0, 1));
+    }
 }
 
 

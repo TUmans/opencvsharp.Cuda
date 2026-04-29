@@ -1641,6 +1641,56 @@ public class CudaArthimTest : CudaTestBase
         Assert.NotEqual(128, value);
         Assert.InRange(value, 180, 195);
     }
+
+    [Fact]
+    public void Gemm_BasicMultiplicationTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 
+        // A (2x1) * B (1x2) = Result (2x2)
+        using var cpuA = Mat.FromPixelData(2, 1, MatType.CV_32FC1, new float[] { 2, 2 });
+        using var cpuB = Mat.FromPixelData(1, 2, MatType.CV_32FC1, new float[] { 3, 3 });
+
+        using var gpuA = new GpuMat(); gpuA.Upload(cpuA);
+        using var gpuB = new GpuMat(); gpuB.Upload(cpuB);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Result = 1.0 * A * B + 0.0 * null
+        Cv2.Cuda.Gemm(gpuA, gpuB, 1.0, null, 0.0, gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(2, cpuDst.Rows);
+        Assert.Equal(2, cpuDst.Cols);
+
+        // All elements should be 6.0
+        Assert.Equal(6.0f, cpuDst.At<float>(0, 0));
+        Assert.Equal(6.0f, cpuDst.At<float>(1, 1));
+    }
+
+    [Fact]
+    public void Gemm_WithAdditionTest()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: (1x1) mat: (2 * 3) + (10 * 0.5) = 11
+        using var gpuA = new GpuMat(1, 1, MatType.CV_32FC1, new Scalar(2));
+        using var gpuB = new GpuMat(1, 1, MatType.CV_32FC1, new Scalar(3));
+        using var gpuC = new GpuMat(1, 1, MatType.CV_32FC1, new Scalar(10));
+        using var gpuDst = new GpuMat();
+
+        // Act: 1.0 * (A*B) + 0.5 * C
+        Cv2.Cuda.Gemm(gpuA, gpuB, 1.0, gpuC, 0.5, gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.Equal(11.0f, cpuDst.At<float>(0, 0));
+    }
 }
 
 

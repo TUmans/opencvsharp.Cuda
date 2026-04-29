@@ -64,5 +64,38 @@ public static partial class Cv2
             ThrowIfGpuNotAvailable();
             EnsureSizeIsEnough(size.Height, size.Width, type, m);
         }
+
+        /// <summary>
+        /// Returns the number of installed CUDA-enabled devices.
+        /// Use this function before any other GPU functions calls. 
+        /// If OpenCV is compiled without GPU support, this function returns 0.
+        /// </summary>
+        /// <returns></returns>
+        public static int GetCudaEnabledDeviceCount()
+        {
+            NativeMethods.HandleException(NativeMethods.cuda_getCudaEnabledDeviceCount(out int res));
+            return res;
+        }
+
+        /// <summary>
+        /// Returns the current device index set by SetDevice() or initialized by default.
+        /// </summary>
+        /// <returns></returns>
+        public static int GetDevice()
+        {
+            ThrowIfGpuNotAvailable();
+            NativeMethods.HandleException(NativeMethods.cuda_getDevice(out int res));
+            return res;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static void ThrowIfGpuNotAvailable()
+        {
+            if (GetCudaEnabledDeviceCount() < 1)
+                throw new OpenCvSharpException("GPU module cannot be used.");
+        }
     }
 }

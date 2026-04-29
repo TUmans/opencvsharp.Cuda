@@ -217,7 +217,7 @@ public class CudaLegacyTest : CudaTestBase
         catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
         {
             // Graceful exit if cudabgsegm is not compiled into the OpenCV binaries.
-            return;
+            Assert.Skip("The called functionality is disabled for current build or platform");
         }
     }
 
@@ -273,6 +273,79 @@ public class CudaLegacyTest : CudaTestBase
             colors.Type() == MatType.CV_32FC3 ||
             colors.Type() == MatType.CV_8UC4
         );
+    }
+
+    [Fact]
+    public void Graphcut_Test()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            int rows = 10;
+            int cols = 10;
+
+            // terminals: 2-channel CV_32S (Source and Sink weights)
+            using var terminals = new GpuMat(rows, cols, MatType.CV_32SC2, new Scalar(0, 0));
+            // Neighborhood weights (all CV_32S)
+            using var leftTransp = new GpuMat(cols, rows, MatType.CV_32SC1, new Scalar(1));
+            using var rightTransp = new GpuMat(cols, rows, MatType.CV_32SC1, new Scalar(1));
+            using var top = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+            using var bottom = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+
+            using var labels = new GpuMat(rows, cols, MatType.CV_8UC1);
+            using var buf = new GpuMat();
+
+            // Act
+            Cv2.Cuda.Graphcut(terminals, leftTransp, rightTransp, top, bottom, labels, buf);
+
+            // Assert
+            Assert.False(labels.Empty());
+            Assert.Equal(rows, labels.Rows);
+            Assert.Equal(cols, labels.Cols);
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("not implemented"))
+        {
+            Assert.Skip("The called functionality is disabled for current build or platform");
+        }
+    }
+
+    [Fact]
+    public void Graphcut8_Test()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            int rows = 10;
+            int cols = 10;
+
+            using var terminals = new GpuMat(rows, cols, MatType.CV_32SC2, new Scalar(0, 0));
+
+            // Neighborhood weights (All 11 matrices!)
+            using var leftT = new GpuMat(cols, rows, MatType.CV_32SC1, new Scalar(1));
+            using var rightT = new GpuMat(cols, rows, MatType.CV_32SC1, new Scalar(1));
+            using var top = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+            using var tLeft = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+            using var tRight = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+            using var bot = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+            using var bLeft = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+            using var bRight = new GpuMat(rows, cols, MatType.CV_32SC1, new Scalar(1));
+
+            using var labels = new GpuMat(rows, cols, MatType.CV_8UC1);
+            using var buf = new GpuMat();
+
+            // Act
+            Cv2.Cuda.Graphcut(terminals, leftT, rightT, top, tLeft, tRight, bot, bLeft, bRight, labels, buf);
+
+            // Assert
+            Assert.False(labels.Empty());
+            Assert.Equal(rows, labels.Rows);
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("not implemented"))
+        {
+            Assert.Skip("The called functionality is disabled for current build or platform");
+        }
     }
 }
 

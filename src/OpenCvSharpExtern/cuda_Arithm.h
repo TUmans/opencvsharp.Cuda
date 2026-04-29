@@ -547,3 +547,11 @@ CVAPI(ExceptionStatus) cuda_flip(cv::_InputArray *src, cv::_OutputArray *dst, in
     cv::cuda::flip(*src, *dst, flipCode, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_gemm(cv::_InputArray *src1, cv::_InputArray *src2, double alpha, cv::_InputArray *src3, double beta, cv::_OutputArray *dst, int flags, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::gemm(*src1, *src2, alpha, src3 ? *src3 : cv::noArray(), beta, *dst, flags, streamRef);
+    END_WRAP
+}

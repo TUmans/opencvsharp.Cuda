@@ -683,6 +683,42 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        /// <summary>
+        /// Performs generalized matrix multiplication.
+        /// </summary>
+        /// <param name="src1">First multiplied matrix. CV_32FC1, CV_32FC2, CV_64FC1, CV_64FC2 are supported.</param>
+        /// <param name="src2">Second multiplied matrix. Same type as src1.</param>
+        /// <param name="alpha">Weight of the matrix product.</param>
+        /// <param name="src3">Optional third matrix to add. Same type as src1.</param>
+        /// <param name="beta">Weight of src3.</param>
+        /// <param name="dst">Destination matrix.</param>
+        /// <param name="flags">Operation flags (GemmFlags).</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Gemm(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, double alpha, OpenCvSharp.Cuda.InputArray? src3, double beta, OpenCvSharp.Cuda.OutputArray dst, GemmFlags flags = GemmFlags.None, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (src2 is null) 
+                throw new ArgumentNullException(nameof(src2));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            src2.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_gemm(
+                    src1.CvPtr, src2.CvPtr, alpha,
+                    src3 ?.CvPtr ?? IntPtr.Zero, beta, dst.CvPtr,
+                    (int)flags, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src1);
+            GC.KeepAlive(src2);
+            if (src3 != null) GC.KeepAlive(src3);
+        }
+
 
         // -----------------------------------------------------------------------
         // log

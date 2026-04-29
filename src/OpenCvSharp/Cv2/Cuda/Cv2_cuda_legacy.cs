@@ -102,5 +102,106 @@ public static partial class Cv2
             GC.KeepAlive(vertex);
             GC.KeepAlive(colors);
         }
+
+        /// <summary>
+        /// Performs labeling via graph cuts of a 2D regular 4-connected graph.
+        /// </summary>
+        public static void Graphcut(GpuMat terminals, GpuMat leftTransp, GpuMat rightTransp, GpuMat top, GpuMat bottom, GpuMat labels, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (terminals is null) 
+                throw new ArgumentNullException(nameof(terminals));
+            if (leftTransp is null) 
+                throw new ArgumentNullException(nameof(leftTransp));
+            if (rightTransp is null) 
+                throw new ArgumentNullException(nameof(rightTransp));
+            if (top is null) 
+                throw new ArgumentNullException(nameof(top));
+            if (bottom is null) 
+                throw new ArgumentNullException(nameof(bottom));
+            if (labels is null) 
+                throw new ArgumentNullException(nameof(labels));
+            if (buf is null) 
+                throw new ArgumentNullException(nameof(buf));
+
+            terminals.ThrowIfDisposed();
+            leftTransp.ThrowIfDisposed();
+            rightTransp.ThrowIfDisposed();
+            top.ThrowIfDisposed();
+            bottom.ThrowIfDisposed();
+            labels.ThrowIfDisposed();
+            buf.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_graphcut(
+                    terminals.CvPtr, leftTransp.CvPtr, rightTransp.CvPtr,
+                    top.CvPtr, bottom.CvPtr, labels.CvPtr,
+                    buf.CvPtr, ToPtr(stream)));
+
+            GC.KeepAlive(terminals);
+            GC.KeepAlive(leftTransp);
+            GC.KeepAlive(rightTransp);
+            GC.KeepAlive(top);
+            GC.KeepAlive(bottom);
+            GC.KeepAlive(labels);
+            GC.KeepAlive(buf);
+        }
+
+        /// <summary>
+        /// Performs labeling via graph cuts of a 2D regular 8-connected graph.
+        /// </summary>
+        public static void Graphcut(GpuMat terminals, GpuMat leftTransp, GpuMat rightTransp, GpuMat top, GpuMat topLeft, GpuMat topRight, GpuMat bottom, GpuMat bottomLeft, GpuMat bottomRight, GpuMat labels, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (terminals is null) 
+                throw new ArgumentNullException(nameof(terminals));
+            if (leftTransp is null) 
+                throw new ArgumentNullException(nameof(leftTransp));
+            if (rightTransp is null) 
+                throw new ArgumentNullException(nameof(rightTransp));
+            if (top is null) 
+                throw new ArgumentNullException(nameof(top));
+            if (topLeft is null) 
+                throw new ArgumentNullException(nameof(topLeft));
+            if (topRight is null) 
+                throw new ArgumentNullException(nameof(topRight));
+            if (bottom is null) 
+                throw new ArgumentNullException(nameof(bottom));
+            if (bottomLeft is null) 
+                throw new ArgumentNullException(nameof(bottomLeft));
+            if (bottomRight is null) 
+                throw new ArgumentNullException(nameof(bottomRight));
+            if (labels is null) 
+                throw new ArgumentNullException(nameof(labels));
+            if (buf is null) 
+                throw new ArgumentNullException(nameof(buf));
+
+            // ThrowIfDisposed for all...
+            terminals.ThrowIfDisposed();
+            leftTransp.ThrowIfDisposed();
+            rightTransp.ThrowIfDisposed();
+            top.ThrowIfDisposed();
+            topLeft.ThrowIfDisposed();
+            topRight.ThrowIfDisposed();
+            bottom.ThrowIfDisposed();
+            bottomLeft.ThrowIfDisposed();
+            bottomRight.ThrowIfDisposed();
+            labels.ThrowIfDisposed();
+            buf.ThrowIfDisposed();
+
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_graphcut8(terminals.CvPtr, leftTransp.CvPtr, rightTransp.CvPtr, top.CvPtr, topLeft.CvPtr, topRight.CvPtr, bottom.CvPtr, bottomLeft.CvPtr, bottomRight.CvPtr, labels.CvPtr, buf.CvPtr, ToPtr(stream)));
+
+            GC.KeepAlive(terminals); 
+            GC.KeepAlive(leftTransp); 
+            GC.KeepAlive(rightTransp);
+            GC.KeepAlive(top); 
+            GC.KeepAlive(topLeft); 
+            GC.KeepAlive(topRight);
+            GC.KeepAlive(bottom); 
+            GC.KeepAlive(bottomLeft); 
+            GC.KeepAlive(bottomRight);
+            GC.KeepAlive(labels); 
+            GC.KeepAlive(buf);
+        }
     }
 }
