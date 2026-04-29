@@ -11,4 +11,6 @@
 #include "cuda_Bgsegm.h"
 #include "cuda_Filters.h"
 #include "cuda_Stereo.h"
+#include "cuda_Calib3d.h"
+#include "cuda_OpenGL.h"
 #endif

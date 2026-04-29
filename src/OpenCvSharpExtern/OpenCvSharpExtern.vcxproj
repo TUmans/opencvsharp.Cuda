@@ -111,9 +111,11 @@
     <ClInclude Include="core_UMat.h" />
     <ClInclude Include="cuda.h" />
     <ClInclude Include="cuda_Bgsegm.h" />
+    <ClInclude Include="cuda_Calib3d.h" />
     <ClInclude Include="cuda_Core.h" />
     <ClInclude Include="cuda_GpuMat.h" />
     <ClInclude Include="cuda_Legacy.h" />
+    <ClInclude Include="cuda_OpenGL.h" />
     <ClInclude Include="cuda_Stereo.h" />
     <ClInclude Include="cuda_Warping.h" />
     <ClInclude Include="dnn.h" />

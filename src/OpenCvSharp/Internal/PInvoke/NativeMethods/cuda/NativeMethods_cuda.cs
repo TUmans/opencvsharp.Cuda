@@ -14,17 +14,9 @@ namespace OpenCvSharp.Internal
     static partial class NativeMethods
     {
         #region Device
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_getCudaEnabledDeviceCount(out int returnValue);
+       
 
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_setDevice(int device);
 
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_getDevice(out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_resetDevice();
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_deviceSupports(int feature_set, out int returnValue);
@@ -108,12 +100,6 @@ namespace OpenCvSharp.Internal
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_printShortCudaDeviceInfo(int device);
         #endregion
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_registerPageLocked(IntPtr m);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_unregisterPageLocked(IntPtr m);
 
         #region Stream
 

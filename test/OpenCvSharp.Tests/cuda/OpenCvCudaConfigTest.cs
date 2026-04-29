@@ -35,19 +35,19 @@ public class OpenCvCudaConfigTest : CudaTestBase
                 valid = false;
 
             if (!valid)
-                throw new SkipException("OpenCV binary was not compiled with CUDA support.");
+                throw new Exception("OpenCV binary was not compiled with CUDA support.");
 
 
 
             int deviceCount = Cv2.Cuda.GetCudaEnabledDeviceCount();
 
             if (deviceCount ==0)
-                throw new SkipException("OpenCV binary compiled with CUDA support, but no device found");
+                throw new Exception("OpenCV binary compiled with CUDA support, but no device found");
 
         }
         catch (Exception ex)
         {
-            throw new SkipException($"Could not load OpenCV native library: {ex.Message}");
+            throw new Exception($"Could not load OpenCV native library: {ex.Message}");
         }
 
     }

@@ -343,5 +343,30 @@ public static partial class Cv2
             foreach (var h in hist) if (h != null) GC.KeepAlive(h);
             foreach (var l in levels) if (l != null) GC.KeepAlive(l);
         }
+
+        /// <summary>
+        /// Exchanges the color channels of an image in-place.
+        /// </summary>
+        /// <param name="image">Source and destination image. Must be 4-channel (CV_8UC4).</param>
+        /// <param name="dstOrder">Integer array describing how to slot the source channels into the destination. Must have length 4.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void SwapChannels(OpenCvSharp.Cuda.InputArray image, int[] dstOrder, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (image is null) 
+                throw new ArgumentNullException(nameof(image));
+            if (dstOrder is null) 
+                throw new ArgumentNullException(nameof(dstOrder));
+            if (dstOrder.Length != 4) 
+                throw new ArgumentException("dstOrder must have exactly 4 elements.", nameof(dstOrder));
+
+            image.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_swapChannels(image.CvPtr, dstOrder, ToPtr(stream)));
+
+            GC.KeepAlive(image);
+        }
+
+      
     }
 }

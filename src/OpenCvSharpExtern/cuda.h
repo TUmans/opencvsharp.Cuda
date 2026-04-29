@@ -293,6 +293,7 @@ CVAPI(ExceptionStatus) cuda_Stream_bool(cv::cuda::Stream *obj, int *returnValue)
     END_WRAP
 }
 
+
 #pragma endregion
 
 #endif

@@ -468,3 +468,43 @@ CVAPI(ExceptionStatus) cuda_histRange_multi(cv::_InputArray *src, cv::cuda::GpuM
     }
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_meanShiftFiltering(cv::_InputArray *src, cv::_OutputArray *dst, int sp, int sr, CvTermCriteria criteria, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::meanShiftFiltering(*src, *dst, sp, sr, criteria, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_meanShiftProc(cv::_InputArray *src, cv::_OutputArray *dstr, cv::_OutputArray *dstsp, int sp, int sr, CvTermCriteria criteria, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::meanShiftProc(*src, *dstr, *dstsp, sp, sr, criteria, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_meanShiftSegmentation(cv::_InputArray *src, cv::_OutputArray *dst, int sp, int sr, int minsize, CvTermCriteria criteria, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::meanShiftSegmentation(*src, *dst, sp, sr, minsize, criteria, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_nonLocalMeans(cv::_InputArray *src, cv::_OutputArray *dst, float h, int search_window, int block_size, int borderMode, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::nonLocalMeans(*src, *dst, h, search_window, block_size, borderMode, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_swapChannels(cv::_InputOutputArray *image, const int *dstOrder, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::swapChannels(*image, dstOrder, streamRef);
+    END_WRAP
+}

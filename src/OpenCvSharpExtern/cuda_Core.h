@@ -18,3 +18,31 @@ CVAPI(ExceptionStatus) cuda_convertFp16(
     cv::cuda::convertFp16(*src, *dst, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_registerPageLocked(cv::Mat *m)
+{
+    BEGIN_WRAP
+    cv::cuda::registerPageLocked(*m);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_unregisterPageLocked(cv::Mat *m)
+{
+    BEGIN_WRAP
+    cv::cuda::unregisterPageLocked(*m);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_setBufferPoolConfig(int deviceId, size_t stackSize, int stackCount)
+{
+    BEGIN_WRAP
+    cv::cuda::setBufferPoolConfig(deviceId, stackSize, stackCount);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_setBufferPoolUsage(int on)
+{
+    BEGIN_WRAP
+    cv::cuda::setBufferPoolUsage(on != 0);
+    END_WRAP
+}

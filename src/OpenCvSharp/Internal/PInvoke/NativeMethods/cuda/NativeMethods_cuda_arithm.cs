@@ -224,6 +224,64 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_gemm(IntPtr src1, IntPtr src2, double alpha, IntPtr src3, double beta, IntPtr dst, int flags, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_integral(IntPtr src, IntPtr sum, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanStdDev(IntPtr mtx, out Scalar mean, out Scalar stddev);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanStdDev_dst(IntPtr mtx, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_merge(IntPtr[] src, UIntPtr n, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_minMax(IntPtr src, out double minVal, out double maxVal, IntPtr mask);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_minMaxLoc(IntPtr src, out double minVal, out double maxVal, out Point minLoc, out Point maxLoc, IntPtr mask);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_mulSpectrums(IntPtr src1, IntPtr src2, IntPtr dst, int flags, int conjB, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_mulAndScaleSpectrums(IntPtr src1, IntPtr src2, IntPtr dst, int flags, float scale, int conjB, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_norm1(IntPtr src1, int normType, IntPtr mask, out double returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_norm2(IntPtr src1, IntPtr src2, int normType, out double returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_normalize(IntPtr src, IntPtr dst, double alpha, double beta, int normType, int dtype, IntPtr mask, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_rectStdDev(IntPtr src, IntPtr sqr, IntPtr dst, Rect rect, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_reduce(IntPtr mtx, IntPtr vec, int dim, int reduceOp, int dtype, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_split(IntPtr src, IntPtr[] dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_sqrIntegral(IntPtr src, IntPtr sqsum, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_sqrSum(IntPtr src, IntPtr mask, out Scalar returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_subtract_scalar(
+        IntPtr src1, Scalar src2, IntPtr dst, IntPtr mask, int dtype, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_sum(IntPtr src, IntPtr mask, out Scalar returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_transpose(IntPtr src, IntPtr dst, IntPtr stream);
 }
 
 

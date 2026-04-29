@@ -88,6 +88,96 @@ public static partial class Cv2
             return res;
         }
 
+        /// <summary>
+        /// Sets a device and initializes it for the current thread.
+        /// </summary>
+        /// <param name="device">System index of a GPU device starting with 0.</param>
+        /// <returns></returns>
+        public static int SetDevice(int device)
+        {
+            ThrowIfGpuNotAvailable();
+            NativeMethods.HandleException(NativeMethods.cuda_getDevice(out int res));
+            return res;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="device"></param>
+        public static void PrintCudaDeviceInfo(int device)
+        {
+            ThrowIfGpuNotAvailable();
+            NativeMethods.HandleException(NativeMethods.cuda_printCudaDeviceInfo(device));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="device"></param>
+        public static void PrintShortCudaDeviceInfo(int device)
+        {
+            ThrowIfGpuNotAvailable();
+            NativeMethods.HandleException(NativeMethods.cuda_printShortCudaDeviceInfo(device));
+        }
+
+        /// <summary>
+        /// Page-locks the matrix m memory and maps it for the device(s)
+        /// </summary>
+        /// <param name="m"></param>
+        public static void RegisterPageLocked(Mat m)
+        {
+            ThrowIfGpuNotAvailable();
+            if (m is null)
+                throw new ArgumentNullException(nameof(m));
+            NativeMethods.HandleException(NativeMethods.cuda_registerPageLocked(m.CvPtr));
+            GC.KeepAlive(m);
+        }
+
+        /// <summary>
+        /// Unmaps the memory of matrix m, and makes it pageable again.
+        /// </summary>
+        /// <param name="m"></param>
+        public static void UnregisterPageLocked(Mat m)
+        {
+            ThrowIfGpuNotAvailable();
+            if (m is null)
+                throw new ArgumentNullException(nameof(m));
+           NativeMethods.HandleException(NativeMethods.cuda_unregisterPageLocked(m.CvPtr));
+            GC.KeepAlive(m);
+        }
+
+        /// <summary>
+        /// Explicitly destroys and cleans up all resources associated with the current device in the current process.
+        /// Any subsequent API call to this device will reinitialize the device.
+        /// </summary>
+        public static void ResetDevice()
+        {
+            ThrowIfGpuNotAvailable();
+            NativeMethods.HandleException(NativeMethods.cuda_resetDevice());
+        }
+
+        /// <summary>
+        /// Sets the parameters of the buffer pool for a specific device.
+        /// </summary>
+        /// <param name="deviceId">Device ID.</param>
+        /// <param name="stackSize">Size of one stack in bytes.</param>
+        /// <param name="stackCount">Number of stacks.</param>
+        public static void SetBufferPoolConfig(int deviceId, ulong stackSize, int stackCount)
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_setBufferPoolConfig(deviceId, (UIntPtr)stackSize, stackCount));
+        }
+
+        /// <summary>
+        /// Enables or disables the buffer pool.
+        /// This must be called before any Stream is created to take effect.
+        /// </summary>
+        /// <param name="on">True to enable, false to disable.</param>
+        public static void SetBufferPoolUsage(bool on)
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_setBufferPoolUsage(on ? 1 : 0));
+        }
 
         /// <summary>
         /// 

@@ -159,3 +159,50 @@ CVAPI(ExceptionStatus) cuda_graphcut8(cv::cuda::GpuMat *terminals, cv::cuda::Gpu
     cv::cuda::graphcut(*terminals, *leftTransp, *rightTransp, *top, *topLeft, *topRight, *bottom, *bottomLeft, *bottomRight, *labels, *buf, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_interpolateFrames(cv::cuda::GpuMat *frame0, cv::cuda::GpuMat *frame1, cv::cuda::GpuMat *fu, cv::cuda::GpuMat *fv, cv::cuda::GpuMat *bu, cv::cuda::GpuMat *bv, float pos, cv::cuda::GpuMat *newFrame, cv::cuda::GpuMat *buf, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::interpolateFrames(*frame0, *frame1, *fu, *fv, *bu, *bv, pos, *newFrame, *buf, streamRef);
+    END_WRAP
+}
+
+
+CVAPI(ExceptionStatus) cuda_labelComponents(cv::cuda::GpuMat *mask, cv::cuda::GpuMat *components, int flags, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::labelComponents(*mask, *components, flags, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_projectPoints(cv::cuda::GpuMat *src, cv::Mat *rvec, cv::Mat *tvec, cv::Mat *camera_mat, cv::Mat *dist_coef, cv::cuda::GpuMat *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::projectPoints(*src, *rvec, *tvec, *camera_mat, *dist_coef, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_solvePnPRansac(cv::Mat *object, cv::Mat *image, cv::Mat *camera_mat, cv::Mat *dist_coef, cv::Mat *rvec, cv::Mat *tvec, int use_extrinsic_guess, int num_iters, float max_dist, int min_inlier_count, cv::_OutputArray *inliers)
+{
+    BEGIN_WRAP
+    std::vector<int> inliers_vec;
+
+    cv::cuda::solvePnPRansac(*object, *image, *camera_mat, *dist_coef, *rvec, *tvec, use_extrinsic_guess != 0, num_iters, max_dist, min_inlier_count,  inliers ? &inliers_vec : NULL);
+
+    if (inliers && inliers->needed())
+    {
+        cv::Mat(inliers_vec).copyTo(*inliers);
+    }
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_transformPoints(cv::cuda::GpuMat *src, cv::Mat *rvec, cv::Mat *tvec, cv::cuda::GpuMat *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::transformPoints(*src, *rvec, *tvec, *dst, streamRef);
+    END_WRAP
+}

@@ -1691,21 +1691,576 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(11.0f, cpuDst.At<float>(0, 0));
     }
+
+    [Fact]
+    public void Integral_Test()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: 2x2 matrix of 1s
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1, new Scalar(1));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuSum = new GpuMat();
+
+        // Act
+        Cv2.Cuda.Integral(gpuSrc, gpuSum);
+
+        // Assert
+        using var cpuSum = new Mat();
+        gpuSum.Download(cpuSum);
+
+        // Integral size is (W+1)x(H+1) -> 3x3
+        Assert.Equal(3, cpuSum.Rows);
+        // Bottom-right pixel (2,2) should be the sum of all (1+1+1+1 = 4)
+        // CUDA integral defaults to CV_32S
+        Assert.Equal(4, cpuSum.At<int>(2, 2));
+    }
+
+    [Fact]
+    public void MeanStdDev_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix with values 10, 20, 30, 40
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1);
+        cpuSrc.Set<byte>(0, 0, 10);
+        cpuSrc.Set<byte>(0, 1, 20);
+        cpuSrc.Set<byte>(1, 0, 30);
+        cpuSrc.Set<byte>(1, 1, 40);
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        // 2. Act
+        Cv2.Cuda.MeanStdDev(gpuSrc, out Scalar mean, out Scalar stddev);
+
+        // 3. Assert
+        // Mean should be exactly 25
+        Assert.Equal(25.0, mean.Val0);
+
+        // StdDev should be ~11.18
+        Assert.InRange(stddev.Val0, 11.17, 11.19);
+    }
+
+    [Fact]
+    public void MeanStdDev_OutputArrayTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1);
+        cpuSrc.Set<byte>(0, 0, 10);
+        cpuSrc.Set<byte>(0, 1, 20);
+        cpuSrc.Set<byte>(1, 0, 30);
+        cpuSrc.Set<byte>(1, 1, 40);
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.MeanStdDev(gpuSrc, gpuDst);
+
+        // 3. Download
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Expected layout: 1x2
+        Assert.Equal(1, cpuDst.Rows);
+        Assert.Equal(2, cpuDst.Cols);
+        Assert.Equal(MatType.CV_64FC1, cpuDst.Type());
+
+        double mean = cpuDst.At<double>(0, 0);
+        double stddev = cpuDst.At<double>(0, 1);
+
+        Assert.Equal(25.0, mean);
+        Assert.InRange(stddev, 11.17, 11.19);
+    }
+
+    [Fact]
+    public void Merge_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Two 1-channel images
+        using var cpuSrc1 = new Mat(5, 5, MatType.CV_8UC1, new Scalar(10));
+        using var cpuSrc2 = new Mat(5, 5, MatType.CV_8UC1, new Scalar(20));
+
+        using var gpuSrc1 = new GpuMat(); gpuSrc1.Upload(cpuSrc1);
+        using var gpuSrc2 = new GpuMat(); gpuSrc2.Upload(cpuSrc2);
+
+        GpuMat[] sources = { gpuSrc1, gpuSrc2 };
+
+        // 2. Act: Merge them
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.Merge(sources, gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Result should have 2 channels (CV_8UC2)
+        Assert.Equal(2, cpuDst.Channels());
+        Assert.Equal(MatType.CV_8UC2, cpuDst.Type());
+
+        // Check the values at (0,0)
+        // Vec2b represents a 2-byte vector
+        Vec2b pixel = cpuDst.At<Vec2b>(0, 0);
+        Assert.Equal(10, pixel.Item0); // Channel 1
+        Assert.Equal(20, pixel.Item1); // Channel 2
+    }
+
+    [Fact]
+    public void MinMaxLoc_DirectTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 image with specific min/max
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(128));
+        cpuSrc.Set<byte>(10, 20, 5);   // Min at (20, 10)
+        cpuSrc.Set<byte>(80, 70, 250); // Max at (70, 80)
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        // 2. Act
+        Cv2.Cuda.MinMaxLoc(gpuSrc, out double minVal, out double maxVal, out Point minLoc, out Point maxLoc);
+
+        // 3. Assert
+        Assert.Equal(5.0, minVal);
+        Assert.Equal(250.0, maxVal);
+
+        // Note: OpenCV Point is (X, Y) which is (Col, Row)
+        Assert.Equal(20, minLoc.X);
+        Assert.Equal(10, minLoc.Y);
+        Assert.Equal(70, maxLoc.X);
+        Assert.Equal(80, maxLoc.Y);
+    }
+
+    [Fact]
+    public void MinMax_WithMaskTest()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: 10x10 image filled with 100.
+        using var cpuSrc = new Mat(10, 10, MatType.CV_8UC1, new Scalar(100));
+        // Add a very small value (10) that we will MASK OUT
+        cpuSrc.Set<byte>(0, 0, 10);
+
+        // Create mask: only the bottom-right 5x5 area is active (255)
+        using var cpuMask = new Mat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Rectangle(cpuMask, new Rect(5, 5, 5, 5), new Scalar(255), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuMask = new GpuMat(); gpuMask.Upload(cpuMask);
+
+        // Act
+        Cv2.Cuda.MinMax(gpuSrc, out double minVal, out double maxVal, gpuMask);
+
+        // Assert
+        // Even though '10' exists in the image at (0,0), it is masked out.
+        // The minimum value in the active 5x5 region is 100.
+        Assert.Equal(100, minVal);
+        Assert.Equal(100, maxVal);
+    }
+
+    [Fact]
+    public void MulSpectrums_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 1x1 Complex Matrices (CV_32FC2)
+        using var cpu1 = Mat.FromPixelData(1, 1, MatType.CV_32FC2, new float[] { 1f, 1f }); // 1 + 1i
+        using var cpu2 = Mat.FromPixelData(1, 1, MatType.CV_32FC2, new float[] { 2f, 3f }); // 2 + 3i
+
+        using var gpu1 = new GpuMat(); gpu1.Upload(cpu1);
+        using var gpu2 = new GpuMat(); gpu2.Upload(cpu2);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.MulSpectrums(gpu1, gpu2, gpuDst, DftFlags.None);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Vec2f result = cpuDst.At<Vec2f>(0, 0);
+
+        // (1*2 - 1*3) = -1
+        Assert.Equal(-1f, result.Item0);
+        // (1*3 + 1*2) = 5
+        Assert.Equal(5f, result.Item1);
+    }
+
+    [Fact]
+    public void MulAndScaleSpectrums_Test()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: (1 + 0i) * (1 + 0i) = 1. Scaled by 0.5 = 0.5
+        using var gpu1 = new GpuMat(1, 1, MatType.CV_32FC2, new Scalar(1, 0));
+        using var gpu2 = new GpuMat(1, 1, MatType.CV_32FC2, new Scalar(1, 0));
+
+        // Act: scale = 0.5f
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.MulAndScaleSpectrums(gpu1, gpu2, gpuDst, DftFlags.None, 0.5f);
+
+        // Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+        Vec2f result = cpuDst.At<Vec2f>(0, 0);
+
+        Assert.Equal(0.5f, result.Item0);
+        Assert.Equal(0f, result.Item1);
+    }
+
+    [Fact]
+    public void NonLocalMeans_Test()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: small noisy region instead of single pixel
+        using var cpuSrc = new Mat(20, 20, MatType.CV_8UC1, new Scalar(100));
+        cpuSrc[new Rect(9, 9, 3, 3)].SetTo(new Scalar(200));
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuDst = new GpuMat();
+
+        // Stronger filtering
+        Cv2.Cuda.NonLocalMeans(gpuSrc, gpuDst, h: 30.0f, searchWindow: 15, blockSize: 3);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        byte denoisedPixel = cpuDst.At<byte>(10, 10);
+
+        // Now smoothing should occur
+        Assert.True(denoisedPixel < 200, $"Value was not reduced. Got: {denoisedPixel}");
+    }
+
+    [Fact]
+    public void Norm_SingleMatrixTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix filled with 3.0
+        using var cpuSrc = new Mat(2, 2, MatType.CV_32FC1, new Scalar(3.0));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // 2. Act: Calculate L1 Norm (Sum of absolute values)
+        // |3| + |3| + |3| + |3| = 12.0
+        double l1Norm = Cv2.Cuda.Norm(gpuSrc, NormTypes.L1 );
+
+        // 3. Act: Calculate L2 Norm (Euclidean)
+        // sqrt(3^2 + 3^2 + 3^2 + 3^2) = sqrt(36) = 6.0
+        double l2Norm = Cv2.Cuda.Norm(gpuSrc, NormTypes.L2);
+
+        // 4. Assert
+        Assert.Equal(12.0, l1Norm);
+        Assert.Equal(6.0, l2Norm);
+    }
+
+    [Fact]
+    public void Norm_DifferenceTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 8-bit matrices
+        using var gpuA = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(10));
+        using var gpuB = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(7));
+
+        // 2. Act
+        double diffNorm = Cv2.Cuda.Norm(gpuA, gpuB, NormTypes.L1);
+
+        // 3. Assert
+        // Each pixel diff = 3, total pixels = 25 → 75
+        Assert.Equal(75.0, diffNorm);
+    }
+
+    [Fact]
+    public void Normalize_MinMaxTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x1 matrix with values 10.0 and 20.0
+        using var cpuSrc = new Mat(2, 1, MatType.CV_32FC1);
+        cpuSrc.Set<float>(0, 0, 10.0f);
+        cpuSrc.Set<float>(1, 0, 20.0f);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Normalize to range [0, 255]
+        Cv2.Cuda.Normalize(gpuSrc, gpuDst, 0.0, 255.0, NormTypes.MinMax, -1);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        float valMin = cpuDst.At<float>(0, 0);
+        float valMax = cpuDst.At<float>(1, 0);
+
+        // 10.0 should have become the new alpha (0)
+        Assert.InRange(valMin, -0.01f, 0.01f);
+        // 20.0 should have become the new beta (255)
+        Assert.InRange(valMax, 254.9f, 255.1f);
+    }
+
+    [Fact]
+    public void RectStdDev_Test()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            int rows = 8, cols = 8;
+
+            // FIX 1: use CV_8UC1 (or CV_32FC1)
+            using var cpuSrc = new Mat(rows, cols, MatType.CV_8UC1, Scalar.All(4));
+
+            // FIX 2: separate outputs
+            using var cpuSum = new Mat();
+            using var cpuSqSum = new Mat();
+
+            // tilted not needed → pass null
+            Cv2.Integral(cpuSrc, cpuSum, cpuSqSum);
+
+            using var gpuSum = new GpuMat();
+            using var gpuSqSum = new GpuMat();
+
+            gpuSum.Upload(cpuSum);
+            gpuSqSum.Upload(cpuSqSum);
+
+            using var gpuDst = new GpuMat();
+
+            var rect = new Rect(0, 0, cols, rows);
+
+            Cv2.Cuda.RectStdDev(gpuSum, gpuSqSum, gpuDst, rect);
+
+            using var cpuDst = new Mat();
+            gpuDst.Download(cpuDst);
+
+            Assert.False(cpuDst.Empty());
+
+            double stdDev = cpuDst.At<double>(rows / 2, cols / 2);
+
+            // uniform image → stddev ≈ 0
+            Assert.InRange(stdDev, -0.01, 0.01);
+        }
+        catch (OpenCVException ex) when (
+            ex.Message.Contains("disabled") ||
+            ex.Message.Contains("not implemented"))
+        {
+            Assert.Skip("CUDA functionality not available");
+        }
+    }
+
+    [Fact]
+    public void Reduce_ToRowSumTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix
+        // [1, 2]
+        // [3, 4]
+        using var cpuSrc = new Mat(2, 2, MatType.CV_32SC1);
+        cpuSrc.Set<int>(0, 0, 1);
+        cpuSrc.Set<int>(0, 1, 2);
+        cpuSrc.Set<int>(1, 0, 3);
+        cpuSrc.Set<int>(1, 1, 4);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuVec = new GpuMat();
+
+        // 2. Act: Reduce to single row (dim=0) using Sum
+        Cv2.Cuda.Reduce(gpuSrc, gpuVec, dim: 0, reduceOp: ReduceTypes.Sum, dtype: -1);
+
+        // 3. Download and Assert
+        using var cpuVec = new Mat();
+        gpuVec.Download(cpuVec);
+
+        Assert.False(cpuVec.Empty());
+        // Result should be 1x2
+        Assert.Equal(1, cpuVec.Rows);
+        Assert.Equal(2, cpuVec.Cols);
+
+        // [1+3, 2+4] = [4, 6]
+        Assert.Equal(4, cpuVec.At<int>(0, 0));
+        Assert.Equal(6, cpuVec.At<int>(0, 1));
+    }
+
+    [Fact]
+    public void Reduce_ToColMaxTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange
+        using var cpuSrc = new Mat(2, 2, MatType.CV_32SC1);
+        cpuSrc.Set<int>(0, 0, 10);
+        cpuSrc.Set<int>(0, 1, 50);
+        cpuSrc.Set<int>(1, 0, 100);
+        cpuSrc.Set<int>(1, 1, 5);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // 2. Act: Reduce to single column (dim=1) using Max
+        // Row 0: Max(10, 50) = 50
+        // Row 1: Max(100, 5) = 100
+        using var gpuVec = new GpuMat();
+        Cv2.Cuda.Reduce(gpuSrc, gpuVec, dim: 1, reduceOp: ReduceTypes.Max);
+
+        // 3. Download and Assert
+        using var cpuVec = new Mat();
+        gpuVec.Download(cpuVec);
+
+        Assert.Equal(2, cpuVec.Rows);
+        Assert.Equal(1, cpuVec.Cols);
+        Assert.Equal(50, cpuVec.At<int>(0, 0));
+        Assert.Equal(100, cpuVec.At<int>(1, 0));
+    }
+    [Fact]
+    public void Split_BGRTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 5x5 BGR image
+        // B=10, G=20, R=30
+        using var cpuSrc = new Mat(5, 5, MatType.CV_8UC3, new Scalar(10, 20, 30));
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        // 2. Act
+        int cn = cpuSrc.Channels();
+        GpuMat[] channels = new GpuMat[cn];
+        Cv2.Cuda.Split(gpuSrc, channels);
+
+        // 3. Assert
+        Assert.Equal(3, channels.Length);
+
+        using var b = new Mat();
+        using var g = new Mat();
+        using var r = new Mat();
+
+        channels[0].Download(b);
+        channels[1].Download(g);
+        channels[2].Download(r);
+
+        Assert.Equal(10, b.At<byte>(0, 0));
+        Assert.Equal(20, g.At<byte>(0, 0));
+        Assert.Equal(30, r.At<byte>(0, 0));
+
+        // Cleanup
+        foreach (var m in channels) m.Dispose();
+    }
+
+    [Fact]
+    public void SqrIntegral_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix of 2s. 
+        // The squares are all 4s.
+        using var cpuSrc = new Mat(2, 2, MatType.CV_8UC1, new Scalar(2));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuSqSum = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.SqrIntegral(gpuSrc, gpuSqSum);
+
+        // 3. Assert
+        using var cpuSqSum = new Mat();
+        gpuSqSum.Download(cpuSqSum);
+
+        // Integral size is (W+1)x(H+1) -> 3x3. Type is CV_64F.
+        Assert.Equal(3, cpuSqSum.Rows);
+        Assert.Equal(MatType.CV_64FC1, cpuSqSum.Type());
+
+        // Bottom-right pixel (2,2) should be sum of squares: (2^2 * 4 pixels) = 16
+        double totalSqrSum = cpuSqSum.At<double>(2, 2);
+        Assert.Equal(16.0, totalSqrSum);
+    }
+
+    [Fact]
+    public void SqrSum_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix of 3s.
+        // Squares are 9s. Sum of squares should be (9 * 4) = 36.
+        using var gpuSrc = new GpuMat(2, 2, MatType.CV_8UC1, new Scalar(3));
+
+        // 2. Act
+        Scalar result = Cv2.Cuda.SqrSum(gpuSrc);
+
+        // 3. Assert
+        Assert.Equal(36.0, result.Val0);
+    }
+
+    [Fact]
+    public void Subtract_MatrixScalarTest()
+    {
+        VerifyCudaSupport();
+
+        // 100 - 40 = 60
+        using var gpuSrc = new GpuMat(5, 5, MatType.CV_8UC1, new Scalar(100));
+        using var gpuDst = new GpuMat();
+
+        Cv2.Cuda.Subtract(gpuSrc, new Scalar(40), gpuDst);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.Equal(60, cpuDst.At<byte>(0, 0));
+    }
+
+    [Fact]
+    public void Sum_BasicTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix filled with 10
+        using var gpuSrc = new GpuMat(2, 2, MatType.CV_8UC1, new Scalar(10));
+
+        // 2. Act
+        Scalar result = Cv2.Cuda.Sum(gpuSrc);
+
+        // 3. Assert
+        // Val0 is the sum of the first channel
+        Assert.Equal(40.0, result.Val0);
+    }
+
+    [Fact]
+    public void Sum_WithMaskTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 2x2 matrix filled with 10
+        using var gpuSrc = new GpuMat(2, 2, MatType.CV_8UC1, new Scalar(10));
+
+        // 2. Create Mask: only one pixel is active (255)
+        using var cpuMask = new Mat(2, 2, MatType.CV_8UC1, new Scalar(0));
+        cpuMask.Set<byte>(0, 0, 255);
+        using var gpuMask = new GpuMat();
+        gpuMask.Upload(cpuMask);
+
+        // 3. Act
+        Scalar result = Cv2.Cuda.Sum(gpuSrc, gpuMask);
+
+        // 4. Assert
+        // Only the one active pixel (10) should be summed
+        Assert.Equal(10.0, result.Val0);
+    }
+
 }
-
-
-// ---------------------------------------------------------------------------
-// Minimal skip-test support (replace with xunit.skip NuGet if available)
-// ---------------------------------------------------------------------------
-
-/// <summary>
-/// Thrown to signal that a test should be skipped (no CUDA device present).
-/// Wire this up with a custom <see cref="SkippableFactAttribute"/> or use the
-/// <c>Xunit.SkippableFact</c> NuGet package instead.
-/// </summary>
-public sealed class SkipException : Exception
-{
-    public SkipException(string reason) : base(reason) { }
-}
-
-

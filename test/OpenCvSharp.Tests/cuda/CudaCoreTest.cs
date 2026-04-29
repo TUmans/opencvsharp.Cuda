@@ -65,4 +65,55 @@ public class CudaCoreTest : CudaTestBase
         Assert.Equal(200, gpuMat.Rows);
     }
 
+    [Fact]
+    public void PageLockedMemory_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Create a large Mat (large enough to benefit from pinning)
+        using var cpuMat = new Mat(2000, 2000, MatType.CV_8UC3, new Scalar(0, 255, 0));
+        using var gpuMat = new GpuMat();
+
+        // 2. Register the memory as Page-Locked (Pinned)
+        Cv2.Cuda.RegisterPageLocked(cpuMat);
+
+        // 3. Perform the upload (this will now use DMA and be faster)
+        gpuMat.Upload(cpuMat);
+
+        // 4. Perform a download
+        gpuMat.Download(cpuMat);
+
+        // 5. Unregister to return memory to normal OS management
+        Cv2.Cuda.UnregisterPageLocked(cpuMat);
+
+        // Assertions
+        Assert.False(gpuMat.Empty());
+        Assert.Equal(2000, gpuMat.Rows);
+        Assert.Equal(255, cpuMat.At<Vec3b>(0, 0).Item1);
+    }
+
+    [Fact]
+    public void SetBufferPool_SetupTest()
+    {
+        VerifyCudaSupport();
+
+        // Get current device
+        int deviceId = Cv2.Cuda.GetDevice();
+
+        // Act & Assert
+        var exception = Record.Exception(() =>
+        {
+            // Enable the pool
+            Cv2.Cuda.SetBufferPoolUsage(true);
+
+            // Configure: 10MB per stack, 5 stacks total
+            Cv2.Cuda.SetBufferPoolConfig(deviceId, 10 * 1024 * 1024, 5);
+        });
+
+        Assert.Null(exception);
+
+        // Clean up: switch back to default (optional)
+        Cv2.Cuda.SetBufferPoolUsage(false);
+    }
+
 }

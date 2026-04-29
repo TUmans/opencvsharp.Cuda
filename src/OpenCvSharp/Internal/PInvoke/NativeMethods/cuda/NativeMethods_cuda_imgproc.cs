@@ -156,4 +156,19 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_histRange_multi(IntPtr src, IntPtr[] hist, IntPtr[] levels, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanShiftFiltering(IntPtr src, IntPtr dst, int sp, int sr, TermCriteria criteria, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanShiftProc(IntPtr src, IntPtr dstr, IntPtr dstsp, int sp, int sr, TermCriteria criteria, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanShiftSegmentation( IntPtr src, IntPtr dst, int sp, int sr, int minsize, TermCriteria criteria, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_nonLocalMeans(IntPtr src, IntPtr dst, float h, int searchWindow, int blockSize, int borderMode, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_swapChannels(IntPtr image, [In] int[] dstOrder, IntPtr stream);
 }

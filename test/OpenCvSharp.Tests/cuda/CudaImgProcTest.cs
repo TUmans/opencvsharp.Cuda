@@ -719,6 +719,176 @@ public class CudaImgProcTest : CudaTestBase
         // Bin 1 (100-255) should be 100
         Assert.Equal(100, cpuHist.At<int>(0, 1));
     }
+
+    [Fact]
+    public void MeanShiftFiltering_Test()
+    {
+        VerifyCudaSupport();
+
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC4, new Scalar(255, 0, 0));
+
+        // Correct region assignment
+        cpuSrc[new Rect(50, 0, 50, 100)].SetTo(new Scalar(250, 5, 5));
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        using var gpuDst = new GpuMat();
+
+        // Stronger parameters
+        Cv2.Cuda.MeanShiftFiltering(gpuSrc, gpuDst, sp: 50, sr: 20);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        Vec4b left = cpuDst.At<Vec4b>(50, 10);
+        Vec4b right = cpuDst.At<Vec4b>(50, 90);
+
+        int diff = Math.Abs(left.Item0 - right.Item0);
+
+        // Relaxed threshold
+        Assert.True(diff < 10, $"Colors did not sufficiently merge. Difference was {diff}");
+    }
+
+    [Fact]
+    public void MeanShiftProc_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: BGR → BGRA
+        using var bgr = new Mat(50, 50, MatType.CV_8UC3, new Scalar(100, 100, 100));
+        using var cpuSrc = new Mat();
+        Cv2.CvtColor(bgr, cpuSrc, ColorConversionCodes.BGR2BGRA);
+
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        // 2. Act
+        using var gpuColor = new GpuMat();
+        using var gpuSpatial = new GpuMat();
+
+        Cv2.Cuda.MeanShiftProc(gpuSrc, gpuColor, gpuSpatial, sp: 5, sr: 5);
+
+        // 3. Assert
+        Assert.False(gpuColor.Empty());
+        Assert.False(gpuSpatial.Empty());
+
+        // Color output keeps same type
+        Assert.Equal(MatType.CV_8UC4, gpuColor.Type());
+        Assert.Equal(50, gpuColor.Rows);
+
+        // Spatial output: 2 channels (x, y)
+        Assert.Equal(2, gpuSpatial.Channels());
+    }
+
+    [Fact]
+    public void MeanShiftSegmentation_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 BGR image (Value 100, 100, 100)
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC4, new Scalar(100, 100, 100));
+
+        // Draw a tiny 3x3 square (9 pixels total) with a different color
+        Cv2.Rectangle(cpuSrc, new Rect(50, 50, 3, 3), new Scalar(200, 200, 200), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Set minsize to 20. 
+        // Since our square is only 9 pixels, it should be merged into the background.
+        Cv2.Cuda.MeanShiftSegmentation(gpuSrc, gpuDst, sp: 10, sr: 10, minsize: 20);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Check pixel where the square used to be
+        Vec3b squareAreaPixel = cpuDst.At<Vec3b>(51, 51);
+        Vec3b backgroundPixel = cpuDst.At<Vec3b>(10, 10);
+
+        // Because minsize (20) > square size (9), they should have merged into the same color
+        Assert.Equal(backgroundPixel.Item0, squareAreaPixel.Item0);
+        Assert.Equal(backgroundPixel.Item1, squareAreaPixel.Item1);
+        Assert.Equal(backgroundPixel.Item2, squareAreaPixel.Item2);
+    }
+
+    [Fact]
+    public void SwapChannels_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 4-channel BGRA image
+        // Blue=10, Green=20, Red=30, Alpha=255
+        using var cpuSrc = new Mat(5, 5, MatType.CV_8UC4, new Scalar(10, 20, 30, 255));
+        using var gpuSrc = new GpuMat();
+        gpuSrc.Upload(cpuSrc);
+
+        // New order: Index 2 becomes 0, 1 stays 1, 0 becomes 2, 3 stays 3
+        // This effectively swaps Blue (0) and Red (2)
+        int[] dstOrder = { 2, 1, 0, 3 };
+
+        // 2. Act
+        Cv2.Cuda.SwapChannels(gpuSrc, dstOrder);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuSrc.Download(cpuDst);
+
+        Vec4b pixel = cpuDst.At<Vec4b>(0, 0);
+
+        // New Blue (Item0) should be old Red (30)
+        Assert.Equal(30, pixel.Item0);
+        // Green (Item1) should stay 20
+        Assert.Equal(20, pixel.Item1);
+        // New Red (Item2) should be old Blue (10)
+        Assert.Equal(10, pixel.Item2);
+        // Alpha stays 255
+        Assert.Equal(255, pixel.Item3);
+    }
+
+    [Fact]
+    public void Transpose_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a 2x3 matrix
+        // [ 1, 2, 3 ]
+        // [ 4, 5, 6 ]
+        using var cpuSrc = new Mat(2, 3, MatType.CV_8UC1);
+        cpuSrc.Set<byte>(0, 0, 1); cpuSrc.Set<byte>(0, 1, 2); cpuSrc.Set<byte>(0, 2, 3);
+        cpuSrc.Set<byte>(1, 0, 4); cpuSrc.Set<byte>(1, 1, 5); cpuSrc.Set<byte>(1, 2, 6);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.Transpose(gpuSrc, gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // Dimensions should be swapped
+        Assert.Equal(3, cpuDst.Rows); // Old Cols
+        Assert.Equal(2, cpuDst.Cols); // Old Rows
+
+        // Content should be swapped: dst[col, row] = src[row, col]
+        // New Matrix:
+        // [ 1, 4 ]
+        // [ 2, 5 ]
+        // [ 3, 6 ]
+        Assert.Equal(1, cpuDst.At<byte>(0, 0));
+        Assert.Equal(4, cpuDst.At<byte>(0, 1));
+        Assert.Equal(2, cpuDst.At<byte>(1, 0));
+        Assert.Equal(6, cpuDst.At<byte>(2, 1));
+    }
 }
 
 

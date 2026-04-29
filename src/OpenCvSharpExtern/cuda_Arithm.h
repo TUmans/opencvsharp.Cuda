@@ -555,3 +555,164 @@ CVAPI(ExceptionStatus) cuda_gemm(cv::_InputArray *src1, cv::_InputArray *src2, d
     cv::cuda::gemm(*src1, *src2, alpha, src3 ? *src3 : cv::noArray(), beta, *dst, flags, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_integral(cv::_InputArray *src, cv::_OutputArray *sum, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::integral(*src, *sum, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_meanStdDev(cv::_InputArray *mtx, cv::Scalar *mean, cv::Scalar *stddev)
+{
+    BEGIN_WRAP
+    cv::cuda::meanStdDev(*mtx, *mean, *stddev);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_meanStdDev_dst(cv::_InputArray *mtx, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::meanStdDev(*mtx, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_merge(cv::cuda::GpuMat **src, size_t n, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    std::vector<cv::cuda::GpuMat> src_vec;
+    src_vec.reserve(n);
+    for (size_t i = 0; i < n; i++)
+    {
+        src_vec.push_back(*src[i]);
+    }
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::merge(src_vec, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_minMax(cv::_InputArray *src, double *minVal, double *maxVal, cv::_InputArray *mask)
+{
+    BEGIN_WRAP
+    cv::cuda::minMax(*src, minVal, maxVal, mask ? *mask : cv::noArray());
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_minMaxLoc(cv::_InputArray *src, double *minVal, double *maxVal, cv::Point *minLoc, cv::Point *maxLoc, cv::_InputArray *mask)
+{
+    BEGIN_WRAP
+    cv::cuda::minMaxLoc(*src, minVal, maxVal, minLoc, maxLoc, mask ? *mask : cv::noArray());
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_mulSpectrums(cv::_InputArray *src1, cv::_InputArray *src2, cv::_OutputArray *dst, int flags, int conjB, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::mulSpectrums(*src1, *src2, *dst, flags, conjB != 0, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_mulAndScaleSpectrums(cv::_InputArray *src1, cv::_InputArray *src2, cv::_OutputArray *dst, int flags, float scale, int conjB, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::mulAndScaleSpectrums(*src1, *src2, *dst, flags, scale, conjB != 0, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_norm1(cv::_InputArray *src1, int normType, cv::_InputArray *mask, double *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::norm(*src1, normType, mask ? *mask : cv::noArray());
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_norm2(cv::_InputArray *src1, cv::_InputArray *src2, int normType, double *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::norm(*src1, *src2, normType);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_normalize(cv::_InputArray *src, cv::_OutputArray *dst, double alpha, double beta, int norm_type, int dtype, cv::_InputArray *mask, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::normalize(*src, *dst, alpha, beta, norm_type, dtype, mask ? *mask : cv::noArray(), streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_rectStdDev(cv::_InputArray *src, cv::_InputArray *sqr, cv::_OutputArray *dst, cv::Rect rect, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::rectStdDev(*src, *sqr, *dst, rect, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_reduce(cv::_InputArray *mtx, cv::_OutputArray *vec, int dim, int reduceOp, int dtype, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::reduce(*mtx, *vec, dim, reduceOp, dtype, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_split(cv::_InputArray *src, cv::cuda::GpuMat **dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    int cn = src->channels();
+    std::vector<cv::cuda::GpuMat> dst_vec;
+
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::split(*src, dst_vec, streamRef);
+
+    // Copy the resulting GpuMat objects from the vector
+    // back into the pointers provided by C#
+    for (int i = 0; i < cn; i++)
+    {
+        *dst[i] = dst_vec[i];
+    }
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_sqrIntegral(cv::_InputArray *src, cv::_OutputArray *sqsum, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::sqrIntegral(*src, *sqsum, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_sqrSum(cv::_InputArray *src, cv::_InputArray *mask, cv::Scalar *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::sqrSum(*src, mask ? *mask : cv::noArray());
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_subtract_scalar(cv::_InputArray *src1, cv::Scalar src2, cv::_OutputArray *dst, cv::_InputArray *mask, int dtype, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::subtract(*src1, src2, *dst, mask ? *mask : cv::noArray(), dtype, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_sum(cv::_InputArray *src, cv::_InputArray *mask, cv::Scalar *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::sum(*src, mask ? *mask : cv::noArray());
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_transpose(cv::_InputArray *src, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::transpose(*src, *dst, streamRef);
+    END_WRAP
+}

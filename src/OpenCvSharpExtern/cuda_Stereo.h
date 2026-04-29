@@ -128,3 +128,11 @@ CVAPI(ExceptionStatus) cuda_drawColorDisp(cv::_InputArray *src_disp, cv::_Output
     cv::cuda::drawColorDisp(*src_disp, *dst_disp, ndisp, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_reprojectImageTo3D(cv::_InputArray *disp, cv::_OutputArray *xyzw, cv::_InputArray *Q, int dst_cn, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::reprojectImageTo3D(*disp, *xyzw, *Q, dst_cn, streamRef);
+    END_WRAP
+}
