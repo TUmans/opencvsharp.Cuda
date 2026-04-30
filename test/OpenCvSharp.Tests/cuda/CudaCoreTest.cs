@@ -116,4 +116,35 @@ public class CudaCoreTest : CudaTestBase
         Cv2.Cuda.SetBufferPoolUsage(false);
     }
 
+    [Fact]
+    public void CreateGpuMatFromCudaMemory_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create a GpuMat and fill it with data to act as "External Memory"
+        using var originalGpu = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(123));
+
+        // Get the raw device pointer and the step (row pitch)
+        IntPtr rawPtr = originalGpu.Data;
+        ulong step = (ulong)originalGpu.Step();
+
+        // 2. Act: Wrap the raw pointer in a NEW GpuMat header
+        using var wrappedGpu = Cv2.Cuda.CreateGpuMatFromCudaMemory(
+            10, 10, MatType.CV_8UC1, rawPtr, step);
+
+        // 3. Assert
+        Assert.False(wrappedGpu.Empty());
+        Assert.Equal(10, wrappedGpu.Rows);
+        Assert.Equal(originalGpu.Data, wrappedGpu.Data); // They should point to the same memory
+
+        // Verify the data is correct through the wrapper
+        using var cpuCheck = new Mat();
+        wrappedGpu.Download(cpuCheck);
+        Assert.Equal(123, cpuCheck.At<byte>(0, 0));
+
+        // 4. Verify shared memory: Modify original, check wrapper
+        originalGpu.SetTo(new Scalar(200));
+        wrappedGpu.Download(cpuCheck);
+        Assert.Equal(200, cpuCheck.At<byte>(0, 0));
+    }
 }

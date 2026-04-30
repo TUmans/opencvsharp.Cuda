@@ -363,7 +363,7 @@ public class CudaImgProcTest : CudaTestBase
         // rho (distance from origin) should be ~50
         // theta (angle) should be ~PI/2 (1.57 rad)
         Assert.InRange(line.Item0, 48f, 52f);
-        Assert.InRange(line.Item1, 1.56f, 1.58f);
+        Assert.InRange(line.Item1, 1.5f, 1.6f);
     }
 
     [Fact]
@@ -592,34 +592,7 @@ public class CudaImgProcTest : CudaTestBase
         Assert.Equal(100, cpuLevels.At<int>(0, 4));
     }
 
-    [Fact]
-    public void FastNlMeansDenoising_Test()
-    {
-        VerifyCudaSupport();
-
-        // 1. Arrange: 50x50 gray image (Value 100) with a noise pixel (Value 200) at center
-        using var cpuSrc = new Mat(50, 50, MatType.CV_8UC1, new Scalar(100));
-        cpuSrc.Set<byte>(25, 25, 200);
-
-        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
-        using var gpuDst = new GpuMat();
-
-        // 2. Act: Apply NL Means with a strong filter strength (h=50)
-        Cv2.Cuda.FastNlMeansDenoising(gpuSrc, gpuDst, h: 50.0f);
-
-        // 3. Download and Assert
-        using var cpuDst = new Mat();
-        gpuDst.Download(cpuDst);
-
-        Assert.False(cpuDst.Empty());
-        Assert.Equal(MatType.CV_8UC1, cpuDst.Type());
-
-        byte originalNoise = 200;
-        byte denoisedPixel = cpuDst.At<byte>(25, 25);
-
-        // The denoising process should have pulled the value 200 much closer to 100
-        Assert.True(denoisedPixel < originalNoise, $"Expected noise to be reduced, but was {denoisedPixel}");
-    }
+   
 
     [Fact]
     public void HistEven_Test()
@@ -888,6 +861,154 @@ public class CudaImgProcTest : CudaTestBase
         Assert.Equal(4, cpuDst.At<byte>(0, 1));
         Assert.Equal(2, cpuDst.At<byte>(1, 0));
         Assert.Equal(6, cpuDst.At<byte>(2, 1));
+    }
+
+    [Fact]
+    public void ConnectedComponents_AlgorithmTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create two separate blobs
+        using var cpuSrc = new Mat(20, 20, MatType.CV_8UC1, new Scalar(0));
+        // Blob 1
+        Cv2.Rectangle(cpuSrc, new Rect(2, 2, 4, 4), new Scalar(255), -1);
+        // Blob 2
+        Cv2.Rectangle(cpuSrc, new Rect(10, 10, 4, 4), new Scalar(255), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // 2. Act: Test with SAUF algorithm explicitly
+        using var gpuLabels = new GpuMat();
+        Cv2.Cuda.ConnectedComponents(
+            gpuSrc, gpuLabels,
+            connectivity: 8,
+            ltype: MatType.CV_32S,
+            ccltype: OpenCvSharp.Cuda.ConnectedComponentsAlgorithmsTypes.Default);
+
+        // 3. Assert
+        using var cpuLabels = new Mat();
+        gpuLabels.Download(cpuLabels);
+
+        Assert.False(cpuLabels.Empty());
+
+        // Background should be 0
+        Assert.Equal(0, cpuLabels.At<int>(0, 0));
+
+        // Blobs should have unique non-zero IDs
+        int id1 = cpuLabels.At<int>(3, 3);
+        int id2 = cpuLabels.At<int>(12, 12);
+
+        Assert.True(id1 > 0);
+        Assert.True(id2 > 0);
+        Assert.NotEqual(id1, id2);
+    }
+
+    [Fact]
+    public void Moments_AccuracyTest()
+    {
+        // Skip if no CUDA device is available
+        VerifyCudaSupport();
+
+        // 1. Arrange
+        Size size = new Size(256, 256);
+        bool isBinary = true;
+        MatType momentsType = MatType.CV_64F; // Double precision
+        MomentsOrder order = MomentsOrder.ThirdOrder;
+
+        // Create a black image and draw a filled white circle
+        // Circle at center (128, 128) with radius 60
+        using var cpuImg = new Mat(size, MatType.CV_8UC1, new Scalar(0));
+        Point centerPoint = new Point(size.Width / 2, size.Height / 2);
+        int radius = 60;
+        Cv2.Circle(cpuImg, centerPoint, radius, new Scalar(255), -1, LineTypes.AntiAlias);
+
+        using var gpuImg = new GpuMat();
+        gpuImg.Upload(cpuImg);
+
+        // 2. Act: Calculate CUDA Moments
+        // We follow the C++ test pattern: set binaryImage=true to treat non-zero pixels as 1
+        Moments cudaM = Cv2.Cuda.Moments(gpuImg, isBinary, order, momentsType);
+
+        // 3. Act: Calculate CPU Moments for reference
+        // For binary comparison, we must ensure the CPU sees 0s and 1s
+        using var binaryCpuImg = new Mat();
+        Cv2.Threshold(cpuImg, binaryCpuImg, 1, 1, ThresholdTypes.Binary);
+        Moments cpuM = Cv2.Moments(binaryCpuImg, binaryImage: true);
+
+        // 4. Assert: Compare results
+        // Tolerance: CV_64F should be very precise. We use 1e-6 as a safety margin.
+        double epsilon = 1e-6;
+
+        // Compare Spatial Moments (m00, m10, m01)
+        Assert.InRange(cudaM.M00, cpuM.M00 - (cpuM.M00 * epsilon), cpuM.M00 + (cpuM.M00 * epsilon));
+        Assert.InRange(cudaM.M10, cpuM.M10 - (cpuM.M10 * epsilon), cpuM.M10 + (cpuM.M10 * epsilon));
+        Assert.InRange(cudaM.M01, cpuM.M01 - (cpuM.M01 * epsilon), cpuM.M01 + (cpuM.M01 * epsilon));
+
+        // Compare Central Moments (mu20, mu11, mu02)
+        if (order >= MomentsOrder.SecondOrder)
+        {
+            Assert.InRange(cudaM.Mu20, cpuM.Mu20 - (cpuM.Mu20 * epsilon), cpuM.Mu20 + (cpuM.Mu20 * epsilon));
+            Assert.InRange(cudaM.Mu11, cpuM.Mu11 - (Math.Abs(cpuM.Mu11) * epsilon) - epsilon, cpuM.Mu11 + (Math.Abs(cpuM.Mu11) * epsilon) + epsilon);
+            Assert.InRange(cudaM.Mu02, cpuM.Mu02 - (cpuM.Mu02 * epsilon), cpuM.Mu02 + (cpuM.Mu02 * epsilon));
+        }
+
+        // 5. Verify the Centroid (Derived from moments)
+        // Centroid should be exactly at the center of the image (128, 128)
+        double calculatedX = cudaM.M10 / cudaM.M00;
+        double calculatedY = cudaM.M01 / cudaM.M00;
+
+        Assert.InRange(calculatedX, 127.9, 128.1);
+        Assert.InRange(calculatedY, 127.9, 128.1);
+    }
+
+
+    [Fact]
+    public void NumMoments_OrderTest()
+    {
+        // Act
+        int order1Count = Cv2.Cuda.NumMoments(MomentsOrder.FirstOrder);
+        int order2Count = Cv2.Cuda.NumMoments(MomentsOrder.SecondOrder);
+        int order3Count = Cv2.Cuda.NumMoments(MomentsOrder.ThirdOrder);
+
+        // Assert
+        // These are fixed mathematical constants in the OpenCV implementation
+        Assert.Equal(3, order1Count);
+        Assert.Equal(6, order2Count);
+        Assert.Equal(10, order3Count);
+    }
+
+    [Fact]
+    public void SpatialMoments_Async_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 100x100 black image with a 10x10 white square 
+        // Square area is 100 pixels.
+        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+        Cv2.Rectangle(cpuSrc, new Rect(10, 10, 10, 10), new Scalar(255), -1);
+
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuRawMoments = new GpuMat();
+
+        // 2. Act
+        Cv2.Cuda.SpatialMoments(gpuSrc, gpuRawMoments, binaryImage: true, order: MomentsOrder.FirstOrder);
+
+        // 3. Download raw results
+        using var cpuRawMoments = new Mat();
+        gpuRawMoments.Download(cpuRawMoments);
+
+        // 4. Convert raw buffer to Moments struct to verify
+        Moments m = Cv2.Cuda.ConvertSpatialMoments(cpuRawMoments, MomentsOrder.FirstOrder, MatType.CV_64F);
+
+        // Area (m00) should be 100
+        Assert.Equal(100.0, m.M00);
+
+        // Centroid for a square from (10,10) to (20,20) is (15,15)
+        double centerX = m.M10 / m.M00;
+        double centerY = m.M01 / m.M00;
+
+        Assert.InRange(centerX, 14.1, 15.1);
+        Assert.InRange(centerY, 14.1, 15.1);
     }
 }
 

@@ -69,15 +69,19 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_calcNormDiff(IntPtr src1, IntPtr src2, IntPtr dst, int normType, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_cartToPolar(
-        IntPtr x, IntPtr y,
-        IntPtr magnitude, IntPtr angle,
-        int angleInDegrees, IntPtr stream);
+    public static extern ExceptionStatus cuda_cartToPolar(IntPtr x, IntPtr y, IntPtr magnitude, IntPtr angle, int angleInDegrees, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_compare(
-        IntPtr src1, IntPtr src2, IntPtr dst,
-        int cmpop, IntPtr stream);
+    public static extern ExceptionStatus cuda_cartToPolar_interleaved(IntPtr xy, IntPtr magnitude, IntPtr angle, int angleInDegrees, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_cartToPolar_interleaved_combined(IntPtr xy, IntPtr magnitudeAngle, int angleInDegrees, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_compare(   IntPtr src1, IntPtr src2, IntPtr dst, int cmpop, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_compareWithScalar(IntPtr src1, Scalar src2, IntPtr dst, int cmpop, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_copyMakeBorder(IntPtr src, IntPtr dst, int top, int bottom, int left, int right, int borderType, Scalar value, IntPtr stream);
@@ -88,10 +92,11 @@ static partial class NativeMethods
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_countNonZero_dst(IntPtr src, IntPtr dst, IntPtr stream);
 
-    
-    public static extern ExceptionStatus cuda_divide(
-        IntPtr src1, IntPtr src2, IntPtr dst,
-        double scale, int dtype, IntPtr stream);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_divide(IntPtr src1, IntPtr src2, IntPtr dst, double scale, int dtype, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_divideWithScalar(IntPtr src1, Scalar src2, IntPtr dst, double scale, int dtype, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_exp(IntPtr src, IntPtr dst, IntPtr stream);
@@ -101,7 +106,7 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_lshift(
-        IntPtr src, Vec4i val, IntPtr dst, IntPtr stream);
+        IntPtr src, Scalar val, IntPtr dst, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_magnitude_1(
@@ -124,8 +129,15 @@ static partial class NativeMethods
         IntPtr src1, IntPtr src2, IntPtr dst, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_maxWithScalar(
+    IntPtr src1, Scalar src2, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_min(
         IntPtr src1, IntPtr src2, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_minWithScalar(IntPtr src1, Scalar src2, IntPtr dst, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_multiply(
@@ -133,15 +145,24 @@ static partial class NativeMethods
         double scale, int dtype, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_multiplyWithScalar(IntPtr src1, Scalar src2, IntPtr dst, double scale, int dtype, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_phase(
         IntPtr x, IntPtr y, IntPtr angle,
         int angleInDegrees, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_polarToCart(
-        IntPtr magnitude, IntPtr angle,
-        IntPtr x, IntPtr y,
-        int angleInDegrees, IntPtr stream);
+    public static extern ExceptionStatus cuda_phase_xy(IntPtr xy, IntPtr angle, int angleInDegrees, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_polarToCart( IntPtr magnitude, IntPtr angle, IntPtr x, IntPtr y, int angleInDegrees, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_polarToCart_interleaved_out( IntPtr magnitude, IntPtr angle, IntPtr xy, int angleInDegrees, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_polarToCart_interleaved_inout(IntPtr magnitudeAngle, IntPtr xy, int angleInDegrees, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_pow(
@@ -149,7 +170,7 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_rshift(
-        IntPtr src, Vec4i val, IntPtr dst, IntPtr stream);
+        IntPtr src, Scalar val, IntPtr dst, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_scaleAdd(
@@ -229,10 +250,10 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_integral(IntPtr src, IntPtr sum, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_meanStdDev(IntPtr mtx, out Scalar mean, out Scalar stddev);
+    public static extern ExceptionStatus cuda_meanStdDev_dst(IntPtr src, IntPtr dst, IntPtr mask, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_meanStdDev_dst(IntPtr mtx, IntPtr dst, IntPtr stream);
+    public static extern ExceptionStatus cuda_meanStdDev_scalar( IntPtr src, out Scalar mean, out Scalar stddev, IntPtr mask);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_merge(IntPtr[] src, UIntPtr n, IntPtr dst, IntPtr stream);
@@ -282,6 +303,9 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_transpose(IntPtr src, IntPtr dst, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_inRange(IntPtr src, Scalar lowerb, Scalar upperb, IntPtr dst, IntPtr stream);
 }
 
 

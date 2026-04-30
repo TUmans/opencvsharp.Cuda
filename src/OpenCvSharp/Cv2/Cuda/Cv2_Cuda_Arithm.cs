@@ -1,4 +1,5 @@
-﻿using OpenCvSharp.Cuda;
+﻿using System.Runtime.InteropServices;
+using OpenCvSharp.Cuda;
 using OpenCvSharp.Internal;
 
 namespace OpenCvSharp;
@@ -7,8 +8,7 @@ public static partial class Cv2
 {
     public static partial class Cuda
     {
-        #region CudaArithm
-
+        #region Abs
         /// <summary>
         /// Computes an absolute value of each matrix element.
         /// </summary>
@@ -49,7 +49,6 @@ public static partial class Cv2
 
             GC.KeepAlive(src1);
             GC.KeepAlive(src2);
-            GC.KeepAlive(dst);
             dst.Fix();
         }
 
@@ -69,9 +68,7 @@ public static partial class Cv2
             NativeMethods.HandleException(
                 NativeMethods.cuda_absdiffWithScalar(src1.CvPtr, src2, dst.CvPtr, ToPtr(stream)));
 
-
             GC.KeepAlive(src1);
-            GC.KeepAlive(dst);
             dst.Fix();
         }
 
@@ -89,11 +86,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
             return ret;
         }
+        #endregion
 
+        #region Add
         /// <summary>
         /// Computes a matrix-matrix or matrix-scalar sum.
         /// </summary>
-        public static void Add(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Add(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, 
+            OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, int dtype = -1, 
+            OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -108,15 +109,17 @@ public static partial class Cv2
             NativeMethods.HandleException(NativeMethods.cuda_add(src1.CvPtr, src2.CvPtr, dst.CvPtr, ToPtr(mask), dtype, ToPtr(stream)));
             GC.KeepAlive(src1);
             GC.KeepAlive(src2);
-            dst.Fix();
             GC.KeepAlive(mask);
+            dst.Fix();
+            
         }
 
         /// <summary>
         /// Computes the weighted sum of two arrays:
         /// dst = alpha * src1 + beta * src2 + gamma.
         /// </summary>
-        public static void AddWeighted(OpenCvSharp.Cuda.InputArray src1, double alpha, OpenCvSharp.Cuda.InputArray src2, double beta, double gamma, OpenCvSharp.Cuda.OutputArray dst, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void AddWeighted(OpenCvSharp.Cuda.InputArray src1, double alpha, OpenCvSharp.Cuda.InputArray src2, 
+            double beta, double gamma, OpenCvSharp.Cuda.OutputArray dst, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -143,7 +146,8 @@ public static partial class Cv2
         /// <summary>
         /// Computes a matrix-scalar sum. 
         /// </summary>
-        public static void Add(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Add(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, 
+            int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -161,16 +165,15 @@ public static partial class Cv2
 
 
         }
+        #endregion
 
-        // -----------------------------------------------------------------------
-        // bitwise_and
-        // -----------------------------------------------------------------------
-
+        #region Bitwise And
         /// <summary>
         /// Performs a per-element bitwise conjunction of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseAnd(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseAnd(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst,
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -189,15 +192,17 @@ public static partial class Cv2
 
             GC.KeepAlive(src1);
             GC.KeepAlive(src2);
-            dst.Fix();
             GC.KeepAlive(mask);
+            dst.Fix();
+            
         }
 
         /// <summary>
         /// Performs a per-element bitwise conjunction of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseAnd(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseAnd(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -214,10 +219,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region Bitwise Not
+
         /// <summary>
         /// Performs a per-element bitwise inversion.
         /// </summary>
-        public static void BitwiseNot(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseNot(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -236,11 +246,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region Bitwise Or
         /// <summary>
         /// Performs a per-element bitwise disjunction of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst,
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -266,7 +280,8 @@ public static partial class Cv2
         /// <summary>
         /// Performs a per-element bitwise disjunction (OR) of a matrix and scalar.
         /// </summary>
-        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseOr(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst,
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -284,11 +299,16 @@ public static partial class Cv2
 
         }
 
+        #endregion
+
+        #region Bitwise Xor
+
         /// <summary>
         /// Performs a per-element bitwise exclusive-or of two matrices (or of a
         /// matrix and a scalar).
         /// </summary>
-        public static void BitwiseXor(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseXor(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -314,7 +334,8 @@ public static partial class Cv2
         /// <summary>
         /// Performs a per-element bitwise exclusive or (XOR) operation of a matrix and a scalar.
         /// </summary>
-        public static void BitwiseXor(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BitwiseXor(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -331,11 +352,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region calcAbsSum
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the absSum() function only in what argument(s) it accepts. 
         /// </summary>
 
-        public static void CalcAbsSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CalcAbsSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -350,10 +375,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region calcHist
+
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the Hist() function only in what argument(s) it accepts. 
         /// </summary>
-        public static void CalcHist(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CalcHist(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -368,10 +398,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region calcNorm+calcNormDiff
+
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the Norm() function only in what argument(s) it accepts. 
         /// </summary>
-        public static void CalcNorm(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, NormTypes normType, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CalcNorm(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, NormTypes normType, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -389,7 +424,8 @@ public static partial class Cv2
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the NormDiff() function only in what argument(s) it accepts. 
         /// </summary>
-        public static void CalcNormDiff(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, NormTypes normType = NormTypes.L2, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CalcNormDiff(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, 
+            OpenCvSharp.Cuda.OutputArray dst, NormTypes normType = NormTypes.L2, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null)
                 throw new ArgumentNullException(nameof(src1));
@@ -407,10 +443,16 @@ public static partial class Cv2
             dst.Fix();
         }
 
+
+        #endregion
+
+        #region calcSqrSum
+
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the SqrSum() function only in what argument(s) it accepts. 
         /// </summary>
-        public static void CalcSqrSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CalcSqrSum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -425,6 +467,10 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+
+        #endregion
+
+        #region CalcSum
         /// <summary>
         /// This is an overloaded member function, provided for convenience. It differs from the Sum() function only in what argument(s) it accepts. 
         /// </summary>
@@ -443,10 +489,15 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region CartToPolar
+
         /// <summary>
         /// Converts Cartesian coordinates into polar.
         /// </summary>
-        public static void CartToPolar(OpenCvSharp.Cuda.InputArray x, OpenCvSharp.Cuda.InputArray y, OpenCvSharp.Cuda.OutputArray magnitude, OpenCvSharp.Cuda.OutputArray angle, bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CartToPolar(OpenCvSharp.Cuda.InputArray x, OpenCvSharp.Cuda.InputArray y, OpenCvSharp.Cuda.OutputArray magnitude, 
+            OpenCvSharp.Cuda.OutputArray angle, bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (x is null)
                 throw new ArgumentNullException(nameof(x));
@@ -475,6 +526,59 @@ public static partial class Cv2
         }
 
         /// <summary>
+        /// Converts Cartesian coordinates into polar (Interleaved XY).
+        /// </summary>
+        public static void CartToPolar(OpenCvSharp.Cuda.InputArray xy, OpenCvSharp.Cuda.OutputArray magnitude, OpenCvSharp.Cuda.OutputArray angle,
+            bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (xy is null) 
+                throw new ArgumentNullException(nameof(xy));
+            if (magnitude is null) 
+                throw new ArgumentNullException(nameof(magnitude));
+            if (angle is null) 
+                throw new ArgumentNullException(nameof(angle));
+
+            xy.ThrowIfDisposed();
+            magnitude.ThrowIfNotReady();
+            angle.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_cartToPolar_interleaved(xy.CvPtr, magnitude.CvPtr, angle.CvPtr, angleInDegrees ? 1 : 0, ToPtr(stream)));
+
+            magnitude.Fix();
+            angle.Fix();
+            GC.KeepAlive(xy);
+        }
+
+        /// <summary>
+        /// Converts Cartesian coordinates into polar (Interleaved input and Interleaved output).
+        /// </summary>
+        /// <param name="xy">Source interleaved Cartesian coordinates (CV_32FC2 or CV_64FC2).</param>
+        /// <param name="magnitudeAngle">Destination interleaved Polar coordinates (Magnitude, Angle).</param>
+        /// <param name="angleInDegrees">If true, output angles are in degrees, otherwise in radians.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void CartToPolar(OpenCvSharp.Cuda.InputArray xy, OpenCvSharp.Cuda.OutputArray magnitudeAngle,
+            bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (xy is null) 
+                throw new ArgumentNullException(nameof(xy));
+            if (magnitudeAngle is null) 
+                throw new ArgumentNullException(nameof(magnitudeAngle));
+
+            xy.ThrowIfDisposed();
+            magnitudeAngle.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_cartToPolar_interleaved_combined(
+                    xy.CvPtr, magnitudeAngle.CvPtr, angleInDegrees ? 1 : 0, ToPtr(stream)));
+
+            magnitudeAngle.Fix();
+            GC.KeepAlive(xy);
+        }
+        #endregion
+
+        #region Compare
+        /// <summary>
         /// Compares elements of two matrices (or of a matrix and a scalar).
         /// </summary>
         public static void Compare(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2,
@@ -502,9 +606,34 @@ public static partial class Cv2
         }
 
         /// <summary>
+        /// Compares elements of a matrix and a scalar.
+        /// </summary>
+        public static void Compare(OpenCvSharp.Cuda.InputArray src1, Scalar src2,
+            OpenCvSharp.Cuda.OutputArray dst, CmpTypes cmpop, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_compareWithScalar(src1.CvPtr, src2, dst.CvPtr, (int)cmpop, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src1);
+        }
+
+        #endregion
+
+        #region CopyMakeBorder
+        /// <summary>
         /// Forms a border around an image.
         /// </summary>
-        public static void CopyMakeBorder(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, int top, int bottom, int left, int right, BorderTypes borderType, Scalar? value = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CopyMakeBorder(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            int top, int bottom, int left, int right, BorderTypes borderType, Scalar? value = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -523,6 +652,10 @@ public static partial class Cv2
             GC.KeepAlive(src);
             dst.Fix();
         }
+
+        #endregion
+
+        #region CountNonZero
 
         /// <summary>
         /// Counts non-zero matrix elements. (Synchronous, returns count directly).
@@ -560,10 +693,45 @@ public static partial class Cv2
 
         }
 
+        #endregion
+
+        #region DFT
+        /// <summary>
+        /// Performs a forward or inverse discrete Fourier transform (1D or 2D) of the floating point matrix.
+        /// </summary>
+        /// <param name="src">Source array. CV_32FC1 or CV_32FC2 are supported.</param>
+        /// <param name="dst">Destination array.</param>
+        /// <param name="dftSize">Size of the transform.</param>
+        /// <param name="flags">Transformation flags.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Dft(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            Size dftSize, DftFlags flags = 0, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_dft(src.CvPtr, dst.CvPtr, dftSize, (int)flags, ToPtr(stream)));
+
+            GC.KeepAlive(src);
+            dst.Fix();
+
+        }
+
+        #endregion
+
+        #region Divide
+
         /// <summary>
         /// Computes a matrix-matrix or matrix-scalar division.
         /// </summary>
-        public static void Divide(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, double scale = 1.0, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Divide(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2,
+            OpenCvSharp.Cuda.OutputArray dst, double scale = 1.0, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null) 
                 throw new ArgumentNullException(nameof(src1));
@@ -587,6 +755,37 @@ public static partial class Cv2
         }
 
         /// <summary>
+        /// Computes a matrix-scalar division.
+        /// </summary>
+        /// <param name="src1">Source matrix.</param>
+        /// <param name="src2">Scalar divisor.</param>
+        /// <param name="dst">Destination matrix.</param>
+        /// <param name="scale">Scale factor.</param>
+        /// <param name="dtype">Optional output depth. If -1, dst will have the same depth as src1.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Divide(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst,
+            double scale = 1, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_divideWithScalar(src1.CvPtr, src2, dst.CvPtr, scale, dtype, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src1);
+        }
+
+        #endregion
+
+        #region Exp
+
+        /// <summary>
         /// Computes an exponent of each matrix element.
         /// </summary>
         public static void Exp(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
@@ -605,6 +804,11 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region FindMinMax
+
+
         /// <summary>
         /// Finds the minimum and maximum element values and returns them on the GPU.
         /// </summary>
@@ -612,7 +816,8 @@ public static partial class Cv2
         /// <param name="dst">Output 1x2 CV_64F matrix on GPU containing [min, max].</param>
         /// <param name="mask">Optional mask.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void FindMinMax(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void FindMinMax(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -638,7 +843,8 @@ public static partial class Cv2
         /// <param name="loc">Output 1x4 CV_32S matrix on GPU containing [minX, minY, maxX, maxY].</param>
         /// <param name="mask">Optional mask.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void FindMinMaxLoc(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray minMaxVals, OpenCvSharp.Cuda.OutputArray loc,  OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void FindMinMaxLoc(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray minMaxVals, 
+            OpenCvSharp.Cuda.OutputArray loc,  OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -659,6 +865,9 @@ public static partial class Cv2
             loc.Fix();
         }
 
+        #endregion
+
+        #region Flip
         /// <summary>
         /// Flips a 2D matrix around vertical, horizontal, or both axes.
         /// </summary>
@@ -682,6 +891,9 @@ public static partial class Cv2
             GC.KeepAlive(src);
             dst.Fix();
         }
+        #endregion
+
+        #region Gemm
 
         /// <summary>
         /// Performs generalized matrix multiplication.
@@ -694,7 +906,8 @@ public static partial class Cv2
         /// <param name="dst">Destination matrix.</param>
         /// <param name="flags">Operation flags (GemmFlags).</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Gemm(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, double alpha, OpenCvSharp.Cuda.InputArray? src3, double beta, OpenCvSharp.Cuda.OutputArray dst, GemmFlags flags = GemmFlags.None, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Gemm(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, double alpha, 
+            OpenCvSharp.Cuda.InputArray? src3, double beta, OpenCvSharp.Cuda.OutputArray dst, GemmFlags flags = GemmFlags.None, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null) 
                 throw new ArgumentNullException(nameof(src1));
@@ -705,6 +918,8 @@ public static partial class Cv2
 
             src1.ThrowIfDisposed();
             src2.ThrowIfDisposed();
+            if (src3 != null)
+                src3.ThrowIfDisposed();
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
@@ -719,6 +934,40 @@ public static partial class Cv2
             if (src3 != null) GC.KeepAlive(src3);
         }
 
+        #endregion
+
+        #region InRange
+
+        /// <summary>
+        /// Checks if array elements lie between two scalars.
+        /// </summary>
+        /// <param name="src">Source image.</param>
+        /// <param name="lowerb">Inclusive lower boundary scalar.</param>
+        /// <param name="upperb">Inclusive upper boundary scalar.</param>
+        /// <param name="dst">Destination binary mask (CV_8UC1).</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void InRange(OpenCvSharp.Cuda.InputArray src, Scalar lowerb, Scalar upperb,
+            OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null)
+                throw new ArgumentNullException(nameof(src));
+            if (dst is null)
+                throw new ArgumentNullException(nameof(dst));
+
+            src.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_inRange(src.CvPtr, lowerb, upperb, dst.CvPtr, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src);
+        }
+
+
+        #endregion
+
+        #region Integral
         /// <summary>
         /// Computes an integral image.
         /// </summary>
@@ -742,6 +991,10 @@ public static partial class Cv2
             sum.Fix();
         }
 
+        #endregion
+
+        #region Log
+
         /// <summary>
         /// Computes a natural logarithm of the absolute value of each matrix
         /// element.
@@ -762,10 +1015,13 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region Lshift
         /// <summary>
         /// Performs pixel-by-pixel left shift of an image by a constant value.
         /// </summary>
-        public static void Lshift(OpenCvSharp.Cuda.InputArray src, Vec4i val, OpenCvSharp.Cuda.OutputArray dst,   OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Lshift(OpenCvSharp.Cuda.InputArray src, Scalar val, OpenCvSharp.Cuda.OutputArray dst,   OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -780,6 +1036,10 @@ public static partial class Cv2
             GC.KeepAlive(src);
             dst.Fix();
         }
+
+        #endregion
+
+        #region Magnitude
 
         /// <summary>
         /// Computes magnitudes of complex matrix elements (2-channel input).
@@ -826,6 +1086,10 @@ public static partial class Cv2
             magnitude.Fix();
         }
 
+        #endregion
+
+        #region MagnitudeSqr
+
         /// <summary>
         /// Computes squared magnitudes of complex matrix elements (2-channel
         /// input).
@@ -871,6 +1135,10 @@ public static partial class Cv2
             magnitude.Fix();
         }
 
+        #endregion
+
+        #region Max
+
         /// <summary>
         /// Computes the per-element maximum of two matrices (or a matrix and a
         /// scalar).
@@ -897,6 +1165,33 @@ public static partial class Cv2
         }
 
         /// <summary>
+        /// Computes the per-element maximum of a matrix and a scalar.
+        /// </summary>
+        /// <param name="src1">Source matrix.</param>
+        /// <param name="src2">Scalar value.</param>
+        /// <param name="dst">Destination matrix.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Max(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst,
+            OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_maxWithScalar(src1.CvPtr, src2, dst.CvPtr, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src1);
+        }
+        #endregion
+
+        #region MeanShiftFiltering
+        /// <summary>
         /// Performs mean-shift filtering for each point of the source image.
         /// </summary>
         /// <param name="src">Source 8-bit, 3-channel image.</param>
@@ -905,7 +1200,8 @@ public static partial class Cv2
         /// <param name="sr">Color window radius.</param>
         /// <param name="criteria">Termination criteria.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void MeanShiftFiltering(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, int sp, int sr, TermCriteria? criteria = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void MeanShiftFiltering(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            int sp, int sr, TermCriteria? criteria = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -925,6 +1221,10 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region MeanShiftProc
+
         /// <summary>
         /// Performs a mean-shift procedure and stores information about processed points (their colors and positions) in two images.
         /// </summary>
@@ -935,7 +1235,8 @@ public static partial class Cv2
         /// <param name="sr">Color window radius.</param>
         /// <param name="criteria">Termination criteria.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void MeanShiftProc(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dstr, OpenCvSharp.Cuda.OutputArray dstsp, int sp, int sr, TermCriteria? criteria = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void MeanShiftProc(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dstr,
+            OpenCvSharp.Cuda.OutputArray dstsp, int sp, int sr, TermCriteria? criteria = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -959,6 +1260,10 @@ public static partial class Cv2
             dstsp.Fix();
         }
 
+        #endregion
+
+        #region MeanShiftSegmentation
+
         /// <summary>
         /// Performs a mean-shift segmentation of the source image and eliminates small segments.
         /// </summary>
@@ -969,7 +1274,8 @@ public static partial class Cv2
         /// <param name="minsize">Minimum segment size. Smaller segments will be merged.</param>
         /// <param name="criteria">Termination criteria.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void MeanShiftSegmentation(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, int sp, int sr, int minsize, TermCriteria? criteria = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void MeanShiftSegmentation(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            int sp, int sr, int minsize, TermCriteria? criteria = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -989,46 +1295,62 @@ public static partial class Cv2
             dst.Fix();
         }
 
-        /// <summary>
-        /// Computes a mean value and a standard deviation of matrix elements.
-        /// </summary>
-        /// <param name="mtx">Source matrix. CV_8UC1 is supported.</param>
-        /// <param name="mean">Mean value.</param>
-        /// <param name="stddev">Standard deviation.</param>
-        public static void MeanStdDev(OpenCvSharp.Cuda.InputArray mtx, out Scalar mean, out Scalar stddev)
-        {
-            if (mtx is null) throw new ArgumentNullException(nameof(mtx));
-            mtx.ThrowIfDisposed();
+        #endregion
 
-            NativeMethods.HandleException(
-                NativeMethods.cuda_meanStdDev(mtx.CvPtr, out mean, out stddev));
-
-            GC.KeepAlive(mtx);
-        }
+        #region MeanStdDev
 
         /// <summary>
         /// Computes a mean value and a standard deviation of matrix elements (Asynchronous).
         /// </summary>
-        /// <param name="mtx">Source matrix.</param>
+        /// <param name="src">Source matrix.</param>
         /// <param name="dst">Destination matrix on GPU. Typically 1x2 CV_64F [mean, stddev].</param>
+        /// <param name="mask">Optional operation mask.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void MeanStdDev(OpenCvSharp.Cuda.InputArray mtx, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void MeanStdDev(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,
+            OpenCvSharp.Cuda.InputArray? mask = null,
+            OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (mtx is null) 
-                throw new ArgumentNullException(nameof(mtx));
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
             if (dst is null) 
                 throw new ArgumentNullException(nameof(dst));
-
-            mtx.ThrowIfDisposed();
+            src.ThrowIfDisposed();
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
-                NativeMethods.cuda_meanStdDev_dst(mtx.CvPtr, dst.CvPtr, ToPtr(stream)));
-            
-            GC.KeepAlive(mtx);
+                NativeMethods.cuda_meanStdDev_dst(src.CvPtr, dst.CvPtr, ToPtr(mask), ToPtr(stream)));
+
             dst.Fix();
+            GC.KeepAlive(src);
+            GC.KeepAlive(mask);
         }
 
+        /// <summary>
+        /// Computes a mean value and a standard deviation of matrix elements (Synchronous).
+        /// </summary>
+        /// <param name="src">Source matrix.</param>
+        /// <param name="mean">Output mean value.</param>
+        /// <param name="stddev">Output standard deviation.</param>
+        /// <param name="mask">Optional operation mask.</param>
+        public static void MeanStdDev(OpenCvSharp.Cuda.InputArray src,
+            out Scalar mean,
+            out Scalar stddev,
+            OpenCvSharp.Cuda.InputArray? mask = null)
+        {
+            if (src is null) throw new ArgumentNullException(nameof(src));
+            src.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_meanStdDev_scalar(src.CvPtr, out mean, out stddev,ToPtr(mask)));
+
+            GC.KeepAlive(src);
+            if (mask != null) GC.KeepAlive(mask);
+        }
+
+
+        #endregion
+
+        #region Merge
         /// <summary>
         /// Makes a multi-channel matrix out of several single-channel matrices.
         /// </summary>
@@ -1071,11 +1393,16 @@ public static partial class Cv2
             return dst;
         }
 
+        #endregion
+
+        #region Min
+
         /// <summary>
         /// Computes the per-element minimum of two matrices (or a matrix and a
         /// scalar).
         /// </summary>
-        public static void Min(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Min(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, 
+            OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null) 
                 throw new ArgumentNullException(nameof(src1));
@@ -1095,6 +1422,36 @@ public static partial class Cv2
             GC.KeepAlive(src2);
             dst.Fix();
         }
+
+        /// <summary>
+        /// Computes the per-element minimum of a matrix and a scalar.
+        /// </summary>
+        /// <param name="src1">Source matrix.</param>
+        /// <param name="src2">Scalar value acting as the upper limit.</param>
+        /// <param name="dst">Destination matrix.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Min(OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst,
+            OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_minWithScalar(src1.CvPtr, src2, dst.CvPtr, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src1);
+        }
+
+
+        #endregion
+
+        #region MinMax
 
         /// <summary>
         /// Finds global minimum and maximum matrix elements and returns their values.
@@ -1138,10 +1495,87 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region Moments
+        /// <summary>
+        /// Calculates all of the moments up to the 3rd order of a rasterized shape.
+        /// </summary>
+        /// <param name="src">Raster image (8-bit 1-channel or floating-point 2D array).</param>
+        /// <param name="binaryImage">If it is true, all non-zero image pixels are treated as 1's.</param>
+        /// <param name="order">Order of moments to compute.</param>
+        /// <param name="momentsType">Type of moments (CV_32F or CV_64F).</param>
+        /// <returns>Moments structure.</returns>
+        public static Moments Moments(
+       OpenCvSharp.Cuda.InputArray src,
+       bool binaryImage = false,
+       MomentsOrder order = MomentsOrder.ThirdOrder,
+       MatType? momentsType = null)
+        {
+            if (src is null) throw new ArgumentNullException(nameof(src));
+            src.ThrowIfDisposed();
+
+            int type = momentsType?.Value ?? (int)MatType.CV_64F;
+
+            // Allocate array for the 24 doubles contained in cv::Moments
+            double[] buffer = new double[24];
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_moments(
+                    src.CvPtr,
+                    binaryImage ? 1 : 0,
+                    (int)order,
+                    type,
+                    buffer));
+
+            GC.KeepAlive(src);
+
+            // Map the flat array back into the OpenCvSharp Moments class.
+            // The C++ memory layout is strictly ordered: 
+            // Spatial (10), Central (7), Normalized (7)
+            return new Moments
+            {
+                // Spatial moments
+                M00 = buffer[0],
+                M10 = buffer[1],
+                M01 = buffer[2],
+                M20 = buffer[3],
+                M11 = buffer[4],
+                M02 = buffer[5],
+                M30 = buffer[6],
+                M21 = buffer[7],
+                M12 = buffer[8],
+                M03 = buffer[9],
+
+                // Central moments
+                Mu20 = buffer[10],
+                Mu11 = buffer[11],
+                Mu02 = buffer[12],
+                Mu30 = buffer[13],
+                Mu21 = buffer[14],
+                Mu12 = buffer[15],
+                Mu03 = buffer[16],
+
+                // Central normalized moments
+                Nu20 = buffer[17],
+                Nu11 = buffer[18],
+                Nu02 = buffer[19],
+                Nu30 = buffer[20],
+                Nu21 = buffer[21],
+                Nu12 = buffer[22],
+                Nu03 = buffer[23]
+            };
+        }
+
+
+        #endregion
+
+        #region MulAndScaleSpectrums
         /// <summary>
         /// Performs a per-element multiplication of two Fourier spectrums and scales the result.
         /// </summary>
-        public static void MulAndScaleSpectrums(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, DftFlags flags, float scale, bool conjB = false, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void MulAndScaleSpectrums(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, 
+            OpenCvSharp.Cuda.OutputArray dst, DftFlags flags, float scale, bool conjB = false, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null) 
                 throw new ArgumentNullException(nameof(src1));
@@ -1162,10 +1596,14 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region MulSpectrums
         /// <summary>
         /// Performs a per-element multiplication of two Fourier spectrums.
         /// </summary>
-        public static void MulSpectrums(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, DftFlags flags, bool conjB = false, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void MulSpectrums(OpenCvSharp.Cuda.InputArray src1, OpenCvSharp.Cuda.InputArray src2, 
+            OpenCvSharp.Cuda.OutputArray dst, DftFlags flags, bool conjB = false, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null) 
                 throw new ArgumentNullException(nameof(src1));
@@ -1185,6 +1623,10 @@ public static partial class Cv2
             GC.KeepAlive(src2);
             dst.Fix();
         }
+
+        #endregion
+
+        #region Multiply
 
         /// <summary>
         /// Computes a matrix-matrix or matrix-scalar per-element product.
@@ -1213,6 +1655,37 @@ public static partial class Cv2
         }
 
         /// <summary>
+        /// Computes a matrix-scalar per-element product.
+        /// </summary>
+        /// <param name="src1">Source matrix.</param>
+        /// <param name="src2">Scalar multiplier.</param>
+        /// <param name="dst">Destination matrix.</param>
+        /// <param name="scale">Optional scale factor.</param>
+        /// <param name="dtype">Optional output depth. If -1, dst will have the same depth as src1.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Multiply(
+            OpenCvSharp.Cuda.InputArray src1, Scalar src2, OpenCvSharp.Cuda.OutputArray dst,
+            double scale = 1, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src1 is null) 
+                throw new ArgumentNullException(nameof(src1));
+            if (dst is null) 
+                throw new ArgumentNullException(nameof(dst));
+
+            src1.ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_multiplyWithScalar(src1.CvPtr, src2, dst.CvPtr, scale, dtype, ToPtr(stream)));
+
+            dst.Fix();
+            GC.KeepAlive(src1);
+        }
+
+        #endregion
+
+        #region NonLocalMeans
+        /// <summary>
         /// Performs pure non local means denoising without any simplification.
         /// </summary>
         /// <param name="src">Source image. Supports CV_8UC1, CV_8UC3.</param>
@@ -1222,7 +1695,8 @@ public static partial class Cv2
         /// <param name="blockSize">Size of patch.</param>
         /// <param name="borderMode">Border type.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void NonLocalMeans(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, float h, int searchWindow = 21, int blockSize = 7, BorderTypes borderMode = BorderTypes.Default, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void NonLocalMeans(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,
+            float h, int searchWindow = 21, int blockSize = 7, BorderTypes borderMode = BorderTypes.Default, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -1240,6 +1714,9 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region Norm
         /// <summary>
         /// Returns the norm of a matrix.
         /// </summary>
@@ -1286,6 +1763,9 @@ public static partial class Cv2
             return ret;
         }
 
+        #endregion
+
+        #region Normalize
         /// <summary>
         /// Normalizes the norm or value range of an array.
         /// </summary>
@@ -1297,7 +1777,8 @@ public static partial class Cv2
         /// <param name="dtype">When negative, the output array has the same type as src; otherwise, it has the same number of channels as src and the depth =CV_MAT_DEPTH(dtype).</param>
         /// <param name="mask">Optional operation mask.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Normalize( OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, double alpha, double beta, NormTypes normType, int dtype = -1, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Normalize( OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            double alpha, double beta, NormTypes normType, int dtype = -1, OpenCvSharp.Cuda.InputArray? mask = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -1314,6 +1795,10 @@ public static partial class Cv2
             GC.KeepAlive(mask);
             dst.Fix();
         }
+
+        #endregion
+
+        #region Phase
 
         /// <summary>
         /// Computes polar angles of complex matrix elements.
@@ -1345,9 +1830,41 @@ public static partial class Cv2
         }
 
         /// <summary>
-        /// Converts polar coordinates into Cartesian.
+        /// Computes polar angles of complex matrix elements.
         /// </summary>
-        public static void PolarToCart(OpenCvSharp.Cuda.InputArray magnitude, OpenCvSharp.Cuda.InputArray angle, OpenCvSharp.Cuda.OutputArray x, OpenCvSharp.Cuda.OutputArray y, bool angleInDegrees = false,  OpenCvSharp.Cuda.Stream? stream = null)
+        /// <param name="xy">Source interleaved Cartesian coordinates (CV_32FC2 or CV_64FC2).</param>
+        /// <param name="angle">Destination single-channel angles matrix.</param>
+        /// <param name="angleInDegrees">If true, output angles are in degrees, otherwise in radians.</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void Phase( OpenCvSharp.Cuda.InputArray xy, OpenCvSharp.Cuda.OutputArray angle,
+            bool angleInDegrees = false,
+            OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (xy is null) throw new ArgumentNullException(nameof(xy));
+            if (angle is null) throw new ArgumentNullException(nameof(angle));
+
+            xy.ThrowIfDisposed();
+            angle.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_phase_xy(xy.CvPtr, angle.CvPtr, angleInDegrees ? 1 : 0, ToPtr(stream)));
+
+            angle.Fix();
+            GC.KeepAlive(xy);
+        }
+
+
+        #endregion
+
+        #region PolarToCart
+
+        /// <summary>
+        /// Converts polar coordinates into Cartesian (Separate In, Separate Out).
+        /// </summary>
+        public static void PolarToCart(
+            OpenCvSharp.Cuda.InputArray magnitude, OpenCvSharp.Cuda.InputArray angle,
+            OpenCvSharp.Cuda.OutputArray x, OpenCvSharp.Cuda.OutputArray y,
+            bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (magnitude is null) 
                 throw new ArgumentNullException(nameof(magnitude));
@@ -1364,20 +1881,64 @@ public static partial class Cv2
             y.ThrowIfNotReady();
 
             NativeMethods.HandleException(
-                NativeMethods.cuda_polarToCart(
-                    magnitude.CvPtr, angle.CvPtr,
-                    x.CvPtr, y.CvPtr,
-                    angleInDegrees ? 1 : 0,
-                   ToPtr(stream)));
+                NativeMethods.cuda_polarToCart(magnitude.CvPtr, angle.CvPtr, x.CvPtr, y.CvPtr, angleInDegrees ? 1 : 0, ToPtr(stream)));
 
-            GC.KeepAlive(magnitude);
-            GC.KeepAlive(angle);
-            x.Fix();
+            x.Fix(); 
             y.Fix();
+            GC.KeepAlive(magnitude); 
+            GC.KeepAlive(angle);
+        }
+
+        /// <summary>
+        /// Converts polar coordinates into Cartesian (Separate In, Interleaved Out).
+        /// </summary>
+        public static void PolarToCart(
+            OpenCvSharp.Cuda.InputArray magnitude, OpenCvSharp.Cuda.InputArray angle,
+            OpenCvSharp.Cuda.OutputArray xy, bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (magnitude is null) 
+                throw new ArgumentNullException(nameof(magnitude));
+            if (angle is null) 
+                throw new ArgumentNullException(nameof(angle));
+            if (xy is null) 
+                throw new ArgumentNullException(nameof(xy));
+
+            magnitude.ThrowIfDisposed();
+            angle.ThrowIfDisposed();
+            xy.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_polarToCart_interleaved_out(magnitude.CvPtr, angle.CvPtr, xy.CvPtr, angleInDegrees ? 1 : 0, ToPtr(stream)));
+
+            xy.Fix();
+            GC.KeepAlive(magnitude); 
+            GC.KeepAlive(angle);
+        }
+
+        /// <summary>
+        /// Converts polar coordinates into Cartesian (Interleaved In, Interleaved Out).
+        /// </summary>
+        public static void PolarToCart(
+            OpenCvSharp.Cuda.InputArray magnitudeAngle, OpenCvSharp.Cuda.OutputArray xy,
+            bool angleInDegrees = false, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (magnitudeAngle is null) throw new ArgumentNullException(nameof(magnitudeAngle));
+            if (xy is null) throw new ArgumentNullException(nameof(xy));
+
+            magnitudeAngle.ThrowIfDisposed();
+            xy.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_polarToCart_interleaved_inout(magnitudeAngle.CvPtr, xy.CvPtr, angleInDegrees ? 1 : 0, ToPtr(stream)));
+
+            xy.Fix();
+            GC.KeepAlive(magnitudeAngle);
         }
 
 
+        #endregion
 
+        #region Pow
         /// <summary>
         /// Raises every matrix element to a power.
         /// </summary>
@@ -1398,6 +1959,9 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region RectStdDev
         /// <summary>
         /// Computes a standard deviation of integral images.
         /// </summary>
@@ -1427,6 +1991,10 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region Reduce
+
         /// <summary>
         /// Reduces a matrix to a vector.
         /// </summary>
@@ -1436,7 +2004,8 @@ public static partial class Cv2
         /// <param name="reduceOp">Reduction operation (ReduceTypes.Sum, ReduceTypes.Avg, etc.).</param>
         /// <param name="dtype">When it is negative, the destination vector will have the same type as the source matrix.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Reduce(OpenCvSharp.Cuda.InputArray mtx, OpenCvSharp.Cuda.OutputArray vec, int dim, ReduceTypes reduceOp, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Reduce(OpenCvSharp.Cuda.InputArray mtx, OpenCvSharp.Cuda.OutputArray vec,
+            int dim, ReduceTypes reduceOp, int dtype = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (mtx is null) 
                 throw new ArgumentNullException(nameof(mtx));
@@ -1453,12 +2022,14 @@ public static partial class Cv2
             vec.Fix();
             
         }
+        #endregion
 
+        #region RShift
 
         /// <summary>
         /// Performs pixel-by-pixel right shift of an image by a constant value.
         /// </summary>
-        public static void Rshift(OpenCvSharp.Cuda.InputArray src, Vec4i val, OpenCvSharp.Cuda.OutputArray dst,  OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Rshift(OpenCvSharp.Cuda.InputArray src, Scalar val, OpenCvSharp.Cuda.OutputArray dst,  OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -1475,10 +2046,14 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region ScaleAdd
         /// <summary>
         /// Adds a scaled array to another one: dst = alpha * src1 + src2.
         /// </summary>
-        public static void ScaleAdd(OpenCvSharp.Cuda.InputArray src1, double alpha, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void ScaleAdd(OpenCvSharp.Cuda.InputArray src1, double alpha, OpenCvSharp.Cuda.InputArray src2, OpenCvSharp.Cuda.OutputArray dst, 
+            OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src1 is null) 
                 throw new ArgumentNullException(nameof(src1));
@@ -1500,6 +2075,10 @@ public static partial class Cv2
             GC.KeepAlive(src2);
             dst.Fix();
         }
+        #endregion
+
+        #region Split
+
 
         /// <summary>
         /// Copies each plane of a multi-channel matrix into an array.
@@ -1536,6 +2115,9 @@ public static partial class Cv2
             foreach (var m in dst) GC.KeepAlive(m);
         }
 
+        #endregion
+
+        #region Sqr
 
         /// <summary>
         /// Computes a square value of each matrix element.
@@ -1556,6 +2138,10 @@ public static partial class Cv2
             GC.KeepAlive(src);
             dst.Fix();
         }
+
+        #endregion
+
+        #region SqrIntegral
 
         /// <summary>
         /// Computes a squared integral image.
@@ -1581,6 +2167,10 @@ public static partial class Cv2
            
         }
 
+        #endregion
+
+        #region SqrSum
+
         /// <summary>
         /// Returns the squared sum of matrix elements.
         /// </summary>
@@ -1603,6 +2193,9 @@ public static partial class Cv2
             return ret;
         }
 
+        #endregion
+
+        #region Sqrt
 
         /// <summary>
         /// Computes a square root of each matrix element.
@@ -1623,7 +2216,9 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
 
+        #region Substract
 
         /// <summary>
         /// Computes a matrix-matrix or matrix-scalar difference.
@@ -1669,6 +2264,9 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region Sum
         /// <summary>
         /// Returns the sum of matrix elements.
         /// </summary>
@@ -1677,7 +2275,8 @@ public static partial class Cv2
         /// <returns>The sum of elements per channel.</returns>
         public static Scalar Sum(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.InputArray? mask = null)
         {
-            if (src is null) throw new ArgumentNullException(nameof(src));
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
             src.ThrowIfDisposed();
 
             NativeMethods.HandleException(
@@ -1687,6 +2286,10 @@ public static partial class Cv2
             GC.KeepAlive(mask);
             return ret;
         }
+
+        #endregion
+
+        #region Threshold
 
         /// <summary>
         /// Applies a fixed-level threshold to each array element.
@@ -1714,6 +2317,10 @@ public static partial class Cv2
             return retVal;
         }
 
+        #endregion
+
+        #region Transpose
+
         /// <summary>
         /// Transposes a matrix.
         /// </summary>
@@ -1737,33 +2344,7 @@ public static partial class Cv2
             dst.Fix();
         }
 
-        /// <summary>
-        /// Performs a forward or inverse discrete Fourier transform (1D or 2D) of the floating point matrix.
-        /// </summary>
-        /// <param name="src">Source array. CV_32FC1 or CV_32FC2 are supported.</param>
-        /// <param name="dst">Destination array.</param>
-        /// <param name="dftSize">Size of the transform.</param>
-        /// <param name="flags">Transformation flags.</param>
-        /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Dft(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, Size dftSize, DftFlags flags = 0, OpenCvSharp.Cuda.Stream? stream = null)
-        {
-            if (src is null) 
-                throw new ArgumentNullException(nameof(src));
-            if (dst is null) 
-                throw new ArgumentNullException(nameof(dst));
-
-            src.ThrowIfDisposed();
-            dst.ThrowIfNotReady();
-
-            NativeMethods.HandleException(
-                NativeMethods.cuda_dft(src.CvPtr, dst.CvPtr, dftSize, (int)flags, ToPtr(stream)));
-
-            GC.KeepAlive(src);
-            dst.Fix();
-            
-        }
+        #endregion
 
     }
-        #endregion
 }
-

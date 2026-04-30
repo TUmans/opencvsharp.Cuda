@@ -112,6 +112,9 @@
     <ClCompile Include="cuda_Filters.h">
       <Filter>Header Files\cuda</Filter>
     </ClCompile>
+    <ClCompile Include="cuda_Event.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgsegm.h">
@@ -416,6 +419,12 @@
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
     <ClInclude Include="cuda_OpenGL.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_Photo.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_Stream.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
   </ItemGroup>

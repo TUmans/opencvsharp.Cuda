@@ -12,6 +12,7 @@ public static partial class Cv2
 {
     public static partial class Cuda
     {
+        #region DrawColorDisp
         /// <summary>
         /// Colors a disparity image.
         /// </summary>
@@ -37,35 +38,40 @@ public static partial class Cv2
          
         }
 
-        /// <summary>
-        /// Reprojects a disparity image to 3D space.
-        /// </summary>
-        /// <param name="disp">Input single-channel 8-bit or 16-bit signed disparity image.</param>
-        /// <param name="xyzw">Output 3- or 4-channel floating-point image of the same size as disp.</param>
-        /// <param name="Q">4x4 perspective transformation matrix (CPU Mat or GpuMat).</param>
-        /// <param name="dstCn">Output channels. 3 or 4.</param>
-        /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void ReprojectImageTo3D( OpenCvSharp.Cuda.InputArray disp, OpenCvSharp.Cuda.OutputArray xyzw,  InputArray Q, int dstCn = 4, OpenCvSharp.Cuda.Stream? stream = null)
-        {
-            if (disp is null)
-                throw new ArgumentNullException(nameof(disp));
-            if (xyzw is null) 
-                throw new ArgumentNullException(nameof(xyzw));
-            if (Q is null) 
-                throw new ArgumentNullException(nameof(Q));
+        #endregion
 
-            disp.ThrowIfDisposed();
-            Q.ThrowIfDisposed();
-            xyzw.ThrowIfNotReady();
+        #region reprojectImageto3D
+                /// <summary>
+                /// Reprojects a disparity image to 3D space.
+                /// </summary>
+                /// <param name="disp">Input single-channel 8-bit or 16-bit signed disparity image.</param>
+                /// <param name="xyzw">Output 3- or 4-channel floating-point image of the same size as disp.</param>
+                /// <param name="Q">4x4 perspective transformation matrix (CPU Mat or GpuMat).</param>
+                /// <param name="dstCn">Output channels. 3 or 4.</param>
+                /// <param name="stream">Stream for the asynchronous version.</param>
+                public static void ReprojectImageTo3D( OpenCvSharp.Cuda.InputArray disp, OpenCvSharp.Cuda.OutputArray xyzw,  InputArray Q, int dstCn = 4, OpenCvSharp.Cuda.Stream? stream = null)
+                {
+                    if (disp is null)
+                        throw new ArgumentNullException(nameof(disp));
+                    if (xyzw is null) 
+                        throw new ArgumentNullException(nameof(xyzw));
+                    if (Q is null) 
+                        throw new ArgumentNullException(nameof(Q));
 
-            NativeMethods.HandleException(
-                NativeMethods.cuda_reprojectImageTo3D(
-                    disp.CvPtr, xyzw.CvPtr, Q.CvPtr, dstCn, ToPtr(stream)));
+                    disp.ThrowIfDisposed();
+                    Q.ThrowIfDisposed();
+                    xyzw.ThrowIfNotReady();
 
-            GC.KeepAlive(disp);
-            GC.KeepAlive(Q);
-            xyzw.Fix();
+                    NativeMethods.HandleException(
+                        NativeMethods.cuda_reprojectImageTo3D(
+                            disp.CvPtr, xyzw.CvPtr, Q.CvPtr, dstCn, ToPtr(stream)));
+
+                    GC.KeepAlive(disp);
+                    GC.KeepAlive(Q);
+                    xyzw.Fix();
          
-        }
+                }
+
+                #endregion
     }
 }

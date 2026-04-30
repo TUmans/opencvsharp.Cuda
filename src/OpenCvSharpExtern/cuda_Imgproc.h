@@ -10,7 +10,6 @@
 #include "include_opencv.h"
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/cudaimgproc.hpp>
-#include <opencv2/photo/cuda.hpp>
 
 // ---------- Alpha Composite --------------------------------------------------
 CVAPI(ExceptionStatus) cuda_alphaComp(cv::_InputArray *img1, cv::_InputArray *img2, cv::_OutputArray *dst, int alpha_op, cv::cuda::Stream *stream)
@@ -391,14 +390,6 @@ CVAPI(ExceptionStatus) cuda_evenLevels(cv::_OutputArray *levels, int nLevels, in
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_fastNlMeansDenoising(cv::_InputArray *src, cv::_OutputArray *dst, float h, int search_window, int block_size, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    cv::cuda::fastNlMeansDenoising(*src, *dst, h, search_window, block_size, streamRef);
-    END_WRAP
-}
-
 CVAPI(ExceptionStatus) cuda_gammaCorrection(cv::_InputArray *src, cv::_OutputArray *dst, int forward, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
@@ -493,18 +484,72 @@ CVAPI(ExceptionStatus) cuda_meanShiftSegmentation(cv::_InputArray *src, cv::_Out
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_nonLocalMeans(cv::_InputArray *src, cv::_OutputArray *dst, float h, int search_window, int block_size, int borderMode, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    cv::cuda::nonLocalMeans(*src, *dst, h, search_window, block_size, borderMode, streamRef);
-    END_WRAP
-}
+
 
 CVAPI(ExceptionStatus) cuda_swapChannels(cv::_InputOutputArray *image, const int *dstOrder, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     cv::cuda::swapChannels(*image, dstOrder, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_connectedComponents(
+    cv::_InputArray *image,
+    cv::_OutputArray *labels,
+    int connectivity,
+    int ltype,
+    int ccltype)
+{
+    BEGIN_WRAP
+    if (ccltype == -1)
+    {
+        cv::cuda::connectedComponents(*image, *labels, connectivity, ltype);
+    }
+    else
+    {
+        cv::cuda::connectedComponents(*image, *labels, connectivity, ltype, static_cast<cv::cuda::ConnectedComponentsAlgorithmsTypes>(ccltype));
+    }
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_convertSpatialMoments(cv::Mat *spatialMoments, int order, int momentsType, double *outPointer)
+{
+    BEGIN_WRAP
+    cv::Moments res = cv::cuda::convertSpatialMoments( *spatialMoments, static_cast<cv::cuda::MomentsOrder>(order), momentsType);
+
+    double *data = reinterpret_cast<double *>(&res);
+    for (int i = 0; i < 24; i++)
+    {
+        outPointer[i] = data[i];
+    }
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_moments(cv::_InputArray *src,  int binaryImage, int order, int momentsType, double *outPointer)
+{
+    BEGIN_WRAP
+    cv::Moments res = cv::cuda::moments(*src, binaryImage != 0, static_cast<cv::cuda::MomentsOrder>(order), momentsType);
+
+    double *data = reinterpret_cast<double *>(&res);
+    for (int i = 0; i < 24; i++)
+    {
+        outPointer[i] = data[i];
+    }
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_numMoments(int order, int *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::numMoments(static_cast<cv::cuda::MomentsOrder>(order));
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_spatialMoments(cv::_InputArray *src, cv::_OutputArray *moments, int binaryImage, int order, int momentsType,  cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::spatialMoments(*src, *moments, binaryImage != 0, static_cast<cv::cuda::MomentsOrder>(order), momentsType, streamRef);
     END_WRAP
 }

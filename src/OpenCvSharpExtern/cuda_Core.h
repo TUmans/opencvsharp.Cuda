@@ -46,3 +46,10 @@ CVAPI(ExceptionStatus) cuda_setBufferPoolUsage(int on)
     cv::cuda::setBufferPoolUsage(on != 0);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_createGpuMatFromCudaMemory(int rows, int cols, int type, void *cudaMemoryAddress, size_t step, cv::cuda::GpuMat **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = new cv::cuda::GpuMat(rows, cols, type, cudaMemoryAddress, step);
+    END_WRAP
+}

@@ -13,4 +13,7 @@
 #include "cuda_Stereo.h"
 #include "cuda_Calib3d.h"
 #include "cuda_OpenGL.h"
+#include "cuda_Photo.h"
+#include "cuda_Stream.h"
+#include "cuda_Event.h"
 #endif

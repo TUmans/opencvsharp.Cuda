@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenCvSharp.Tests;
+﻿using OpenCvSharp.Cuda;
 using Xunit;
 
 namespace OpenCvSharp.Tests.Cuda;

@@ -52,4 +52,13 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_reprojectImageTo3D(IntPtr disp, IntPtr xyzw, IntPtr Q, int dstCn, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_createStereoSGM(int minDisparity, int numDisparities, int P1, int P2, int uniquenessRatio, int mode, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_StereoSGM_get(IntPtr ptr, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_StereoSGM_delete(IntPtr ptr);
 }

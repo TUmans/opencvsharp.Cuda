@@ -633,6 +633,28 @@ public class CudaArthimTest : CudaTestBase
     }
 
     [Fact]
+    public void Compare_5()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: matrix with [50, 150]
+        using var cpuSrc = Mat.FromPixelData(1, 2, MatType.CV_8UC1, new byte[] { 50, 150 });
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+
+        // Act: Find where src > 100
+        using var gpuDst = new GpuMat(); 
+        Cv2.Cuda.Compare(gpuSrc, new Scalar(100), gpuDst, CmpTypes.GT);
+        // Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        // index 0: 50 > 100 (False -> 0)
+        // index 1: 150 > 100 (True -> 255)
+        Assert.Equal(0, cpuDst.At<byte>(0, 0));
+        Assert.Equal(255, cpuDst.At<byte>(0, 1));
+    }
+
+    [Fact]
     public void CopyMakeBorder()
     {
         VerifyCudaSupport();
@@ -824,7 +846,7 @@ public class CudaArthimTest : CudaTestBase
         using var src = MakeByte(Rows, Cols, 1);
         using var dst = new GpuMat();
 
-        Cv2.Cuda.Lshift(src, new Vec4i(3, 0, 0, 0), dst);
+        Cv2.Cuda.Lshift(src, new Scalar(3, 0, 0, 0), dst);
 
         Assert.Equal((byte)8, PixelB(dst));
     }
@@ -838,7 +860,7 @@ public class CudaArthimTest : CudaTestBase
         using var src = MakeByte(Rows, Cols, 16);
         using var dst = new GpuMat();
 
-        Cv2.Cuda.Rshift(src, new Vec4i(2, 0, 0, 0), dst);
+        Cv2.Cuda.Rshift(src, new Scalar(2, 0, 0, 0), dst);
 
         Assert.Equal((byte)4, PixelB(dst));
     }
@@ -897,6 +919,32 @@ public class CudaArthimTest : CudaTestBase
         Cv2.Cuda.Max(src1, src2, dst);
 
         Assert.Equal(7f, PixelF(dst), 3);
+    }
+
+    [Fact]
+    public void MaxWithScalar_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 1x2 matrix with values 50 and 150
+        using var cpuSrc = Mat.FromPixelData(1, 2, MatType.CV_8UC1, new byte[] { 50, 150 });
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Take max with 100
+        // Math: max(50, 100) = 100; max(150, 100) = 150
+        Cv2.Cuda.Max(gpuSrc, new Scalar(100), gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // index 0: was 50, capped at 100
+        Assert.Equal(100, cpuDst.At<byte>(0, 0));
+        // index 1: was 150, stays 150
+        Assert.Equal(150, cpuDst.At<byte>(0, 1));
     }
 
     // -----------------------------------------------------------------------
@@ -987,19 +1035,49 @@ public class CudaArthimTest : CudaTestBase
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void PolarToCart_UnitMagnitudeZeroAngle_XIsOneYIsZero()
+    public void PolarToCart_Test()
     {
         VerifyCudaSupport();
 
-        using var mag = MakeFloat(Rows, Cols, 1f);
-        using var ang = MakeFloat(Rows, Cols, 0f);
-        using var x = new GpuMat();
-        using var y = new GpuMat();
+        // 1. Arrange: Magnitude 5, Angle ~53.13 degrees
+        using var gpuMag = new GpuMat(1, 1, MatType.CV_32FC1, new Scalar(5.0f));
+        using var gpuAngle = new GpuMat(1, 1, MatType.CV_32FC1, new Scalar(53.1301024f));
+        using var gpuX = new GpuMat();
+        using var gpuY = new GpuMat();
 
-        Cv2.Cuda.PolarToCart(mag, ang, x, y, angleInDegrees: true);
+        // 2. Act
+        Cv2.Cuda.PolarToCart(gpuMag, gpuAngle, gpuX, gpuY, angleInDegrees: true);
 
-        Assert.Equal(1f, PixelF(x), 3);
-        Assert.Equal(0f, PixelF(y), 3);
+        // 3. Download and Assert
+        using var cpuX = new Mat();
+        using var cpuY = new Mat();
+        gpuX.Download(cpuX);
+        gpuY.Download(cpuY);
+
+        // Results should be approx 3 and 4
+        Assert.InRange(cpuX.At<float>(0, 0), 2.99f, 3.01f);
+        Assert.InRange(cpuY.At<float>(0, 0), 3.99f, 4.01f);
+    }
+
+    [Fact]
+    public void PolarToCart_InterleavedTest()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: 2-channel [Magnitude, Angle]
+        using var gpuMA = new GpuMat(1, 1, MatType.CV_32FC2, new Scalar(5.0f, 53.1301024f));
+        using var gpuXY = new GpuMat();
+
+        // Act
+        Cv2.Cuda.PolarToCart(gpuMA, gpuXY, angleInDegrees: true);
+
+        // Assert
+        using var cpuXY = new Mat();
+        gpuXY.Download(cpuXY);
+        Vec2f res = cpuXY.At<Vec2f>(0, 0);
+
+        Assert.InRange(res.Item0, 2.99f, 3.01f); // X
+        Assert.InRange(res.Item1, 3.99f, 4.01f); // Y
     }
 
     // -----------------------------------------------------------------------
@@ -1814,6 +1892,33 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(10, pixel.Item0); // Channel 1
         Assert.Equal(20, pixel.Item1); // Channel 2
     }
+    [Fact]
+    public void MinWithScalar_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 1x2 matrix with values 50 and 150
+        using var cpuSrc = Mat.FromPixelData(1, 2, MatType.CV_8UC1, new byte[] { 50, 150 });
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Take min with 100
+        // Math: min(50, 100) = 50; min(150, 100) = 100
+        Cv2.Cuda.Min(gpuSrc, new Scalar(100), gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+
+        // index 0: was 50, remains 50 (it was already lower than 100)
+        Assert.Equal(50, cpuDst.At<byte>(0, 0));
+        // index 1: was 150, capped at 100
+        Assert.Equal(100, cpuDst.At<byte>(0, 1));
+    }
+
+
 
     [Fact]
     public void MinMaxLoc_DirectTest()
@@ -2261,6 +2366,46 @@ public class CudaArthimTest : CudaTestBase
         // 4. Assert
         // Only the one active pixel (10) should be summed
         Assert.Equal(10.0, result.Val0);
+    }
+
+    [Fact]
+    public void Multiply_MatrixScalarTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: 5x5 matrix filled with 10
+        using var cpuSrc = new Mat(5, 5, MatType.CV_8UC1, new Scalar(10));
+        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Multiply by 5 (result = 10 * 5 = 50)
+        Cv2.Cuda.Multiply(gpuSrc, new Scalar(5), gpuDst);
+
+        // 3. Download and Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.False(cpuDst.Empty());
+        Assert.Equal(50, cpuDst.At<byte>(0, 0));
+    }
+
+    [Fact]
+    public void Multiply_WithScaleTest()
+    {
+        VerifyCudaSupport();
+
+        // Arrange: 10 * 10 with a scale of 0.1
+        // Math: (10 * 10) * 0.1 = 10
+        using var gpuSrc = new GpuMat(1, 1, MatType.CV_32FC1, new Scalar(10));
+
+        // Act
+        using var gpuDst = new GpuMat();
+        Cv2.Cuda.Multiply(gpuSrc,  new Scalar(10), gpuDst, scale: 0.1);
+
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.Equal(10.0f, cpuDst.At<float>(0, 0));
     }
 
 }

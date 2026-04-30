@@ -12,6 +12,7 @@ public static partial class Cv2
     public static partial class Cuda
     {
 
+        #region CalcOpticalFlowBM
         /// <summary>
         /// Calculates optical flow for 2 images using block matching algorithm.
         /// </summary>
@@ -52,6 +53,9 @@ public static partial class Cv2
             GC.KeepAlive(buf);
         }
 
+        #endregion
+
+        #region ConnectivityMask
         /// <summary>
         /// compute mask for Generalized Flood fill componetns labeling. 
         /// </summary>
@@ -75,6 +79,9 @@ public static partial class Cv2
             GC.KeepAlive(mask);
         }
 
+        #endregion
+
+        #region CreateOpticalFlowNeedleMap
         /// <summary>
         /// Creates a needle map (vector field visualization) from optical flow components.
         /// </summary>
@@ -103,10 +110,15 @@ public static partial class Cv2
             GC.KeepAlive(colors);
         }
 
+        #endregion
+
+        #region GraphCut
+
         /// <summary>
         /// Performs labeling via graph cuts of a 2D regular 4-connected graph.
         /// </summary>
-        public static void Graphcut(GpuMat terminals, GpuMat leftTransp, GpuMat rightTransp, GpuMat top, GpuMat bottom, GpuMat labels, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Graphcut(GpuMat terminals, GpuMat leftTransp, GpuMat rightTransp, GpuMat top, GpuMat bottom, GpuMat labels, GpuMat buf, 
+            OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (terminals is null) 
                 throw new ArgumentNullException(nameof(terminals));
@@ -149,7 +161,8 @@ public static partial class Cv2
         /// <summary>
         /// Performs labeling via graph cuts of a 2D regular 8-connected graph.
         /// </summary>
-        public static void Graphcut(GpuMat terminals, GpuMat leftTransp, GpuMat rightTransp, GpuMat top, GpuMat topLeft, GpuMat topRight, GpuMat bottom, GpuMat bottomLeft, GpuMat bottomRight, GpuMat labels, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Graphcut(GpuMat terminals, GpuMat leftTransp, GpuMat rightTransp, GpuMat top, GpuMat topLeft, GpuMat topRight, 
+            GpuMat bottom, GpuMat bottomLeft, GpuMat bottomRight, GpuMat labels, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (terminals is null) 
                 throw new ArgumentNullException(nameof(terminals));
@@ -203,10 +216,15 @@ public static partial class Cv2
             GC.KeepAlive(buf);
         }
 
+        #endregion
+
+        #region InterpolateFrames
+
         /// <summary>
         /// Interpolates frames (images) using provided optical flow (displacement field).
         /// </summary>
-        public static void InterpolateFrames(GpuMat frame0, GpuMat frame1, GpuMat fu, GpuMat fv, GpuMat bu, GpuMat bv, float pos, GpuMat newFrame, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void InterpolateFrames(GpuMat frame0, GpuMat frame1, GpuMat fu, GpuMat fv, GpuMat bu, 
+            GpuMat bv, float pos, GpuMat newFrame, GpuMat buf, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (frame0 is null)
                 throw new ArgumentNullException(nameof(frame0));
@@ -248,6 +266,9 @@ public static partial class Cv2
             GC.KeepAlive(buf);
         }
 
+        #endregion
+
+        #region LabelComponents
         /// <summary>
         /// Performs connected components labeling.
         /// </summary>
@@ -271,6 +292,10 @@ public static partial class Cv2
             GC.KeepAlive(mask);
             GC.KeepAlive(components);
         }
+
+        #endregion
+
+        #region ProjectPoints
 
         /// <summary>
         /// Projects 3D points to an image plane.
@@ -319,6 +344,10 @@ public static partial class Cv2
             GC.KeepAlive(dst);
         }
 
+        #endregion
+
+        #region SolvePnPRansac
+
         /// <summary>
         /// Finds the object pose from 3D-2D point correspondences using RANSAC scheme.
         /// </summary>
@@ -334,12 +363,12 @@ public static partial class Cv2
         /// <param name="minInlierCount">Minimum number of inliers to consider the solution valid.</param>
         /// <param name="inliers">Output vector that contains indices of inliers in objectPoints and imagePoints.</param>
         public static void SolvePnPRansac(
-            Mat @object, Mat image, Mat cameraMat, Mat distCoef,
+            Mat obj, Mat image, Mat cameraMat, Mat distCoef,
             Mat rvec, Mat tvec, bool useExtrinsicGuess = false, int numIters = 100,
             float maxDist = 8.0f, int minInlierCount = 100, OutputArray? inliers = null)
         {
-            if (@object is null) 
-                throw new ArgumentNullException(nameof(@object));
+            if (obj is null) 
+                throw new ArgumentNullException(nameof(obj));
             if (image is null) 
                 throw new ArgumentNullException(nameof(image));
             if (cameraMat is null) 
@@ -353,11 +382,11 @@ public static partial class Cv2
 
             NativeMethods.HandleException(
                 NativeMethods.cuda_solvePnPRansac(
-                    @object.CvPtr, image.CvPtr, cameraMat.CvPtr, distCoef.CvPtr,
+                    obj.CvPtr, image.CvPtr, cameraMat.CvPtr, distCoef.CvPtr,
                     rvec.CvPtr, tvec.CvPtr, useExtrinsicGuess ? 1 : 0, numIters,
                     maxDist, minInlierCount, inliers?.CvPtr ?? IntPtr.Zero));
 
-            GC.KeepAlive(@object);
+            GC.KeepAlive(obj);
             GC.KeepAlive(image);
             GC.KeepAlive(cameraMat);
             GC.KeepAlive(distCoef);
@@ -367,6 +396,9 @@ public static partial class Cv2
         
         }
 
+        #endregion
+
+        #region Transform Points
 
         /// <summary>
         /// Transforms 3D points using a rotation vector and a translation vector.
@@ -401,6 +433,7 @@ public static partial class Cv2
             GC.KeepAlive(dst);
         }
 
+        #endregion
 
     }
 

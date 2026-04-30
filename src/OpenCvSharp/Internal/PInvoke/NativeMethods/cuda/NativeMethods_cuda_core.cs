@@ -36,4 +36,7 @@ static partial class NativeMethods
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_setBufferPoolUsage(int on);
 
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_createGpuMatFromCudaMemory(int rows, int cols, int type, IntPtr cudaMemoryAddress, UIntPtr step, out IntPtr returnValue);
+
 }

@@ -136,3 +136,26 @@ CVAPI(ExceptionStatus) cuda_reprojectImageTo3D(cv::_InputArray *disp, cv::_Outpu
     cv::cuda::reprojectImageTo3D(*disp, *xyzw, *Q, dst_cn, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_createStereoSGM( int minDisparity, int numDisparities, int P1, int P2, int uniquenessRatio, int mode, cv::Ptr<cv::cuda::StereoSGM> **returnValue)
+{
+    BEGIN_WRAP
+    auto ptr = cv::cuda::createStereoSGM(minDisparity, numDisparities, P1, P2, uniquenessRatio, mode);
+    *returnValue = new cv::Ptr<cv::cuda::StereoSGM>(ptr);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_StereoSGM_get(cv::Ptr<cv::cuda::StereoSGM> *ptr, cv::cuda::StereoSGM **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = ptr->get();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_StereoSGM_delete(cv::Ptr<cv::cuda::StereoSGM> *ptr)
+{
+    BEGIN_WRAP
+    delete ptr;
+    END_WRAP
+}
+

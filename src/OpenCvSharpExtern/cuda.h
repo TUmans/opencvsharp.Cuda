@@ -230,68 +230,7 @@ CVAPI(ExceptionStatus) cuda_printShortCudaDeviceInfo(int device)
 
 #pragma region Stream
 
-CVAPI(ExceptionStatus) cuda_Stream_new1(cv::cuda::Stream **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = new cv::cuda::Stream();
-    END_WRAP
-}
 
-CVAPI(ExceptionStatus) cuda_Stream_new2(cv::cuda::Stream *s, cv::cuda::Stream **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = new cv::cuda::Stream(*s);
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_delete(cv::cuda::Stream *obj)
-{
-    BEGIN_WRAP
-    delete obj;
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_opAssign(cv::cuda::Stream *left, cv::cuda::Stream *right)
-{
-    BEGIN_WRAP
-    *left = *right;
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_queryIfComplete(cv::cuda::Stream *obj, int *returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = obj->queryIfComplete() ? 1 : 0;
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_waitForCompletion(cv::cuda::Stream *obj)
-{
-    BEGIN_WRAP
-    obj->waitForCompletion();
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_enqueueHostCallback(cv::cuda::Stream *obj, cv::cuda::Stream::StreamCallback callback, void *userData)
-{
-    BEGIN_WRAP
-    obj->enqueueHostCallback(callback, userData);
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_Null(cv::cuda::Stream **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = const_cast<cv::cuda::Stream *>(&cv::cuda::Stream::Null());
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_Stream_bool(cv::cuda::Stream *obj, int *returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = (bool)(*obj) ? 1 : 0;
-    END_WRAP
-}
 
 
 #pragma endregion

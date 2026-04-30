@@ -140,9 +140,6 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_evenLevels(IntPtr levels, int nLevels, int lowerLevel, int upperLevel, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_fastNlMeansDenoising(IntPtr src, IntPtr dst, float h, int searchWindow, int blockSize, IntPtr stream);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_gammaCorrection(IntPtr src, IntPtr dst, int forward, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -171,4 +168,19 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_swapChannels(IntPtr image, [In] int[] dstOrder, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_connectedComponents(IntPtr image, IntPtr labels, int connectivity, int ltype, int ccltype);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_convertSpatialMoments(IntPtr spatialMoments, int order, int momentsType, [Out] double[] outMoments);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_moments(IntPtr src, int binaryImage,    int order,int momentsType, [Out] double[] outMoments);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_numMoments(int order, out int returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_spatialMoments( IntPtr src, IntPtr moments, int binaryImage, int order, int momentsType,  IntPtr stream);
 }

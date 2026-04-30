@@ -58,6 +58,7 @@
     <ClCompile Include="core.cpp" />
     <ClCompile Include="cuda.cpp" />
     <ClCompile Include="cuda_Arithm.h" />
+    <ClCompile Include="cuda_Event.h" />
     <ClCompile Include="cuda_Filters.h" />
     <ClCompile Include="cuda_Imgproc.h" />
     <ClCompile Include="dnn.cpp" />
@@ -116,7 +117,9 @@
     <ClInclude Include="cuda_GpuMat.h" />
     <ClInclude Include="cuda_Legacy.h" />
     <ClInclude Include="cuda_OpenGL.h" />
+    <ClInclude Include="cuda_Photo.h" />
     <ClInclude Include="cuda_Stereo.h" />
+    <ClInclude Include="cuda_Stream.h" />
     <ClInclude Include="cuda_Warping.h" />
     <ClInclude Include="dnn.h" />
     <ClInclude Include="dnn_Net.h" />

@@ -193,6 +193,22 @@ CVAPI(ExceptionStatus) cuda_cartToPolar(cv::_InputArray *x,cv::_InputArray *y,cv
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) cuda_cartToPolar_interleaved(cv::_InputArray *xy, cv::_OutputArray *magnitude, cv::_OutputArray *angle, int angleInDegrees, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::cartToPolar(*xy, *magnitude, *angle, angleInDegrees != 0, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_cartToPolar_interleaved_combined(cv::_InputArray *xy, cv::_OutputArray *magnitudeAngle, int angleInDegrees, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::cartToPolar(*xy, *magnitudeAngle, angleInDegrees != 0, streamRef);
+    END_WRAP
+}
+
 // ---------- compare ------------------------------------------------------
 CVAPI(ExceptionStatus) cuda_compare(cv::_InputArray *src1,cv::_InputArray *src2,cv::_OutputArray *dst, int cmpop,cv::cuda::Stream *stream)
 {
@@ -201,6 +217,15 @@ CVAPI(ExceptionStatus) cuda_compare(cv::_InputArray *src1,cv::_InputArray *src2,
     cv::cuda::compare(*src1, *src2, *dst, cmpop, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_compareWithScalar(cv::_InputArray *src1, cv::Scalar src2, cv::_OutputArray *dst, int cmpop, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::compare(*src1, src2, *dst, cmpop, streamRef);
+    END_WRAP
+}
+
 
 // ---------- copyMakeborder ------------------------------------------------------
 CVAPI(ExceptionStatus) cuda_copyMakeBorder(
@@ -236,6 +261,14 @@ CVAPI(ExceptionStatus) cuda_divide(cv::_InputArray *src1,cv::_InputArray *src2,c
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) cuda_divideWithScalar(cv::_InputArray *src1, cv::Scalar src2, cv::_OutputArray *dst, double scale, int dtype, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::divide(*src1, src2, *dst, scale, dtype, streamRef);
+    END_WRAP
+}
+
 // ---------- exp ----------------------------------------------------------
 CVAPI(ExceptionStatus) cuda_exp(cv::_InputArray *src,cv::_OutputArray *dst,cv::cuda::Stream *stream)
 {
@@ -255,13 +288,11 @@ CVAPI(ExceptionStatus) cuda_log(cv::_InputArray *src,cv::_OutputArray *dst,cv::c
 }
 
 // ---------- lshift -------------------------------------------------------
-CVAPI(ExceptionStatus) cuda_lshift(cv::_InputArray *src, cv::Vec4i val, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+CVAPI(ExceptionStatus) cuda_lshift(cv::_InputArray *src, cv::Scalar val, cv::_OutputArray *dst, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    // Convert the Vec4i to Scalar_<int> to satisfy OpenCV's function signature
-    cv::Scalar_<int> scalarVal(val[0], val[1], val[2], val[3]);
-    cv::cuda::lshift(*src, scalarVal, *dst, streamRef);
+    cv::cuda::lshift(*src, val, *dst, streamRef);
     END_WRAP
 }
 
@@ -310,12 +341,28 @@ CVAPI(ExceptionStatus) cuda_max(cv::_InputArray *src1,cv::_InputArray *src2,cv::
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) cuda_maxWithScalar(cv::_InputArray *src1, cv::Scalar src2, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::max(*src1, src2, *dst, streamRef);
+    END_WRAP
+}
+
 // ---------- min ----------------------------------------------------------
 CVAPI(ExceptionStatus) cuda_min(cv::_InputArray *src1,cv::_InputArray *src2,cv::_OutputArray *dst,cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     cv::cuda::min(*src1, *src2, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_minWithScalar(cv::_InputArray *src1, cv::Scalar src2, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::min(*src1, src2, *dst, streamRef);
     END_WRAP
 }
 
@@ -328,6 +375,14 @@ CVAPI(ExceptionStatus) cuda_multiply(cv::_InputArray *src1,cv::_InputArray *src2
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) cuda_multiplyWithScalar(cv::_InputArray *src1, cv::Scalar src2, cv::_OutputArray *dst, double scale, int dtype, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::multiply(*src1, src2, *dst, scale, dtype, streamRef);
+    END_WRAP
+}
+
 // ---------- phase --------------------------------------------------------
 CVAPI(ExceptionStatus) cuda_phase(cv::_InputArray *x,cv::_InputArray *y,cv::_OutputArray *angle,    int angleInDegrees,cv::cuda::Stream *stream)
 {
@@ -337,12 +392,36 @@ CVAPI(ExceptionStatus) cuda_phase(cv::_InputArray *x,cv::_InputArray *y,cv::_Out
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) cuda_phase_xy(cv::_InputArray *xy, cv::_OutputArray *angle, int angleInDegrees, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::phase(*xy, *angle, angleInDegrees != 0, streamRef);
+    END_WRAP
+}
+
 // ---------- polarToCart --------------------------------------------------
 CVAPI(ExceptionStatus) cuda_polarToCart(cv::_InputArray *magnitude, cv::_InputArray *angle, cv::_OutputArray *x, cv::_OutputArray *y, int angleInDegrees, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     cv::cuda::polarToCart(*magnitude, *angle, *x, *y, angleInDegrees != 0, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_polarToCart_interleaved_out( cv::_InputArray *magnitude, cv::_InputArray *angle, cv::_OutputArray *xy, int angleInDegrees, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::polarToCart(*magnitude, *angle, *xy, angleInDegrees != 0, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_polarToCart_interleaved_inout(cv::_InputArray *magnitudeAngle, cv::_OutputArray *xy, int angleInDegrees, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::polarToCart(*magnitudeAngle, *xy, angleInDegrees != 0, streamRef);
     END_WRAP
 }
 
@@ -356,14 +435,11 @@ CVAPI(ExceptionStatus) cuda_pow( cv::_InputArray *src, double power,  cv::_Outpu
 }
 
 // ---------- rshift -------------------------------------------------------
-CVAPI(ExceptionStatus) cuda_rshift(cv::_InputArray *src, cv::Vec4i val, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+CVAPI(ExceptionStatus) cuda_rshift(cv::_InputArray *src, cv::Scalar val, cv::_OutputArray *dst, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    // Convert the Vec4i to Scalar_<int> to satisfy OpenCV's function signature
-    cv::Scalar_<int> scalarVal(val[0], val[1], val[2], val[3]);
-    cv::cuda::rshift(*src, scalarVal, *dst, streamRef);
-
+    cv::cuda::rshift(*src, val, *dst, streamRef);
     END_WRAP
 }
 
@@ -564,18 +640,21 @@ CVAPI(ExceptionStatus) cuda_integral(cv::_InputArray *src, cv::_OutputArray *sum
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_meanStdDev(cv::_InputArray *mtx, cv::Scalar *mean, cv::Scalar *stddev)
-{
-    BEGIN_WRAP
-    cv::cuda::meanStdDev(*mtx, *mean, *stddev);
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_meanStdDev_dst(cv::_InputArray *mtx, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+CVAPI(ExceptionStatus) cuda_meanStdDev_dst(
+    cv::_InputArray *src, cv::_OutputArray *dst, cv::_InputArray *mask, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    cv::cuda::meanStdDev(*mtx, *dst, streamRef);
+    cv::cuda::meanStdDev(*src, *dst, mask ? *mask : cv::noArray(), streamRef);
+    END_WRAP
+}
+
+// Handles Sync overloads (Result to CPU Scalars)
+CVAPI(ExceptionStatus) cuda_meanStdDev_scalar(
+    cv::_InputArray *src, cv::Scalar *mean, cv::Scalar *stddev, cv::_InputArray *mask)
+{
+    BEGIN_WRAP
+    cv::cuda::meanStdDev(*src, *mean, *stddev, mask ? *mask : cv::noArray());
     END_WRAP
 }
 
@@ -714,5 +793,13 @@ CVAPI(ExceptionStatus) cuda_transpose(cv::_InputArray *src, cv::_OutputArray *ds
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     cv::cuda::transpose(*src, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_inRange(cv::_InputArray *src, cv::Scalar lowerb, cv::Scalar upperb, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::inRange(*src, lowerb, upperb, *dst, streamRef);
     END_WRAP
 }

@@ -13,10 +13,12 @@ public static partial class Cv2
     public static partial class Cuda
     {
 
+        #region Alpha Comp
         /// <summary>
         /// Composites two images using alpha opacity values contained in each image. 
         /// </summary>
-        public static void AlphaComp(OpenCvSharp.Cuda.InputArray img1, OpenCvSharp.Cuda.InputArray img2, OpenCvSharp.Cuda.OutputArray dst, AlphaCompTypes alphaOp, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void AlphaComp(OpenCvSharp.Cuda.InputArray img1, OpenCvSharp.Cuda.InputArray img2, OpenCvSharp.Cuda.OutputArray dst, 
+            AlphaCompTypes alphaOp, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (img1 is null) 
                 throw new ArgumentNullException(nameof(img1));
@@ -38,10 +40,14 @@ public static partial class Cv2
        
         }
 
+        #endregion
+
+        #region Bilateral Filter
         /// <summary>
         /// Performs bilateral filtering of passed image.
         /// </summary>
-        public static void BilateralFilter(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,  int kernelSize, float sigmaColor, float sigmaSpatial, BorderTypes borderMode = BorderTypes.Default, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BilateralFilter(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,  
+            int kernelSize, float sigmaColor, float sigmaSpatial, BorderTypes borderMode = BorderTypes.Default, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -59,10 +65,15 @@ public static partial class Cv2
          
         }
 
+        #endregion
+
+        #region BlendLinear
+
         /// <summary>
         /// Performs linear blending of two images. 
         /// </summary>
-        public static void BlendLinear(OpenCvSharp.Cuda.InputArray img1, OpenCvSharp.Cuda.InputArray img2, OpenCvSharp.Cuda.InputArray weights1, OpenCvSharp.Cuda.InputArray weights2, OpenCvSharp.Cuda.OutputArray result, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BlendLinear(OpenCvSharp.Cuda.InputArray img1, OpenCvSharp.Cuda.InputArray img2, OpenCvSharp.Cuda.InputArray weights1, 
+            OpenCvSharp.Cuda.InputArray weights2, OpenCvSharp.Cuda.OutputArray result, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (img1 is null)
                 throw new ArgumentNullException(nameof(img1));
@@ -72,6 +83,8 @@ public static partial class Cv2
                 throw new ArgumentNullException(nameof(weights1));
             if (weights2 is null)
                 throw new ArgumentNullException(nameof(weights2));
+            if (result is null)
+                throw new ArgumentNullException(nameof(result));
             img1.ThrowIfDisposed();
             img2.ThrowIfDisposed();
             weights1.ThrowIfDisposed();
@@ -89,10 +102,112 @@ public static partial class Cv2
             result.Fix();
         }
 
+        #endregion
+
+        #region ConnectedComponents
+
+        /// <summary>
+        /// Computes the Connected Components Labeled image of a binary image.
+        /// </summary>
+        /// <param name="image">The 8-bit single-channel image to be labeled.</param>
+        /// <param name="labels">Destination labeled image.</param>
+        /// <param name="connectivity">8 or 4 connected components.</param>
+        /// <param name="ltype">Output image label type. Currently CV_32S and CV_16S are supported.</param>
+        /// <param name="ccltype">Connected components algorithm type.</param>
+        public static void ConnectedComponents(OpenCvSharp.Cuda.InputArray image, OpenCvSharp.Cuda.OutputArray labels,
+            int connectivity = 8,
+            MatType? ltype = null,
+            OpenCvSharp.Cuda.ConnectedComponentsAlgorithmsTypes ccltype = OpenCvSharp.Cuda.ConnectedComponentsAlgorithmsTypes.Default)
+        {
+            if (image is null) 
+                throw new ArgumentNullException(nameof(image));
+            if (labels is null) 
+                throw new ArgumentNullException(nameof(labels));
+
+            image.ThrowIfDisposed();
+            labels.ThrowIfNotReady();
+
+            int type = ltype?.Value ?? (int)MatType.CV_32S;
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_connectedComponents(
+                    image.CvPtr,
+                    labels.CvPtr,
+                    connectivity,
+                    type,
+                    (int)ccltype));
+
+            labels.Fix();
+            GC.KeepAlive(image);
+        }
+
+        #endregion
+
+        #region ConvertSpatialMoments
+
+        /// <summary>
+        /// Converts the spatial image moments returned from cuda::spatialMoments to cv::Moments.
+        /// </summary>
+        /// <param name="spatialMoments">Spatial moments returned from cuda::spatialMoments (CPU Mat).</param>
+        /// <param name="order">Order of moments.</param>
+        /// <param name="momentsType">Type of moments (CV_32F or CV_64F).</param>
+        /// <returns>A Moments structure.</returns>
+        public static Moments ConvertSpatialMoments(Mat spatialMoments, MomentsOrder order, MatType momentsType)
+        {
+            if (spatialMoments is null) throw new ArgumentNullException(nameof(spatialMoments));
+            spatialMoments.ThrowIfDisposed();
+
+            double[] buffer = new double[24];
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_convertSpatialMoments(
+                    spatialMoments.CvPtr,
+                    (int)order,
+                    momentsType.Value,
+                    buffer));
+
+            GC.KeepAlive(spatialMoments);
+
+            return new Moments
+            {
+                // Spatial
+                M00 = buffer[0],
+                M10 = buffer[1],
+                M01 = buffer[2],
+                M20 = buffer[3],
+                M11 = buffer[4],
+                M02 = buffer[5],
+                M30 = buffer[6],
+                M21 = buffer[7],
+                M12 = buffer[8],
+                M03 = buffer[9],
+                // Central
+                Mu20 = buffer[10],
+                Mu11 = buffer[11],
+                Mu02 = buffer[12],
+                Mu30 = buffer[13],
+                Mu21 = buffer[14],
+                Mu12 = buffer[15],
+                Mu03 = buffer[16],
+                // Normalized
+                Nu20 = buffer[17],
+                Nu11 = buffer[18],
+                Nu02 = buffer[19],
+                Nu30 = buffer[20],
+                Nu21 = buffer[21],
+                Nu12 = buffer[22],
+                Nu03 = buffer[23]
+            };
+        }
+
+        #endregion
+
+        #region CvtColor
         /// <summary>
         /// Converts an image from one color space to another.
         /// </summary>
-        public static void CvtColor( OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, ColorConversionCodes code, int dcn = 0, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void CvtColor( OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, ColorConversionCodes code, 
+            int dcn = 0, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -109,6 +224,9 @@ public static partial class Cv2
             dst.Fix();
             
         }
+        #endregion
+
+        #region Demosaicing
 
         /// <summary>
         /// Converts an image from Bayer pattern to RGB or grayscale.
@@ -118,7 +236,8 @@ public static partial class Cv2
         /// <param name="code">Demosaicing code (e.g. ColorConversionCodes.BayerRG2BGR).</param>
         /// <param name="dcn">Number of channels in the destination image. -1 means derived automatically.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Demosaicing(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, ColorConversionCodes code, int dcn = -1, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Demosaicing(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,
+            ColorConversionCodes code, int dcn = -1, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -135,6 +254,9 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region EqualizeHist
         /// <summary>
         /// Equalizes the histogram of a grayscale image.
         /// </summary>
@@ -145,8 +267,6 @@ public static partial class Cv2
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
-            if (src.Type() != MatType.CV_8UC1)
-                throw new InvalidDataException(nameof(src));
             if (dst is null) 
                 throw new ArgumentNullException(nameof(dst));
 
@@ -159,6 +279,10 @@ public static partial class Cv2
             dst.Fix();
             
         }
+
+        #endregion
+
+        #region EvenLevels
 
         /// <summary>
         /// Computes levels with even distribution.
@@ -180,31 +304,9 @@ public static partial class Cv2
             levels.Fix();
         }
 
-        /// <summary>
-        /// Perform image denoising using Non-local Means Denoising algorithm.
-        /// </summary>
-        /// <param name="src">Input 8-bit single-channel image.</param>
-        /// <param name="dst">Destination image.</param>
-        /// <param name="h">Parameter regulating filter strength. Big h value perfectly removes noise but also removes image details.</param>
-        /// <param name="searchWindow">Size in pixels of window that is used to compute weights for pixel.</param>
-        /// <param name="blockSize">Size in pixels of template patch that is used to compute weights.</param>
-        /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void FastNlMeansDenoising(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, float h, int searchWindow = 21, int blockSize = 7, OpenCvSharp.Cuda.Stream? stream = null)
-        {
-            if (src is null) 
-                throw new ArgumentNullException(nameof(src));
-            if (dst is null) 
-                throw new ArgumentNullException(nameof(dst));
+        #endregion
 
-            src.ThrowIfDisposed();
-            dst.ThrowIfNotReady();
-
-            NativeMethods.HandleException(
-                NativeMethods.cuda_fastNlMeansDenoising(src.CvPtr, dst.CvPtr, h, searchWindow, blockSize, ToPtr(stream)));
-
-            GC.KeepAlive(src);
-            dst.Fix();
-        }
+        #region GammaCorrection
 
         /// <summary>
         /// Routines for correcting image color gamma.
@@ -230,6 +332,10 @@ public static partial class Cv2
             dst.Fix();
         }
 
+        #endregion
+
+        #region HistEven
+
         /// <summary>
         /// Calculates a histogram with evenly distributed bins.
         /// </summary>
@@ -239,7 +345,8 @@ public static partial class Cv2
         /// <param name="lowerLevel">Lower bound of the histogram.</param>
         /// <param name="upperLevel">Upper bound of the histogram.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void HistEven(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, int histSize, int lowerLevel, int upperLevel, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void HistEven(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, 
+            int histSize, int lowerLevel, int upperLevel, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -259,12 +366,21 @@ public static partial class Cv2
         /// <summary>
         /// Calculates a histogram with evenly distributed bins for each channel (up to 4).
         /// </summary>
-        public static void HistEven(OpenCvSharp.Cuda.InputArray src, GpuMat[] hist,  int[] histSize, int[] lowerLevel, int[] upperLevel, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void HistEven(OpenCvSharp.Cuda.InputArray src, GpuMat[] hist,  int[] histSize, int[] lowerLevel, int[] upperLevel, 
+            OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
             if (hist is null) 
                 throw new ArgumentNullException(nameof(hist));
+            if (histSize is null)
+                throw new ArgumentNullException(nameof(histSize));
+            if (histSize is null)
+                throw new ArgumentNullException(nameof(histSize));
+            if (lowerLevel is null)
+                throw new ArgumentNullException(nameof(lowerLevel));
+            if (upperLevel is null)
+                throw new ArgumentNullException(nameof(upperLevel));
             if (hist.Length != 4) 
                 throw new ArgumentException("hist array must have length 4");
             if (histSize.Length != 4) 
@@ -291,10 +407,14 @@ public static partial class Cv2
                 GC.KeepAlive(h);
         }
 
+        #endregion
+
+        #region HistRange
         /// <summary>
         /// Calculates a histogram with bins determined by the levels array.
         /// </summary>
-        public static void HistRange(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist, OpenCvSharp.Cuda.InputArray levels, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void HistRange(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray hist,
+            OpenCvSharp.Cuda.InputArray levels, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -322,9 +442,13 @@ public static partial class Cv2
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
-            if (hist == null || hist.Length != 4) 
+            if (hist is null)
+                throw new ArgumentNullException(nameof(hist));
+            if (levels is null)
+                throw new ArgumentNullException(nameof(levels));
+            if (hist.Length != 4) 
                 throw new ArgumentException("hist must be length 4");
-            if (levels == null || levels.Length != 4) 
+            if (levels.Length != 4) 
                 throw new ArgumentException("levels must be length 4");
 
             src.ThrowIfDisposed();
@@ -344,6 +468,65 @@ public static partial class Cv2
             foreach (var l in levels) if (l != null) GC.KeepAlive(l);
         }
 
+        #endregion
+
+        #region NumMoments
+
+        /// <summary>
+        /// Returns the number of image moments less than or equal to the largest image moments order.
+        /// </summary>
+        /// <param name="order">Order of moments.</param>
+        /// <returns>Number of moments (buffer size required).</returns>
+        public static int NumMoments(MomentsOrder order)
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_numMoments((int)order, out var ret));
+
+            return ret;
+        }
+
+        #endregion
+
+        #region SpatialMoments
+        /// <summary>
+        /// Calculates all of the spatial moments up to the 3rd order of a rasterized shape (Asynchronous).
+        /// </summary>
+        /// <param name="src">Raster image (8-bit 1-channel or floating-point 2D array).</param>
+        /// <param name="moments">Destination 1D matrix on GPU containing raw moment values.</param>
+        /// <param name="binaryImage">If true, all non-zero image pixels are treated as 1's.</param>
+        /// <param name="order">Order of moments to compute.</param>
+        /// <param name="momentsType">Type of moments (CV_32F or CV_64F).</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public static void SpatialMoments(OpenCvSharp.Cuda.InputArray src,  OpenCvSharp.Cuda.OutputArray moments,
+            bool binaryImage = false,  MomentsOrder order = MomentsOrder.ThirdOrder,
+            MatType? momentsType = null, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (src is null) 
+                throw new ArgumentNullException(nameof(src));
+            if (moments is null) 
+                throw new ArgumentNullException(nameof(moments));
+
+            src.ThrowIfDisposed();
+            moments.ThrowIfNotReady();
+
+            int type = momentsType?.Value ?? (int)MatType.CV_64F;
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_spatialMoments(
+                    src.CvPtr,
+                    moments.CvPtr,
+                    binaryImage ? 1 : 0,
+                    (int)order,
+                    type,
+                    ToPtr(stream)));
+
+            moments.Fix();
+            GC.KeepAlive(src);
+        }
+
+        #endregion
+
+        #region SwapChannels
         /// <summary>
         /// Exchanges the color channels of an image in-place.
         /// </summary>
@@ -367,6 +550,8 @@ public static partial class Cv2
             GC.KeepAlive(image);
         }
 
-      
+        #endregion
+
+
     }
 }

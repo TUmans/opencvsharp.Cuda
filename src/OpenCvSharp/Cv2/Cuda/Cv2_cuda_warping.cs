@@ -11,10 +11,13 @@ public static partial class Cv2
 {
     public static partial class Cuda
     {
+        #region BuildWarpAffineMaps
+
         /// <summary>
         /// Builds transformation maps for affine transformation. 
         /// </summary>
-        public static void BuildWarpAffineMaps(OpenCvSharp.Cuda.InputArray src, bool inverse, Size dsize, OpenCvSharp.Cuda.OutputArray xmap, OpenCvSharp.Cuda.OutputArray ymap, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BuildWarpAffineMaps(InputArray src, bool inverse, Size dsize, OpenCvSharp.Cuda.OutputArray xmap, OpenCvSharp.Cuda.OutputArray ymap, 
+            OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -33,32 +36,14 @@ public static partial class Cv2
             ymap.Fix();
         }
 
-        /// <summary>
-        /// Builds transformation maps for affine transformation. 
-        /// </summary>
-        public static void BuildWarpAffineMaps(InputArray src, bool inverse, Size dsize, OpenCvSharp.Cuda.OutputArray xmap, OpenCvSharp.Cuda.OutputArray ymap, OpenCvSharp.Cuda.Stream? stream = null)
-        {
-            if (src is null)
-                throw new ArgumentNullException(nameof(src));
-            if (xmap is null)
-                throw new ArgumentNullException(nameof(xmap));
-            if (ymap is null)
-                throw new ArgumentNullException(nameof(ymap));
-            src.ThrowIfDisposed();
-            xmap.ThrowIfNotReady();
-            ymap.ThrowIfNotReady();
+        #endregion
 
-            NativeMethods.HandleException(NativeMethods.cuda_buildWarpAffineMaps(src.CvPtr, inverse ? 1 : 0, dsize, xmap.CvPtr, ymap.CvPtr, ToPtr(stream)));
-
-            GC.KeepAlive(src);
-            xmap.Fix();
-            ymap.Fix();
-        }
-
+        #region BuildWarpPerspectiveMaps
         /// <summary>
         /// Builds transformation maps for perspective transformation. 
         /// </summary>
-        public static void BuildWarpPerspectiveMaps(InputArray src, bool inverse, Size dsize, OpenCvSharp.Cuda.OutputArray xmap, OpenCvSharp.Cuda.OutputArray ymap, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void BuildWarpPerspectiveMaps(InputArray src, bool inverse, Size dsize, OpenCvSharp.Cuda.OutputArray xmap, 
+            OpenCvSharp.Cuda.OutputArray ymap, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null)
                 throw new ArgumentNullException(nameof(src));
@@ -77,27 +62,9 @@ public static partial class Cv2
             ymap.Fix();
         }
 
-        /// <summary>
-        /// Builds transformation maps for perspective transformation. 
-        /// </summary>
-        public static void BuildWarpPerspectiveMaps(OpenCvSharp.Cuda.InputArray src, bool inverse, Size dsize, OpenCvSharp.Cuda.OutputArray xmap, OpenCvSharp.Cuda.OutputArray ymap, OpenCvSharp.Cuda.Stream? stream = null)
-        {
-            if (src is null)
-                throw new ArgumentNullException(nameof(src));
-            if (xmap is null)
-                throw new ArgumentNullException(nameof(xmap));
-            if (ymap is null)
-                throw new ArgumentNullException(nameof(ymap));
-            src.ThrowIfDisposed();
-            xmap.ThrowIfNotReady();
-            ymap.ThrowIfNotReady();
+        #endregion
 
-            NativeMethods.HandleException(NativeMethods.cuda_buildWarpPerspectiveMaps(src.CvPtr, inverse ? 1 : 0, dsize, xmap.CvPtr, ymap.CvPtr, ToPtr(stream)));
-            
-            GC.KeepAlive(src);
-            xmap.Fix();
-            ymap.Fix();
-        }
+        #region PyrDown
 
         /// <summary>
         /// Smoothes an image and downsamples it.
@@ -123,6 +90,10 @@ public static partial class Cv2
             
         }
 
+        #endregion
+
+        #region pyrUp
+
         /// <summary>
         /// Upsamples an image and then smoothes it.
         /// </summary>
@@ -147,6 +118,9 @@ public static partial class Cv2
             
         }
 
+        #endregion
+
+        #region Remap
         /// <summary>
         /// Applies a generic geometrical transformation to an image.
         /// </summary>
@@ -158,7 +132,8 @@ public static partial class Cv2
         /// <param name="borderMode">Pixel extrapolation method.</param>
         /// <param name="borderValue">Value used in case of a constant border.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Remap(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,   OpenCvSharp.Cuda.InputArray xmap, OpenCvSharp.Cuda.InputArray ymap, InterpolationFlags interpolation, BorderTypes borderMode = BorderTypes.Constant,  Scalar? borderValue = null, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Remap(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,   
+            OpenCvSharp.Cuda.InputArray xmap, OpenCvSharp.Cuda.InputArray ymap, InterpolationFlags interpolation, BorderTypes borderMode = BorderTypes.Constant,  Scalar? borderValue = null, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -187,7 +162,9 @@ public static partial class Cv2
             dst.Fix();
 
         }
+        #endregion
 
+        #region Resize
         /// <summary>
         /// Resizes an image.
         /// </summary>
@@ -217,6 +194,9 @@ public static partial class Cv2
           
         }
 
+        #endregion
+
+        #region Rotate
         /// <summary>
         /// Rotates an image around the origin (0,0) and then shifts it.
         /// </summary>
@@ -229,7 +209,8 @@ public static partial class Cv2
         /// <param name="yShift">Shift along the vertical axis.</param>
         /// <param name="interpolation">Interpolation method.</param>
         /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void Rotate(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, Size dsize, double angle, double xShift = 0, double yShift = 0, InterpolationFlags interpolation = InterpolationFlags.Linear, OpenCvSharp.Cuda.Stream? stream = null)
+        public static void Rotate(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst, 
+            Size dsize, double angle, double xShift = 0, double yShift = 0, InterpolationFlags interpolation = InterpolationFlags.Linear, OpenCvSharp.Cuda.Stream? stream = null)
         {
             if (src is null) 
                 throw new ArgumentNullException(nameof(src));
@@ -276,6 +257,9 @@ public static partial class Cv2
             Rotate(src, dst, s, angle, xshift, yshift, interpolation, stream);
         }
 
+        #endregion
+
+        #region WarpAffine
         /// <summary>
         /// Applies an affine transformation to an image.
         /// </summary>
@@ -303,6 +287,10 @@ public static partial class Cv2
             dst.Fix();
          
         }
+
+        #endregion
+
+        #region WarpPerspective
 
         /// <summary>
         /// Applies a perspective transformation to an image.
@@ -335,5 +323,7 @@ public static partial class Cv2
             dst.Fix();
 
         }
+
+        #endregion
     }
 }
