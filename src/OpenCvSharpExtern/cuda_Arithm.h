@@ -641,20 +641,36 @@ CVAPI(ExceptionStatus) cuda_integral(cv::_InputArray *src, cv::_OutputArray *sum
 }
 
 CVAPI(ExceptionStatus) cuda_meanStdDev_dst(
+    cv::_InputArray *src, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    cv::cuda::meanStdDev(*src, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_meanStdDev_dst_mask(
     cv::_InputArray *src, cv::_OutputArray *dst, cv::_InputArray *mask, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    cv::cuda::meanStdDev(*src, *dst, mask ? *mask : cv::noArray(), streamRef);
+    cv::cuda::meanStdDev(*src, *dst, *mask, streamRef);
     END_WRAP
 }
 
-// Handles Sync overloads (Result to CPU Scalars)
 CVAPI(ExceptionStatus) cuda_meanStdDev_scalar(
+    cv::_InputArray *src, cv::Scalar *mean, cv::Scalar *stddev)
+{
+    BEGIN_WRAP
+    cv::cuda::meanStdDev(*src, *mean, *stddev);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_meanStdDev_scalar_mask(
     cv::_InputArray *src, cv::Scalar *mean, cv::Scalar *stddev, cv::_InputArray *mask)
 {
     BEGIN_WRAP
-    cv::cuda::meanStdDev(*src, *mean, *stddev, mask ? *mask : cv::noArray());
+    cv::cuda::meanStdDev(*src, *mean, *stddev, *mask);
     END_WRAP
 }
 

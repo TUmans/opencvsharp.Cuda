@@ -1298,41 +1298,42 @@ public static partial class Cv2
         #endregion
 
         #region MeanStdDev
-
         /// <summary>
         /// Computes a mean value and a standard deviation of matrix elements (Asynchronous).
         /// </summary>
-        /// <param name="src">Source matrix.</param>
-        /// <param name="dst">Destination matrix on GPU. Typically 1x2 CV_64F [mean, stddev].</param>
-        /// <param name="mask">Optional operation mask.</param>
-        /// <param name="stream">Stream for the asynchronous version.</param>
-        public static void MeanStdDev(OpenCvSharp.Cuda.InputArray src, OpenCvSharp.Cuda.OutputArray dst,
+        public static void MeanStdDev(
+            OpenCvSharp.Cuda.InputArray src,
+            OpenCvSharp.Cuda.OutputArray dst,
             OpenCvSharp.Cuda.InputArray? mask = null,
             OpenCvSharp.Cuda.Stream? stream = null)
         {
-            if (src is null) 
-                throw new ArgumentNullException(nameof(src));
-            if (dst is null) 
-                throw new ArgumentNullException(nameof(dst));
+            if (src is null) throw new ArgumentNullException(nameof(src));
+            if (dst is null) throw new ArgumentNullException(nameof(dst));
             src.ThrowIfDisposed();
             dst.ThrowIfNotReady();
 
-            NativeMethods.HandleException(
-                NativeMethods.cuda_meanStdDev_dst(src.CvPtr, dst.CvPtr, ToPtr(mask), ToPtr(stream)));
+            if (mask == null)
+            {
+                NativeMethods.HandleException(
+                    NativeMethods.cuda_meanStdDev_dst(src.CvPtr, dst.CvPtr, ToPtr(stream)));
+            }
+            else
+            {
+                mask.ThrowIfDisposed();
+                NativeMethods.HandleException(
+                    NativeMethods.cuda_meanStdDev_dst_mask(src.CvPtr, dst.CvPtr, mask.CvPtr, ToPtr(stream)));
+                GC.KeepAlive(mask);
+            }
 
             dst.Fix();
             GC.KeepAlive(src);
-            GC.KeepAlive(mask);
         }
 
         /// <summary>
         /// Computes a mean value and a standard deviation of matrix elements (Synchronous).
         /// </summary>
-        /// <param name="src">Source matrix.</param>
-        /// <param name="mean">Output mean value.</param>
-        /// <param name="stddev">Output standard deviation.</param>
-        /// <param name="mask">Optional operation mask.</param>
-        public static void MeanStdDev(OpenCvSharp.Cuda.InputArray src,
+        public static void MeanStdDev(
+            OpenCvSharp.Cuda.InputArray src,
             out Scalar mean,
             out Scalar stddev,
             OpenCvSharp.Cuda.InputArray? mask = null)
@@ -1340,11 +1341,20 @@ public static partial class Cv2
             if (src is null) throw new ArgumentNullException(nameof(src));
             src.ThrowIfDisposed();
 
-            NativeMethods.HandleException(
-                NativeMethods.cuda_meanStdDev_scalar(src.CvPtr, out mean, out stddev,ToPtr(mask)));
+            if (mask == null)
+            {
+                NativeMethods.HandleException(
+                    NativeMethods.cuda_meanStdDev_scalar(src.CvPtr, out mean, out stddev));
+            }
+            else
+            {
+                mask.ThrowIfDisposed();
+                NativeMethods.HandleException(
+                    NativeMethods.cuda_meanStdDev_scalar_mask(src.CvPtr, out mean, out stddev, mask.CvPtr));
+                GC.KeepAlive(mask);
+            }
 
             GC.KeepAlive(src);
-            if (mask != null) GC.KeepAlive(mask);
         }
 
 

@@ -392,5 +392,37 @@ public class GpuMatTest : CudaTestBase
         Assert.Equal(255, result.At<byte>(0, 0)); // Inside mask
         Assert.Equal(0, result.At<byte>(6, 0));   // Outside mask
     }
+
+    [Fact]
+    public void UpdateContinuityFlag_Test()
+    {
+        VerifyCudaSupport();
+
+        using var gpuMat = new GpuMat(10, 10, MatType.CV_8UC1);
+
+        // Act & Assert
+        // This should execute smoothly without ExceptionStatus issues
+        var exception = Record.Exception(() => gpuMat.UpdateContinuityFlag());
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void Allocators_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Get the built-in standard allocator
+        IntPtr stdAllocator = GpuMat.GetStdAllocator();
+        Assert.NotEqual(IntPtr.Zero, stdAllocator);
+
+        // 2. Get the current default allocator
+        IntPtr defAllocator = GpuMat.DefaultAllocator();
+        Assert.NotEqual(IntPtr.Zero, defAllocator);
+
+        // 3. Set the default allocator to the standard one 
+        // (This is safe because it's the default behavior anyway)
+        var exception = Record.Exception(() => GpuMat.SetDefaultAllocator(stdAllocator));
+        Assert.Null(exception);
+    }
 }
 

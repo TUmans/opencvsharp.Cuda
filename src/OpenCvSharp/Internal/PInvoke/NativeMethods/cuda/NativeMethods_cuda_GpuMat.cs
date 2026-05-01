@@ -210,6 +210,23 @@ namespace OpenCvSharp.Internal
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_GpuMat_setTo_stream(IntPtr handle, Scalar s, IntPtr mask, IntPtr stream, out IntPtr returnValue);
 
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_cudaPtr(IntPtr obj, out IntPtr returnValue);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_updateContinuityFlag(IntPtr obj);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_defaultAllocator(out IntPtr returnValue);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_getStdAllocator(out IntPtr returnValue);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_setDefaultAllocator(IntPtr allocator);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_copyTo_OutputArray(IntPtr obj, IntPtr dst);
         #endregion
     }
 }

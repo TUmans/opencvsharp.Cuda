@@ -444,6 +444,48 @@ CVAPI(ExceptionStatus) cuda_GpuMat_setTo_stream(cv::cuda::GpuMat *obj, MyCvScala
     END_WRAP
 }
 
+CVAPI(ExceptionStatus) cuda_GpuMat_cudaPtr(cv::cuda::GpuMat *obj, void **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = obj->cudaPtr();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_updateContinuityFlag(cv::cuda::GpuMat *obj)
+{
+    BEGIN_WRAP
+    obj->updateContinuityFlag();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_defaultAllocator(cv::cuda::GpuMat::Allocator **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::GpuMat::defaultAllocator();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_getStdAllocator(cv::cuda::GpuMat::Allocator **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::GpuMat::getStdAllocator();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_setDefaultAllocator(cv::cuda::GpuMat::Allocator *allocator)
+{
+    BEGIN_WRAP
+    cv::cuda::GpuMat::setDefaultAllocator(allocator);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_OutputArray(cv::cuda::GpuMat *obj, cv::_OutputArray *dst)
+{
+    BEGIN_WRAP
+    obj->copyTo(*dst);
+    END_WRAP
+}
+
 #pragma endregion
 
 #endif

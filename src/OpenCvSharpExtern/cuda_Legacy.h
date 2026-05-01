@@ -33,39 +33,7 @@ CVAPI(ExceptionStatus) cuda_connectivityMask(cv::cuda::GpuMat *image, cv::cuda::
     END_WRAP
 }
 
-// ---------- createBackgroundSubtractorGMG --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorGMG(int initializationFrames, double decisionThreshold,  cv::Ptr<cv::cuda::BackgroundSubtractorGMG> **returnValue)
-{
-    BEGIN_WRAP
-    auto ptr = cv::cuda::createBackgroundSubtractorGMG(initializationFrames, decisionThreshold);
-    *returnValue = new cv::Ptr<cv::cuda::BackgroundSubtractorGMG>(ptr);
-    END_WRAP
-}
 
-// ---------- BackgroundSubtractorGMG_get --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_get(cv::Ptr<cv::cuda::BackgroundSubtractorGMG> *ptr, cv::cuda::BackgroundSubtractorGMG **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = ptr->get();
-    END_WRAP
-}
-
-// ---------- BackgroundSubtractorGMG_delete --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_delete(cv::Ptr<cv::cuda::BackgroundSubtractorGMG> *ptr)
-{
-    BEGIN_WRAP
-    delete ptr;
-    END_WRAP
-}
-
-// ---------- BackgroundSubtractorGMG_apply --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorGMG_apply(cv::cuda::BackgroundSubtractorGMG *obj, cv::_InputArray *image, cv::_OutputArray *fgmask, double learningRate, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    obj->apply(*image, *fgmask, learningRate, streamRef);
-    END_WRAP
-}
 
 // ---------- createBackgroundSubtractorFGD --------------------------------------------------
 CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorFGD(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> **returnValue)
@@ -204,5 +172,37 @@ CVAPI(ExceptionStatus) cuda_transformPoints(cv::cuda::GpuMat *src, cv::Mat *rvec
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     cv::cuda::transformPoints(*src, *rvec, *tvec, *dst, streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_getForegroundRegions(cv::cuda::BackgroundSubtractorFGD *obj, cv::Mat ***outMats, int *outCount)
+{
+    BEGIN_WRAP
+    // 1. Get the regions into a C++ vector
+    std::vector<cv::Mat> regions;
+    obj->getForegroundRegions(regions);
+
+    // 2. Determine count
+    *outCount = static_cast<int>(regions.size());
+
+    // 3. Allocate an array of pointers
+    cv::Mat **mats = new cv::Mat *[*outCount];
+
+    // 4. Copy each region into a new heap-allocated Mat so C# can take ownership
+    for (int i = 0; i < *outCount; i++)
+    {
+        mats[i] = new cv::Mat(regions[i]);
+    }
+    // 5. Assign output
+    *outMats = mats;
+    END_WRAP
+}
+
+// Helper to prevent memory leaks by deleting the array of pointers
+// (The actual cv::Mat objects will be deleted by the C# Garbage Collector)
+CVAPI(ExceptionStatus) cuda_FreeMatPointerArray(cv::Mat **mats)
+{
+    BEGIN_WRAP
+    delete[] mats;
     END_WRAP
 }

@@ -322,9 +322,9 @@ public class CudaImgProcTest : CudaTestBase
         Vec3f circle = circlesIndexer[0];
 
         // Validate that it found our circle approximately at (100, 100) with radius 50
-        Assert.InRange(circle.Item0, 95f, 105f); // X
-        Assert.InRange(circle.Item1, 95f, 105f); // Y
-        Assert.InRange(circle.Item2, 45f, 55f);  // Radius
+        AssertAround(circle.Item0, 100f,0.1); // X
+        AssertAround(circle.Item1, 100f, 0.1); // Y
+        AssertAround(circle.Item2, 50f, 0.1);  // Radius
     }
 
     [Fact]

@@ -15,18 +15,6 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_connectivityMask(IntPtr image, IntPtr mask, Scalar lo, Scalar hi, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createBackgroundSubtractorGMG(int initializationFrames, double decisionThreshold, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorGMG_apply(IntPtr obj, IntPtr image, IntPtr fgmask, double learningRate, IntPtr stream);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_createBackgroundSubtractorFGD(out IntPtr returnValue);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -75,4 +63,9 @@ static partial class NativeMethods
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_transformPoints(IntPtr src, IntPtr rvec, IntPtr tvec, IntPtr dst, IntPtr stream);
 
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_BackgroundSubtractorFGD_getForegroundRegions( IntPtr obj, out IntPtr outMats, out int outCount);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_FreeMatPointerArray(IntPtr mats);
 }

@@ -594,6 +594,96 @@ public class CudaLegacyTest : CudaTestBase
         }
     }
 
+    [Fact]
+    public void GetForegroundRegions_Test()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            using var fgd = OpenCvSharp.Cuda.BackgroundSubtractorFGD.Create();
+
+            // FGD REQUIRES 3-channel images (BGR).
+            using var cpuFrame1 = new Mat(100, 100, MatType.CV_8UC3, new Scalar(0, 0, 0));
+            using var cpuFrame2 = new Mat(100, 100, MatType.CV_8UC3, new Scalar(0, 0, 0));
+
+            // Draw a square on Frame 2 to trigger a foreground detection
+            Cv2.Rectangle(cpuFrame2, new Rect(30, 30, 40, 40), new Scalar(255, 255, 255), -1);
+
+            using var gpuFrame = new GpuMat();
+            using var gpuFgMask = new GpuMat();
+
+            // Act: Train Background
+            gpuFrame.Upload(cpuFrame1);
+            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 1.0);
+
+            // Act: Detect Foreground
+            gpuFrame.Upload(cpuFrame2);
+            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 0.0);
+
+            // Act: Extract Regions
+            Mat[] regions = fgd.GetForegroundRegions();
+
+            // Assert
+            Assert.NotNull(regions);
+            // Depending on the internal FGD heuristic, there should be at least 1 region detected
+            Assert.True(regions.Length > 0, "Expected to find at least one foreground region.");
+
+            // Cleanup regions
+            foreach (var region in regions)
+            {
+                Assert.False(region.Empty());
+                region.Dispose();
+            }
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
+        {
+            Assert.Skip("CUDA functionality not available");
+        }
+    }
+
+    [Fact]
+    public void GMG_PropertiesAndMaskTest()
+    {
+        VerifyCudaSupport();
+
+        try
+        {
+            // 1. Create Subtractor
+            using var gmg = OpenCvSharp.Cuda.BackgroundSubtractorGMG.Create();
+
+            // 2. Test Setters and Getters
+            gmg.NumFrames = 50;
+            Assert.Equal(50, gmg.NumFrames);
+
+            gmg.DecisionThreshold = 0.5;
+            Assert.Equal(0.5, gmg.DecisionThreshold);
+
+            gmg.UpdateBackgroundModel = false;
+            Assert.False(gmg.UpdateBackgroundModel);
+
+            // 3. Test Apply with Known Foreground Mask
+            using var cpuFrame = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+            using var gpuFrame = new GpuMat(); gpuFrame.Upload(cpuFrame);
+
+            using var knownFgCpu = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
+            Cv2.Rectangle(knownFgCpu, new Rect(10, 10, 20, 20), new Scalar(255), -1);
+            using var knownFgGpu = new GpuMat(); knownFgGpu.Upload(knownFgCpu);
+
+            using var gpuFgMask = new GpuMat();
+
+            // Apply
+            gmg.Apply(gpuFrame, knownFgGpu, gpuFgMask, learningRate: 0.1);
+
+            // Assert
+            Assert.False(gpuFgMask.Empty());
+        }
+        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
+        {
+            Assert.Skip("CUDA functionality not available");
+        }
+    }
+
 }
 
 

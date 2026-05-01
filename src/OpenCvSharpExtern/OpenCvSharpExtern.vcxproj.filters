@@ -115,6 +115,9 @@
     <ClCompile Include="cuda_Event.h">
       <Filter>Header Files\cuda</Filter>
     </ClCompile>
+    <ClCompile Include="cuda_Bgsegm_mog.h">
+      <Filter>Header Files\cuda\bgsegm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgsegm.h">
@@ -409,13 +412,7 @@
     <ClInclude Include="cuda_Core.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
-    <ClInclude Include="cuda_Bgsegm.h">
-      <Filter>Header Files\cuda</Filter>
-    </ClInclude>
     <ClInclude Include="cuda_Stereo.h">
-      <Filter>Header Files\cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="cuda_Calib3d.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
     <ClInclude Include="cuda_OpenGL.h">
@@ -425,6 +422,24 @@
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
     <ClInclude Include="cuda_Stream.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_Bgsegm.h">
+      <Filter>Header Files\cuda\bgsegm</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_Bgsegm_gmg.h">
+      <Filter>Header Files\cuda\bgsegm</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_Bgsegm_mog2.h">
+      <Filter>Header Files\cuda\bgsegm</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_BroxOpticalFlow.h">
+      <Filter>Header Files\cuda\optflow</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_DenseOpticalFlow.h">
+      <Filter>Header Files\cuda\optflow</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_BufferPool.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
   </ItemGroup>
@@ -491,6 +506,12 @@
     </Filter>
     <Filter Include="Header Files\shape">
       <UniqueIdentifier>{b36ab73f-c7bb-491b-aedb-dc16a293c0b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cuda\bgsegm">
+      <UniqueIdentifier>{6aa9055f-d712-47b4-99fe-3a6e2cd43256}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cuda\optflow">
+      <UniqueIdentifier>{50a3f8c6-a5fd-478f-b5e3-a3f7373c50fb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

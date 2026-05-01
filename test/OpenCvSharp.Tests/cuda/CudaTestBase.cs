@@ -48,4 +48,13 @@ public abstract class CudaTestBase : TestBase
         if (_cudaSupport == 2)
             return;
     }
+    public static void AssertAround(double actual, double expected, double percentage)
+    {
+        var tolerance = Math.Abs(expected) * percentage;
+        var diff = Math.Abs(actual - expected);
+
+        Assert.True(diff <= tolerance,
+            $"Expected {actual} to be within {percentage:P} of {expected} (tolerance {tolerance}, diff {diff})");
+    }
+
 }

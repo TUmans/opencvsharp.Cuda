@@ -58,6 +58,7 @@
     <ClCompile Include="core.cpp" />
     <ClCompile Include="cuda.cpp" />
     <ClCompile Include="cuda_Arithm.h" />
+    <ClCompile Include="cuda_Bgsegm_mog.h" />
     <ClCompile Include="cuda_Event.h" />
     <ClCompile Include="cuda_Filters.h" />
     <ClCompile Include="cuda_Imgproc.h" />
@@ -94,6 +95,7 @@
     <ClInclude Include="aruco.h" />
     <ClInclude Include="barcode.h" />
     <ClInclude Include="bgsegm.h" />
+    <ClInclude Include="cuda_BufferPool.h" />
     <ClInclude Include="calib3d.h" />
     <ClInclude Include="calib3d_fisheye.h" />
     <ClInclude Include="calib3d_StereoMatcher.h" />
@@ -112,8 +114,11 @@
     <ClInclude Include="core_UMat.h" />
     <ClInclude Include="cuda.h" />
     <ClInclude Include="cuda_Bgsegm.h" />
-    <ClInclude Include="cuda_Calib3d.h" />
+    <ClInclude Include="cuda_Bgsegm_gmg.h" />
+    <ClInclude Include="cuda_Bgsegm_mog2.h" />
+    <ClInclude Include="cuda_BroxOpticalFlow.h" />
     <ClInclude Include="cuda_Core.h" />
+    <ClInclude Include="cuda_DenseOpticalFlow.h" />
     <ClInclude Include="cuda_GpuMat.h" />
     <ClInclude Include="cuda_Legacy.h" />
     <ClInclude Include="cuda_OpenGL.h" />

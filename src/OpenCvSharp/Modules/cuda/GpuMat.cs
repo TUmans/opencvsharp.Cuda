@@ -426,10 +426,73 @@ namespace OpenCvSharp.Cuda
                 return (int)Math.Pow(2, ((Depth() / 2) + 1) + 2);
             }
         }
-#endregion
 
-#region Indexers
-#region Range Indexer
+        /// <summary>
+        /// Returns the raw CUDA device pointer to the matrix data.
+        /// </summary>
+        public IntPtr CudaPtr
+        {
+            get
+            {
+                ThrowIfDisposed();
+
+                NativeMethods.HandleException(
+                    NativeMethods.cuda_GpuMat_cudaPtr(CvPtr, out IntPtr ptr));
+
+                GC.KeepAlive(this);
+                return ptr;
+            }
+        }
+
+        /// <summary>
+        /// Internal use method: updates the continuity flag.
+        /// Call this if you manually manipulate the GpuMat data pointer or step.
+        /// </summary>
+        public void UpdateContinuityFlag()
+        {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_updateContinuityFlag(CvPtr));
+            GC.KeepAlive(this);
+        }
+
+        #endregion
+        #region Static Allocators
+        /// <summary>
+        /// Returns the default allocator.
+        /// </summary>
+        public static IntPtr DefaultAllocator()
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_defaultAllocator(out IntPtr ptr));
+            return ptr;
+        }
+
+        /// <summary>
+        /// Returns the standard allocator.
+        /// </summary>
+        public static IntPtr GetStdAllocator()
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_getStdAllocator(out IntPtr ptr));
+            return ptr;
+        }
+
+        /// <summary>
+        /// Sets the default allocator.
+        /// </summary>
+        /// <param name="allocator">Pointer to a custom GpuMat::Allocator instance.</param>
+        public static void SetDefaultAllocator(IntPtr allocator)
+        {
+            if (allocator == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(allocator));
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_setDefaultAllocator(allocator));
+        }
+        #endregion
+        #region Indexers
+        #region Range Indexer
         /// <summary>
         /// 
         /// </summary>
@@ -896,6 +959,24 @@ namespace OpenCvSharp.Cuda
             GC.KeepAlive(this);
             GC.KeepAlive(m);
             GC.KeepAlive(mask);
+        }
+
+        /// <summary>
+        /// Copies the GpuMat content to device or host memory (Blocking call).
+        /// </summary>
+        /// <param name="dst">Destination array. Can be a Mat or GpuMat.</param>
+        public void CopyTo(OpenCvSharp.Cuda.OutputArray dst)
+        {
+            if (dst is null) throw new ArgumentNullException(nameof(dst));
+
+            ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_copyTo_OutputArray(CvPtr, dst.CvPtr));
+
+            dst.Fix();
+            GC.KeepAlive(this);
         }
 
         /// <summary>

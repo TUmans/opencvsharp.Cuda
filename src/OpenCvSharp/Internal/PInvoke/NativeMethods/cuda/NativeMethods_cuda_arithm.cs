@@ -250,10 +250,20 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_integral(IntPtr src, IntPtr sum, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_meanStdDev_dst(IntPtr src, IntPtr dst, IntPtr mask, IntPtr stream);
+    public static extern ExceptionStatus cuda_meanStdDev_dst(
+        IntPtr src, IntPtr dst, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_meanStdDev_scalar( IntPtr src, out Scalar mean, out Scalar stddev, IntPtr mask);
+    public static extern ExceptionStatus cuda_meanStdDev_dst_mask(
+        IntPtr src, IntPtr dst, IntPtr mask, IntPtr stream);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanStdDev_scalar(
+        IntPtr src, out Scalar mean, out Scalar stddev);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_meanStdDev_scalar_mask(
+        IntPtr src, out Scalar mean, out Scalar stddev, IntPtr mask);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_merge(IntPtr[] src, UIntPtr n, IntPtr dst, IntPtr stream);
