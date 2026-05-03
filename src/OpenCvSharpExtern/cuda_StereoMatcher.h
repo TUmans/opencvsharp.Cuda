@@ -8,7 +8,4 @@
 // -----------------------------------------------------------------------
 
 #include "include_opencv.h"
-#include <opencv2/cudabgsegm.hpp>
-
-
-
+#include <opencv2/cudastereo.hpp>

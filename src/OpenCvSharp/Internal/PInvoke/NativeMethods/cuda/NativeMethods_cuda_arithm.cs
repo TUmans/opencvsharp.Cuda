@@ -190,48 +190,7 @@ static partial class NativeMethods
         IntPtr mask, int dtype, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_threshold(
-        IntPtr src, IntPtr dst,
-        double thresh, double maxval,
-        int type, IntPtr stream,
-        out double retVal);
-
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createConvolution(Size userBlockSize, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_Convolution_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_Convolution_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_Convolution_convolve(IntPtr obj, IntPtr image, IntPtr templ, IntPtr result, int conj, IntPtr stream);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createDFT(Size dftSize, int flags, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_DFT_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_DFT_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_DFT_compute( IntPtr obj, IntPtr src, IntPtr dst, IntPtr stream);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createLookUpTable(IntPtr lut, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_LookUpTable_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_LookUpTable_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_LookUpTable_transform(IntPtr obj, IntPtr src, IntPtr dst, IntPtr stream);
+    public static extern ExceptionStatus cuda_threshold(IntPtr src, IntPtr dst, double thresh, double maxval, int type, IntPtr stream, out double retVal);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_dft(IntPtr src, IntPtr dst, Size dftSize, int flags, IntPtr stream);

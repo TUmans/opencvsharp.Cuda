@@ -35,75 +35,8 @@ CVAPI(ExceptionStatus) cuda_connectivityMask(cv::cuda::GpuMat *image, cv::cuda::
 
 
 
-// ---------- createBackgroundSubtractorFGD --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorFGD(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> **returnValue)
-{
-    BEGIN_WRAP
-    auto ptr = cv::cuda::createBackgroundSubtractorFGD();
-    *returnValue = new cv::Ptr<cv::cuda::BackgroundSubtractorFGD>(ptr);
-    END_WRAP
-}
 
-// ---------- BackgroundSubtractorFGD_get --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_get(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> *ptr, cv::cuda::BackgroundSubtractorFGD **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = ptr->get();
-    END_WRAP
-}
 
-// ---------- BackgroundSubtractorFGD_delete --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_delete( cv::Ptr<cv::cuda::BackgroundSubtractorFGD> *ptr)
-{
-    BEGIN_WRAP
-    delete ptr;
-    END_WRAP
-}
-
-// ---------- BackgroundSubtractorFGD_apply --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_apply(cv::cuda::BackgroundSubtractorFGD *obj, cv::_InputArray *image, cv::_OutputArray *fgmask, double learningRate)
-{
-    BEGIN_WRAP
-    obj->apply(*image, *fgmask, learningRate);
-    END_WRAP
-}
-
-// ---------- cuda_createImagePyramid --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_createImagePyramid(
-    cv::_InputArray *img, int nLayers, cv::cuda::Stream *stream,
-    cv::Ptr<cv::cuda::ImagePyramid> **returnValue)
-{
-    BEGIN_WRAP
-    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    auto ptr = cv::cuda::createImagePyramid(*img, nLayers, streamRef);
-    *returnValue = new cv::Ptr<cv::cuda::ImagePyramid>(ptr);
-    END_WRAP
-}
-
-// ---------- cuda_ImagePyramid_get --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_ImagePyramid_get(cv::Ptr<cv::cuda::ImagePyramid> *ptr, cv::cuda::ImagePyramid **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = ptr->get();
-    END_WRAP
-}
-
-// ---------- cuda_ImagePyramid_delete --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_ImagePyramid_delete(cv::Ptr<cv::cuda::ImagePyramid> *ptr)
-{
-    BEGIN_WRAP
-    delete ptr;
-    END_WRAP
-}
-
-// ---------- cuda_ImagePyramid_getLayer --------------------------------------------------
-CVAPI(ExceptionStatus) cuda_ImagePyramid_getLayer(cv::cuda::ImagePyramid *obj, cv::_OutputArray *outImg, cv::Size dsize, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    obj->getLayer(*outImg, dsize, streamRef);
-    END_WRAP
-}
 
 CVAPI(ExceptionStatus) cuda_createOpticalFlowNeedleMap(cv::cuda::GpuMat *u, cv::cuda::GpuMat *v, cv::cuda::GpuMat *vertex, cv::cuda::GpuMat *colors)
 {
@@ -175,28 +108,7 @@ CVAPI(ExceptionStatus) cuda_transformPoints(cv::cuda::GpuMat *src, cv::Mat *rvec
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_getForegroundRegions(cv::cuda::BackgroundSubtractorFGD *obj, cv::Mat ***outMats, int *outCount)
-{
-    BEGIN_WRAP
-    // 1. Get the regions into a C++ vector
-    std::vector<cv::Mat> regions;
-    obj->getForegroundRegions(regions);
 
-    // 2. Determine count
-    *outCount = static_cast<int>(regions.size());
-
-    // 3. Allocate an array of pointers
-    cv::Mat **mats = new cv::Mat *[*outCount];
-
-    // 4. Copy each region into a new heap-allocated Mat so C# can take ownership
-    for (int i = 0; i < *outCount; i++)
-    {
-        mats[i] = new cv::Mat(regions[i]);
-    }
-    // 5. Assign output
-    *outMats = mats;
-    END_WRAP
-}
 
 // Helper to prevent memory leaks by deleting the array of pointers
 // (The actual cv::Mat objects will be deleted by the C# Garbage Collector)

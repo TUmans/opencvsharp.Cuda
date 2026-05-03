@@ -59,4 +59,25 @@ public class CornersDetector : Algorithm
         GC.KeepAlive(image);
         if (mask != null) GC.KeepAlive(mask);
     }
+
+    public int MaxCorners
+    {
+        set
+        {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_CornersDetector_setMaxCorners(RawPtr, value));
+            GC.KeepAlive(this);
+        }
+    }
+
+    public double MinDistance
+    {
+        set
+        {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_CornersDetector_setMinDistance(RawPtr, value));
+            GC.KeepAlive(this);
+        }
+    }
+
 }

@@ -15,31 +15,6 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_connectivityMask(IntPtr image, IntPtr mask, Scalar lo, Scalar hi, IntPtr stream);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createBackgroundSubtractorFGD(out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorFGD_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorFGD_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorFGD_apply(IntPtr obj, IntPtr image, IntPtr fgmask, double learningRate);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_createImagePyramid(
-    IntPtr img, int nLayers, IntPtr stream, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_ImagePyramid_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_ImagePyramid_delete(IntPtr ptr);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_ImagePyramid_getLayer(IntPtr obj, IntPtr outImg, Size dsize, IntPtr stream);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_createOpticalFlowNeedleMap(IntPtr u, IntPtr v, IntPtr vertex, IntPtr colors);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -63,8 +38,7 @@ static partial class NativeMethods
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_transformPoints(IntPtr src, IntPtr rvec, IntPtr tvec, IntPtr dst, IntPtr stream);
 
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_BackgroundSubtractorFGD_getForegroundRegions( IntPtr obj, out IntPtr outMats, out int outCount);
+
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_FreeMatPointerArray(IntPtr mats);
