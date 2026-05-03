@@ -445,6 +445,9 @@
     <ClInclude Include="cuda_CannyEdgeDetector.h">
       <Filter>Header Files\cuda\imgproc</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_CascadeClassifier.h">
+      <Filter>Header Files\cuda\objdetect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -518,6 +521,9 @@
     </Filter>
     <Filter Include="Header Files\cuda\imgproc">
       <UniqueIdentifier>{77dea1f3-efb9-485a-b450-d7c564d5ef20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cuda\objdetect">
+      <UniqueIdentifier>{b41df875-2c88-43f6-b15c-ebe8b1618e18}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

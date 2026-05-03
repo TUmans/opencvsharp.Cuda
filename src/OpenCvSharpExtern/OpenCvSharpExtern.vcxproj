@@ -118,6 +118,7 @@
     <ClInclude Include="cuda_Bgsegm_mog2.h" />
     <ClInclude Include="cuda_BroxOpticalFlow.h" />
     <ClInclude Include="cuda_CannyEdgeDetector.h" />
+    <ClInclude Include="cuda_CascadeClassifier.h" />
     <ClInclude Include="cuda_Core.h" />
     <ClInclude Include="cuda_DenseOpticalFlow.h" />
     <ClInclude Include="cuda_GpuMat.h" />

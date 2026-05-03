@@ -23,4 +23,5 @@
 #include "cuda_DenseOpticalFlow.h"
 #include "cuda_BufferPool.h"
 #include "cuda_CannyEdgeDetector.h"
+#include "cuda_CascadeClassifier.h"
 #endif
