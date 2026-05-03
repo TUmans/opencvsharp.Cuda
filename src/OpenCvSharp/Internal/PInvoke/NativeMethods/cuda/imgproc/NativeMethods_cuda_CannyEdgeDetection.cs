@@ -7,7 +7,6 @@ using OpenCvSharp.Cuda;
 
 namespace OpenCvSharp.Internal
 {
-    // ReSharper disable InconsistentNaming
 
     static partial class NativeMethods
     {
