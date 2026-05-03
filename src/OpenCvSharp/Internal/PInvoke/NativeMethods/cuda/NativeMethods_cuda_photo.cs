@@ -5,7 +5,7 @@ using System.Text;
 using OpenCvSharp.Modules.core.Enum;
 
 namespace OpenCvSharp.Internal;
-
+#pragma warning disable 1591
 static partial class NativeMethods
 {
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

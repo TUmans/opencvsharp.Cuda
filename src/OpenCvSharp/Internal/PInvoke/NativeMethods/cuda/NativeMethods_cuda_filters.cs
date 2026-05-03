@@ -5,8 +5,7 @@ using System.Text;
 
 namespace OpenCvSharp.Internal;
 
-// ReSharper disable InconsistentNaming
-
+#pragma warning disable 1591
 static partial class NativeMethods
 {
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
