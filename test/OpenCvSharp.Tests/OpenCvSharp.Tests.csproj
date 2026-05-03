@@ -94,7 +94,6 @@
 
   <ItemGroup>
     <Folder Include="cuda\legacy\" />
-    <Folder Include="cuda\stereo\" />
     <Folder Include="_data\image\Dnn\" />
   </ItemGroup>
 
