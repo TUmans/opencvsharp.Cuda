@@ -3,8 +3,8 @@ using Xunit;
 using OpenCvSharp;
 using OpenCvSharp.Cuda;
 
-namespace OpenCvSharp.Tests.Cuda
-{
+namespace OpenCvSharp.Tests.Cuda.Optflow;
+
     public class CudaBroxOpticalFlowTests : CudaTestBase
     {
         [Fact]
@@ -63,4 +63,4 @@ namespace OpenCvSharp.Tests.Cuda
             }
         }
     }
-}
+

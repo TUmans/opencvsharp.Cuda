@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#pragma warning disable 1591
+
 namespace OpenCvSharp.Internal;
 
 // ReSharper disable InconsistentNaming

@@ -508,6 +508,9 @@
     <ClInclude Include="cuda_ImagePyramid.h">
       <Filter>Header Files\cuda\legacy</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_DensePyrLKOpticalFlow.h">
+      <Filter>Header Files\cuda\optflow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

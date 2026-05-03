@@ -127,6 +127,7 @@
     <ClInclude Include="cuda_CornernessCriteria.h" />
     <ClInclude Include="cuda_CornersDetector.h" />
     <ClInclude Include="cuda_DenseOpticalFlow.h" />
+    <ClInclude Include="cuda_DensePyrLKOpticalFlow.h" />
     <ClInclude Include="cuda_DFT.h" />
     <ClInclude Include="cuda_GeneralizedHough.h" />
     <ClInclude Include="cuda_GeneralizedHoughBallard.h" />

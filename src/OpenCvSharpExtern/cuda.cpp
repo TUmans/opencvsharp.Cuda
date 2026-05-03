@@ -50,6 +50,7 @@
 //optiflow
 #include "cuda_BroxOpticalFlow.h"
 #include "cuda_DenseOpticalFlow.h"
+#include "cuda_DensePyrLKOpticalFlow.h"
 
 // stereo
 #include "cuda_DisparityBilateralFilter.h"
