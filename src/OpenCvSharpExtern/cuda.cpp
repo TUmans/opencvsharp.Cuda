@@ -22,4 +22,5 @@
 #include "cuda_BroxOpticalFlow.h"
 #include "cuda_DenseOpticalFlow.h"
 #include "cuda_BufferPool.h"
+#include "cuda_CannyEdgeDetector.h"
 #endif
