@@ -162,15 +162,35 @@ public class CudaImgProcTest : CudaTestBase
     {
         VerifyCudaSupport();
 
-        // 1. Arrange
-        // Create a 100x100 image with terrible contrast.
+        // 1. Arrange: Create CLAHE algorithm with initial values
+        using var clahe = OpenCvSharp.Cuda.CLAHE.Create(clipLimit: 40.0, tileGridSize: new Size(8, 8));
+
+        // 2. Assert Initial Properties
+        Assert.Equal(40.0, clahe.ClipLimit);
+        Assert.Equal(new Size(8, 8), clahe.TilesGridSize);
+
+        // 3. Act: Modify Properties
+        clahe.ClipLimit = 20.5;
+        clahe.TilesGridSize = new Size(4, 4);
+
+        // 4. Assert Modified Properties
+        Assert.Equal(20.5, clahe.ClipLimit);
+        Assert.Equal(new Size(4, 4), clahe.TilesGridSize);
+
+        // 5. Act: Test CollectGarbage
+        // Just ensuring it successfully calls the native method without crashing
+        var exception = Record.Exception(() => clahe.CollectGarbage());
+        Assert.Null(exception);
+
+        // 6. Act: Test Apply (Ensure it still works after property changes)
         using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(100)); // Dark Gray
 
+        // Create a horizontal gradient (0-99)
         for (int y = 0; y < 100; y++)
         {
             for (int x = 0; x < 100; x++)
             {
-                cpuSrc.Set(y, x, (byte)(x)); // horizontal gradient 0–99
+                cpuSrc.Set(y, x, (byte)x);
             }
         }
 
@@ -180,13 +200,9 @@ public class CudaImgProcTest : CudaTestBase
         using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
         using var gpuDst = new GpuMat();
 
-        // Create CLAHE algorithm
-        using var clahe = OpenCvSharp.Cuda.CLAHE.Create(clipLimit: 40.0, tileGridSize: new Size(8, 8));
-
-        // 2. Act
         clahe.Apply(gpuSrc, gpuDst);
 
-        // 3. Download and Assert
+        // 7. Download and Assert
         using var cpuDst = new Mat();
         gpuDst.Download(cpuDst);
 
