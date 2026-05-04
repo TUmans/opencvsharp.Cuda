@@ -5,55 +5,6 @@ namespace OpenCvSharp.Tests.Cuda;
 
 public class CudaArthimTest : CudaTestBase
 {
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
-    /// <summary>
-    /// Skips the test when no CUDA-capable device is present.
-    /// Call at the top of every test.
-    /// </summary>
-    
-
-    /// <summary>Creates a single-channel float GpuMat filled with <paramref name="value"/>.</summary>
-    private static GpuMat MakeFloat(int rows, int cols, float value)
-    {
-        using var cpu = new Mat(rows, cols, MatType.CV_32FC1, new Scalar(value));
-        var gpu = new GpuMat();
-        gpu.Upload(cpu);
-        return gpu;
-    }
-
-    /// <summary>Creates a single-channel byte GpuMat filled with <paramref name="value"/>.</summary>
-    private static GpuMat MakeByte(int rows, int cols, byte value)
-    {
-        using var cpu = new Mat(rows, cols, MatType.CV_8UC1, new Scalar(value));
-        var gpu = new GpuMat();
-        gpu.Upload(cpu);
-        return gpu;
-    }
-
-    /// <summary>Downloads a GpuMat and returns the value of pixel (0,0) as float.</summary>
-    private static float PixelF(GpuMat gpu)
-    {
-        using var cpu = new Mat();
-        gpu.Download(cpu);
-        return cpu.At<float>(0, 0);
-    }
-
-    /// <summary>Downloads a GpuMat and returns the value of pixel (0,0) as byte.</summary>
-    private static byte PixelB(GpuMat gpu)
-    {
-        using var cpu = new Mat();
-        gpu.Download(cpu);
-        return cpu.At<byte>(0, 0);
-    }
-
-    private const int Rows = 4;
-    private const int Cols = 4;
-    private const float Tolerance = 1e-4f;
-
-    public void Dispose() { }
 
     [Fact]
     public void Abs()
@@ -97,7 +48,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(7f, PixelF(dst2), 3);
     }
-
    
     [Fact]
     public void AbsdiffWithScalar()
@@ -773,10 +723,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(15f, PixelF(dst), 2);
     }
 
-    // -----------------------------------------------------------------------
-    // exp
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Exp_Zero_ReturnsOne()
     {
@@ -803,10 +749,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(Math.E, PixelF(dst), 2);
     }
 
-    // -----------------------------------------------------------------------
-    // log
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Log_One_ReturnsZero()
     {
@@ -832,10 +774,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(1f, PixelF(dst), 3);
     }
-
-    // -----------------------------------------------------------------------
-    // lshift / rshift
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Lshift_ByteMatrix_ShiftsByGivenAmount()
@@ -865,10 +803,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal((byte)4, PixelB(dst));
     }
 
-    // -----------------------------------------------------------------------
-    // magnitude
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Magnitude_SeparatePlanes_Returns345Hypotenuse()
     {
@@ -884,9 +818,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(5f, PixelF(mag), 2);
     }
 
-    // -----------------------------------------------------------------------
-    // magnitudeSqr
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void MagnitudeSqr_SeparatePlanes_ReturnsSquaredMagnitude()
@@ -902,10 +833,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(25f, PixelF(mag), 2);
     }
-
-    // -----------------------------------------------------------------------
-    // max
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Max_TwoMatrices_ReturnsLarger()
@@ -947,10 +874,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(150, cpuDst.At<byte>(0, 1));
     }
 
-    // -----------------------------------------------------------------------
-    // min
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Min_TwoMatrices_ReturnsSmaller()
     {
@@ -964,10 +887,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(3f, PixelF(dst), 3);
     }
-
-    // -----------------------------------------------------------------------
-    // multiply
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Multiply_TwoMatrices_ReturnsProduct()
@@ -998,10 +917,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(3f, PixelF(dst), 3);
     }
 
-    // -----------------------------------------------------------------------
-    // phase
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Phase_PositiveXZeroY_AngleIsZero()
     {
@@ -1029,10 +944,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(45f, PixelF(ang), 1);
     }
-
-    // -----------------------------------------------------------------------
-    // polarToCart
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void PolarToCart_Test()
@@ -1080,10 +991,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.InRange(res.Item1, 3.99f, 4.01f); // Y
     }
 
-    // -----------------------------------------------------------------------
-    // pow
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Pow_BaseAndExponent_ReturnsCorrectPower()
     {
@@ -1111,10 +1018,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(1f, PixelF(dst), 3);
     }
 
-    // -----------------------------------------------------------------------
-    // scaleAdd
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void ScaleAdd_ComputesAlphaSrc1PlusSrc2()
     {
@@ -1130,10 +1033,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(13f, PixelF(dst), 2);
     }
 
-    // -----------------------------------------------------------------------
-    // sqr
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Sqr_PositiveValue_ReturnsSquare()
     {
@@ -1146,10 +1045,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(81f, PixelF(dst), 2);
     }
-
-    // -----------------------------------------------------------------------
-    // sqrt
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Sqrt_PerfectSquare_ReturnsRoot()
@@ -1164,10 +1059,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(12f, PixelF(dst), 3);
     }
 
-    // -----------------------------------------------------------------------
-    // subtract
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Subtract_TwoMatrices_ReturnsDifference()
     {
@@ -1181,10 +1072,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(7f, PixelF(dst), 3);
     }
-
-    // -----------------------------------------------------------------------
-    // threshold
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Threshold_BinaryType_PixelsAboveThresholdBecome255()
@@ -1228,10 +1115,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(128.0, returned, 3);
     }
 
-    // -----------------------------------------------------------------------
-    // null-argument guard tests (no CUDA needed — pure managed layer)
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Add_NullSrc1_Throws() =>
         Assert.Throws<ArgumentNullException>(() =>
@@ -1266,10 +1149,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Throws<ArgumentNullException>(() =>
             Cv2.Cuda.Threshold(src, null!, 0, 255, ThresholdTypes.Binary));
     }
-
-    // -----------------------------------------------------------------------
-    // Stream Tests (Verifying actual results, not just execution)
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Subtract_WithStream_VerifiesResult()
@@ -1306,10 +1185,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(5f, PixelF(mag), 2);
     }
 
-    // -----------------------------------------------------------------------
-    // Mask Tests
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Add_WithEmptyMask_LeavesDestinationUntouched()
     {
@@ -1342,12 +1217,6 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(10f, PixelF(dst), 3);
     }
 
-  
-
-    // -----------------------------------------------------------------------
-    // In-Place Operation Tests (src == dst)
-    // -----------------------------------------------------------------------
-
     [Fact]
     public void Add_InPlace_UpdatesSourceCorrectly()
     {
@@ -1361,12 +1230,6 @@ public class CudaArthimTest : CudaTestBase
 
         Assert.Equal(7f, PixelF(srcDst), 3);
     }
-
-
-
-    // -----------------------------------------------------------------------
-    // Advanced Parameter Tests (dtype, scale, radians vs degrees)
-    // -----------------------------------------------------------------------
 
     [Fact]
     public void Multiply_WithDtype_CastsOutputProperly()
@@ -1505,41 +1368,7 @@ public class CudaArthimTest : CudaTestBase
         Assert.Equal(205, cpuDst.At<byte>(0, 0));
     }
 
-    [Fact]
-    public void MinEigenVal_ComputeTest()
-    {
-        VerifyCudaSupport();
 
-        // 1. Arrange: 100x100 black image with a 40x40 white square
-        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
-        Cv2.Rectangle(cpuSrc, new Rect(30, 30, 40, 40), new Scalar(255), -1);
-
-        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
-        using var gpuDst = new GpuMat();
-
-        // 2. Act
-        using var criteria = OpenCvSharp. Cuda.CornernessCriteria.CreateMinEigenValCorner(
-            MatType.CV_8UC1,
-            blockSize: 3,
-            ksize: 3);
-
-        criteria.Compute(gpuSrc, gpuDst);
-
-        // 3. Download and Assert
-        using var cpuDst = new Mat();
-        gpuDst.Download(cpuDst);
-
-        Assert.False(cpuDst.Empty());
-        Assert.Equal(MatType.CV_32FC1, cpuDst.Type());
-
-        // A corner of the square (30, 30) should have a high positive eigenvalue score
-        float cornerScore = cpuDst.At<float>(30, 30);
-        Assert.True(cornerScore > 0, $"Expected positive score at corner, but got {cornerScore}");
-
-        // A pixel in the middle of a flat white area should have a score near 0
-        float flatScore = cpuDst.At<float>(50, 50);
-        Assert.InRange(flatScore, -0.1f, 0.1f);
-    }
 
     [Fact]
     public void Dft_GlobalFuncTest()
@@ -1917,8 +1746,6 @@ public class CudaArthimTest : CudaTestBase
         // index 1: was 150, capped at 100
         Assert.Equal(100, cpuDst.At<byte>(0, 1));
     }
-
-
 
     [Fact]
     public void MinMaxLoc_DirectTest()

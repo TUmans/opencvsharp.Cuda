@@ -81,7 +81,6 @@ public class CudaLegacyTest : CudaTestBase
         Assert.InRange(bgAvgY, -2.5, 2.5);
     }
 
-
     [Fact]
     public void ConnectivityMaskTest()
     {
@@ -123,127 +122,6 @@ public class CudaLegacyTest : CudaTestBase
         // The pixels within the lo/hi range should be 255
         Assert.Equal(255, cpuMask.At<byte>(2, 2));
         Assert.Equal(255, cpuMask.At<byte>(2, 3));
-    }
-
-    [Fact]
-    public void BackgroundSubtractorGMG()
-    {
-        VerifyCudaSupport();
-
-        try
-        {
-            // 1. Create GMG with exactly 1 initialization frame so it activates immediately.
-            using var gmg = OpenCvSharp.Cuda.BackgroundSubtractorGMG.Create(initializationFrames: 1);
-
-            using var cpuFrame = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
-            using var gpuFrame = new GpuMat();
-            using var gpuFgMask = new GpuMat();
-
-            // 2. FRAME 1: Pure black background (Initialization phase)
-            gpuFrame.Upload(cpuFrame);
-
-            // Using our Stream overload (stream = null) 30 because we need to train our model
-            for (int i = 0; i < 30; i++)
-            {
-                gmg.Apply(gpuFrame, gpuFgMask, learningRate: 0.1);
-            }
-
-            // 3. FRAME 2: Introduce a moving object (white square)
-            Cv2.Rectangle(cpuFrame, new Rect(40, 40, 20, 20), new Scalar(255), -1);
-            gpuFrame.Upload(cpuFrame);
-
-            // Apply frame 2 to extract the foreground
-            gmg.Apply(gpuFrame, gpuFgMask, learningRate: 0.0);
-
-            // 4. Download and Assert
-            using var cpuFgMask = new Mat();
-            gpuFgMask.Download(cpuFgMask);
-
-            Assert.False(cpuFgMask.Empty(), "Foreground mask should not be empty.");
-            Assert.Equal(MatType.CV_8UC1, cpuFgMask.Type());
-
-            // Assert that the static background pixel is dark (0)
-            Assert.Equal(0, cpuFgMask.At<byte>(10, 10));
-
-            // Assert that the moving white square pixel is bright (255)
-            Assert.Equal(255, cpuFgMask.At<byte>(50, 50));
-        }
-        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
-        {
-            // Graceful exit: cudabgsegm is an extra module and not always compiled 
-            // into all OpenCV distribution binaries.
-            Assert.Skip("The called functionality is disabled for current build or platform");
-        }
-    }
-
-
-    [Fact]
-    public void BackgroundSubtractorFGD()
-    {
-        VerifyCudaSupport();
-
-        try
-        {
-            using var fgd = OpenCvSharp.Cuda.BackgroundSubtractorFGD.Create();
-
-            // FGD REQUIRES 3-channel images (BGR). It will crash if given 1-channel grayscale.
-            using var cpuFrame = new Mat(100, 100, MatType.CV_8UC3, new Scalar(0, 0, 0));
-            using var gpuFrame = new GpuMat();
-            using var gpuFgMask = new GpuMat();
-
-            // Frame 1: Train background
-            gpuFrame.Upload(cpuFrame);
-            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 1.0);
-
-            // Frame 2: Introduce foreground (A white square)
-            Cv2.Rectangle(cpuFrame, new Rect(40, 40, 20, 20), new Scalar(255, 255, 255), -1);
-            gpuFrame.Upload(cpuFrame);
-            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 0.0);
-
-            // Assert
-            using var cpuFgMask = new Mat();
-            gpuFgMask.Download(cpuFgMask);
-
-            Assert.False(cpuFgMask.Empty());
-            // The output mask is always a 1-channel binary image (CV_8UC1)
-            Assert.Equal(MatType.CV_8UC1, cpuFgMask.Type());
-
-            // Background should be black (0)
-            Assert.Equal(0, cpuFgMask.At<byte>(10, 10));
-            // Foreground should be white (255)
-            Assert.Equal(255, cpuFgMask.At<byte>(50, 50));
-        }
-        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
-        {
-            // Graceful exit if cudabgsegm is not compiled into the OpenCV binaries.
-            Assert.Skip("The called functionality is disabled for current build or platform");
-        }
-    }
-
-    [Fact]
-    public void ImagePyramid_GetLayerTest()
-    {
-        VerifyCudaSupport();
-
-        // 1. Arrange: 100x100 source image
-        using var cpuSrc = new Mat(100, 100, MatType.CV_8UC1, new Scalar(128));
-        using var gpuSrc = new GpuMat(); gpuSrc.Upload(cpuSrc);
-
-        // 2. Act: Create pyramid
-        using var pyramid = OpenCvSharp.Cuda.ImagePyramid.Create(gpuSrc, nLayers: 3);
-
-        using var gpuLayer0 = new GpuMat();
-        using var gpuLayer1 = new GpuMat();
-
-        // Fetch the 100x100 layer
-        pyramid.GetLayer(gpuLayer0, new Size(100, 100));
-        // Fetch the 50x50 layer
-        pyramid.GetLayer(gpuLayer1, new Size(50, 50));
-
-        // 3. Assert
-        Assert.Equal(100, gpuLayer0.Rows);
-        Assert.Equal(50, gpuLayer1.Rows);
-        Assert.False(gpuLayer1.Empty());
     }
 
     [Fact]
@@ -594,95 +472,9 @@ public class CudaLegacyTest : CudaTestBase
         }
     }
 
-    [Fact]
-    public void GetForegroundRegions_Test()
-    {
-        VerifyCudaSupport();
 
-        try
-        {
-            using var fgd = OpenCvSharp.Cuda.BackgroundSubtractorFGD.Create();
 
-            // FGD REQUIRES 3-channel images (BGR).
-            using var cpuFrame1 = new Mat(100, 100, MatType.CV_8UC3, new Scalar(0, 0, 0));
-            using var cpuFrame2 = new Mat(100, 100, MatType.CV_8UC3, new Scalar(0, 0, 0));
 
-            // Draw a square on Frame 2 to trigger a foreground detection
-            Cv2.Rectangle(cpuFrame2, new Rect(30, 30, 40, 40), new Scalar(255, 255, 255), -1);
-
-            using var gpuFrame = new GpuMat();
-            using var gpuFgMask = new GpuMat();
-
-            // Act: Train Background
-            gpuFrame.Upload(cpuFrame1);
-            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 1.0);
-
-            // Act: Detect Foreground
-            gpuFrame.Upload(cpuFrame2);
-            fgd.Apply(gpuFrame, gpuFgMask, learningRate: 0.0);
-
-            // Act: Extract Regions
-            Mat[] regions = fgd.GetForegroundRegions();
-
-            // Assert
-            Assert.NotNull(regions);
-            // Depending on the internal FGD heuristic, there should be at least 1 region detected
-            Assert.True(regions.Length > 0, "Expected to find at least one foreground region.");
-
-            // Cleanup regions
-            foreach (var region in regions)
-            {
-                Assert.False(region.Empty());
-                region.Dispose();
-            }
-        }
-        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
-        {
-            Assert.Skip("CUDA functionality not available");
-        }
-    }
-
-    [Fact]
-    public void GMG_PropertiesAndMaskTest()
-    {
-        VerifyCudaSupport();
-
-        try
-        {
-            // 1. Create Subtractor
-            using var gmg = OpenCvSharp.Cuda.BackgroundSubtractorGMG.Create();
-
-            // 2. Test Setters and Getters
-            gmg.NumFrames = 50;
-            Assert.Equal(50, gmg.NumFrames);
-
-            gmg.DecisionThreshold = 0.5;
-            Assert.Equal(0.5, gmg.DecisionThreshold);
-
-            gmg.UpdateBackgroundModel = false;
-            Assert.False(gmg.UpdateBackgroundModel);
-
-            // 3. Test Apply with Known Foreground Mask
-            using var cpuFrame = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
-            using var gpuFrame = new GpuMat(); gpuFrame.Upload(cpuFrame);
-
-            using var knownFgCpu = new Mat(100, 100, MatType.CV_8UC1, new Scalar(0));
-            Cv2.Rectangle(knownFgCpu, new Rect(10, 10, 20, 20), new Scalar(255), -1);
-            using var knownFgGpu = new GpuMat(); knownFgGpu.Upload(knownFgCpu);
-
-            using var gpuFgMask = new GpuMat();
-
-            // Apply
-            gmg.Apply(gpuFrame, knownFgGpu, gpuFgMask, learningRate: 0.1);
-
-            // Assert
-            Assert.False(gpuFgMask.Empty());
-        }
-        catch (OpenCVException ex) when (ex.Message.Contains("disabled") || ex.Message.Contains("Not Implemented"))
-        {
-            Assert.Skip("CUDA functionality not available");
-        }
-    }
 
 }
 

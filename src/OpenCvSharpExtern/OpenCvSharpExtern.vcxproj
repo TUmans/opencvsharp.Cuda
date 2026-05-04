@@ -60,6 +60,7 @@
     <ClCompile Include="cuda_Arithm.h" />
     <ClCompile Include="cuda_Bgsegm_mog.h" />
     <ClCompile Include="cuda_CLAHE.h" />
+    <ClCompile Include="cuda_DescriptorMatcher.h" />
     <ClCompile Include="cuda_DisparityBilateralFilter.h" />
     <ClCompile Include="cuda_Event.h" />
     <ClCompile Include="cuda_Filters.h" />

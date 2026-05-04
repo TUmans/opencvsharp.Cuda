@@ -1141,7 +1141,7 @@ namespace OpenCvSharp.Cuda
         /// <returns></returns>
         public override string ToString()
         {
-            return "Mat [ " +
+            return "GpuMat [ " +
                    Rows + "*" + Cols + "*" + Type().ToString() +
                    ", IsContinuous=" + IsContinuous() +
                    ", Ptr=0x" + Convert.ToString(ptr.ToInt64(), 16) +

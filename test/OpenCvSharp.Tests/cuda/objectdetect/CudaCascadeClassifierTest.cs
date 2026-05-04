@@ -4,7 +4,7 @@ using OpenCvSharp;
 using OpenCvSharp.Cuda;
 using OpenCvSharp.Tests.Cuda;
 
-namespace OpenCvSharp.Tests.Cuda.ObjDetect;
+namespace OpenCvSharp.Tests.Cuda.objdetect;
 
 public class CudaCascadeClassifierTest : CudaTestBase
 {

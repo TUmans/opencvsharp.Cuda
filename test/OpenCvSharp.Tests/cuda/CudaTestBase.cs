@@ -57,4 +57,43 @@ public abstract class CudaTestBase : TestBase
             $"Expected {actual} to be within {percentage:P} of {expected} (tolerance {tolerance}, diff {diff})");
     }
 
+
+    public const int Rows = 4;
+    public const int Cols = 4;
+    public const float Tolerance = 1e-4f;
+
+    public static GpuMat MakeFloat(int rows, int cols, float value)
+    {
+        using var cpu = new Mat(rows, cols, MatType.CV_32FC1, new Scalar(value));
+        var gpu = new GpuMat();
+        gpu.Upload(cpu);
+        return gpu;
+    }
+
+    /// <summary>Creates a single-channel byte GpuMat filled with <paramref name="value"/>.</summary>
+    public static GpuMat MakeByte(int rows, int cols, byte value)
+    {
+        using var cpu = new Mat(rows, cols, MatType.CV_8UC1, new Scalar(value));
+        var gpu = new GpuMat();
+        gpu.Upload(cpu);
+        return gpu;
+    }
+
+    /// <summary>Downloads a GpuMat and returns the value of pixel (0,0) as float.</summary>
+    public static float PixelF(GpuMat gpu)
+    {
+        using var cpu = new Mat();
+        gpu.Download(cpu);
+        return cpu.At<float>(0, 0);
+    }
+
+    /// <summary>Downloads a GpuMat and returns the value of pixel (0,0) as byte.</summary>
+    public static byte PixelB(GpuMat gpu)
+    {
+        using var cpu = new Mat();
+        gpu.Download(cpu);
+        return cpu.At<byte>(0, 0);
+    }
+
+
 }

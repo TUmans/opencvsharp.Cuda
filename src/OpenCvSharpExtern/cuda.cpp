@@ -25,6 +25,9 @@
 #include "cuda_DFT.h"
 #include "cuda_LookUpTable.h"
 
+// feature2d
+#include "cuda_DescriptorMatcher.h"
+
 // imgproc
 #include "cuda_CannyEdgeDetector.h"
 #include "cuda_CLAHE.h"

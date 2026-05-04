@@ -93,7 +93,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="cuda\legacy\" />
+    <Folder Include="cuda\filters\" />
     <Folder Include="_data\image\Dnn\" />
   </ItemGroup>
 

@@ -127,6 +127,9 @@
     <ClCompile Include="cuda_StereoSGM.h">
       <Filter>Header Files\cuda\stereo</Filter>
     </ClCompile>
+    <ClCompile Include="cuda_DescriptorMatcher.h">
+      <Filter>Header Files\cuda\features2d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgsegm.h">
@@ -599,6 +602,9 @@
     </Filter>
     <Filter Include="Header Files\cuda\stereo">
       <UniqueIdentifier>{6e4f3b07-a130-4619-ace7-79c3795baf64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\cuda\features2d">
+      <UniqueIdentifier>{747ab544-c00e-4e49-a7df-4645e415fac1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

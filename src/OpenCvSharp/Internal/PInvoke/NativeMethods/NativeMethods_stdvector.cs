@@ -274,7 +274,22 @@ static partial class NativeMethods
     public static extern void vector_Mat_assignToArray(IntPtr vector, [MarshalAs(UnmanagedType.LPArray)] IntPtr[] arr);
 
     #endregion
-
+    #region cv::cuda::GpuMat
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern IntPtr vector_GpuMat_new1();
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern IntPtr vector_GpuMat_new2(uint size);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern IntPtr vector_GpuMat_new3(IntPtr[] data, uint dataLength);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern nuint vector_GpuMat_getSize(IntPtr vector);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern IntPtr vector_GpuMat_getPointer(IntPtr vector);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern void vector_GpuMat_delete(IntPtr vector);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern void vector_GpuMat_assignToArray(IntPtr vector, [MarshalAs(UnmanagedType.LPArray)] IntPtr[] arr);
+    #endregion
     #region cv::ml::DTrees::Node
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
