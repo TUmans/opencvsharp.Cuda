@@ -130,6 +130,9 @@
     <ClCompile Include="cuda_DescriptorMatcher.h">
       <Filter>Header Files\cuda\features2d</Filter>
     </ClCompile>
+    <ClCompile Include="cuda_FarnebackOpticalFlow.h">
+      <Filter>Header Files\cuda\optflow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bgsegm.h">

@@ -61,6 +61,7 @@
 #include "cuda_BroxOpticalFlow.h"
 #include "cuda_DenseOpticalFlow.h"
 #include "cuda_DensePyrLKOpticalFlow.h"
+#include "cuda_FarnebackOpticalFlow.h"
 
 // stereo
 #include "cuda_DisparityBilateralFilter.h"

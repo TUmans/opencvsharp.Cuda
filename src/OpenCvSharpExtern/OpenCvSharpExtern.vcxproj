@@ -63,6 +63,7 @@
     <ClCompile Include="cuda_DescriptorMatcher.h" />
     <ClCompile Include="cuda_DisparityBilateralFilter.h" />
     <ClCompile Include="cuda_Event.h" />
+    <ClCompile Include="cuda_FarnebackOpticalFlow.h" />
     <ClCompile Include="cuda_Filters.h" />
     <ClCompile Include="cuda_Imgproc.h" />
     <ClCompile Include="cuda_StereoSGM.h" />
