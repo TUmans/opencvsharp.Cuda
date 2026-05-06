@@ -199,15 +199,14 @@ CVAPI(ExceptionStatus) cuda_DescriptorMatcher_knnMatchAsync1(
 }
 
 CVAPI(ExceptionStatus) cuda_DescriptorMatcher_knnMatchAsync2(
-    cv::cuda::DescriptorMatcher *obj, cv::_InputArray *queryDescriptors, std::vector<std::vector<cv::DMatch>> *matches,
+    cv::cuda::DescriptorMatcher *obj, cv::_InputArray *queryDescriptors, cv::_OutputArray *matches,
     int k, cv::cuda::GpuMat **masks, int maskCount, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
     std::vector<cv::cuda::GpuMat> masksVec;
-    if (masks != nullptr)
-        for (int i = 0; i < maskCount; i++)
-            masksVec.push_back(*masks[i]);
+    for (int i = 0; i < maskCount; i++)
+        masksVec.push_back(*masks[i]);
     obj->knnMatchAsync(*queryDescriptors, *matches, k, masksVec, streamRef);
     END_WRAP
 }

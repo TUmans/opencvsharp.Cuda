@@ -367,7 +367,7 @@ public class DescriptorMatcher : Algorithm
         queryDescriptors.ThrowIfDisposed();
         matches.ThrowIfNotReady();
 
-        var masksPtrs = Array.Empty<IntPtr>();
+        IntPtr[] masksPtrs = Array.Empty<IntPtr>();
         if (masks is not null)
         {
             masksPtrs = masks.Select(x => x.CvPtr).ToArray();
@@ -433,7 +433,7 @@ public class DescriptorMatcher : Algorithm
     /// </summary>
     /// <param name="gpuMatches">The raw matches buffer returned by MatchAsync.</param>
     /// <returns>An array of DMatch objects.</returns>
-    public DMatch[] MatchConvert(GpuMat gpuMatches)
+    public DMatch[] MatchConvert(OpenCvSharp.Cuda.InputArray gpuMatches)
     {
         if (gpuMatches == null) throw new ArgumentNullException(nameof(gpuMatches));
         gpuMatches.ThrowIfDisposed();
@@ -482,7 +482,7 @@ public class DescriptorMatcher : Algorithm
     /// <param name="gpuMatches">The raw matches buffer returned by RadiusMatchAsync.</param>
     /// <param name="compactResult">If true, removes empty matches from the result.</param>
     /// <returns>A jagged array of DMatch objects.</returns>
-    public DMatch[][] RadiusMatchConvert(GpuMat gpuMatches, bool compactResult = false)
+    public DMatch[][] RadiusMatchConvert(OpenCvSharp.Cuda.InputArray gpuMatches, bool compactResult = false)
     {
         if (gpuMatches == null) throw new ArgumentNullException(nameof(gpuMatches));
         gpuMatches.ThrowIfDisposed();
