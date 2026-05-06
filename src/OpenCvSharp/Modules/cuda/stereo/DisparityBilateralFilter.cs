@@ -50,5 +50,117 @@ public class DisparityBilateralFilter : Algorithm
         GC.KeepAlive(image);
     }
 
- 
+    /// <summary>
+    /// Gets or sets the truncation of data continuity.
+    /// </summary>
+    public virtual float EdgeThreshold
+    {
+        get 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_getEdgeThreshold(RawPtr, out float val)); 
+            GC.KeepAlive(this);
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_setEdgeThreshold(RawPtr, value)); 
+            GC.KeepAlive(this); 
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the truncation of disparity continuity.
+    /// </summary>
+    public virtual float MaxDiscThreshold
+    {
+        get 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_getMaxDiscThreshold(RawPtr, out float val)); 
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_setMaxDiscThreshold(RawPtr, value)); 
+            GC.KeepAlive(this); 
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the number of disparities.
+    /// </summary>
+    public int NumDisparities
+    {
+        get 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_getNumDisparities(RawPtr, out int val));
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_setNumDisparities(RawPtr, value)); 
+            GC.KeepAlive(this); 
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the number of iterations.
+    /// </summary>
+    public int NumIters
+    {
+        get { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_getNumIters(RawPtr, out int val)); 
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_setNumIters(RawPtr, value)); 
+            GC.KeepAlive(this); 
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the filter radius.
+    /// </summary>
+    public int Radius
+    {
+        get 
+        { 
+            ThrowIfDisposed(); NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_getRadius(RawPtr, out int val)); 
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed(); NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_setRadius(RawPtr, value));
+            GC.KeepAlive(this); 
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the filter range sigma.
+    /// </summary>
+    public float SigmaRange
+    {
+        get 
+        { 
+            ThrowIfDisposed(); NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_getSigmaRange(RawPtr, out float val)); 
+            GC.KeepAlive(this); 
+            return val;
+        }
+        set 
+        { 
+            ThrowIfDisposed(); NativeMethods.HandleException(NativeMethods.cuda_DisparityBilateralFilter_setSigmaRange(RawPtr, value)); 
+            GC.KeepAlive(this);
+        }
+    }
 }

@@ -43,3 +43,92 @@ CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_apply(cv::cuda::DisparityBi
     obj->apply(*disparity, *image, *dst, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_getEdgeThreshold(cv::cuda::DisparityBilateralFilter *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getEdgeThreshold();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_setEdgeThreshold(cv::cuda::DisparityBilateralFilter *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setEdgeThreshold(val);
+    END_WRAP
+}
+
+// --- MaxDiscThreshold ---
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_getMaxDiscThreshold(cv::cuda::DisparityBilateralFilter *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMaxDiscThreshold();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_setMaxDiscThreshold(cv::cuda::DisparityBilateralFilter *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setMaxDiscThreshold(val);
+    END_WRAP
+}
+
+// --- NumDisparities ---
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_getNumDisparities(cv::cuda::DisparityBilateralFilter *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getNumDisparities();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_setNumDisparities(cv::cuda::DisparityBilateralFilter *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setNumDisparities(val);
+    END_WRAP
+}
+
+// --- NumIters ---
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_getNumIters(cv::cuda::DisparityBilateralFilter *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getNumIters();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_setNumIters(cv::cuda::DisparityBilateralFilter *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setNumIters(val);
+    END_WRAP
+}
+
+// --- Radius ---
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_getRadius(cv::cuda::DisparityBilateralFilter *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getRadius();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_setRadius(cv::cuda::DisparityBilateralFilter *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setRadius(val);
+    END_WRAP
+}
+
+// --- SigmaRange ---
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_getSigmaRange(cv::cuda::DisparityBilateralFilter *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getSigmaRange();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_DisparityBilateralFilter_setSigmaRange(cv::cuda::DisparityBilateralFilter *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setSigmaRange(val);
+    END_WRAP
+}
