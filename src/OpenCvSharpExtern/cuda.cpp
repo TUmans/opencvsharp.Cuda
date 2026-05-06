@@ -12,13 +12,16 @@
 #include "cuda_Stereo.h"
 #include "cuda_OpenGL.h"
 #include "cuda_Photo.h"
-#include "cuda_Stream.h"
-#include "cuda_Event.h"
+
 
 #include "cuda_Bgsegm_mog.h"
 #include "cuda_Bgsegm_mog2.h"
 
+// core stuff
 #include "cuda_BufferPool.h"
+#include "cuda_DeviceInfo.h"
+#include "cuda_Event.h"
+#include "cuda_Stream.h"
 
 // arithm
 #include "cuda_Convolution.h"

@@ -47,52 +47,7 @@ namespace OpenCvSharp.Internal
         public static extern ExceptionStatus cuda_TargetArchs_hasEqualOrGreaterBin(int major, int minor, out int returnValue);
 
         // DeviceInfo
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_new1(out IntPtr returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_new2(int deviceId, out IntPtr returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_delete(IntPtr obj);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_name(
-            IntPtr obj, [MarshalAs(UnmanagedType.LPStr)] StringBuilder buf, int bufLength);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_majorVersion(IntPtr obj, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_minorVersion(IntPtr obj, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_multiProcessorCount(IntPtr obj, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_sharedMemPerBlock(IntPtr obj, out ulong returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_queryMemory(
-            IntPtr obj, out ulong totalMemory, out ulong freeMemory);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_freeMemory(IntPtr obj, out ulong returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_totalMemory(IntPtr obj, out ulong returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_supports(IntPtr obj, int featureSet, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_isCompatible(IntPtr obj, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_deviceID(IntPtr obj, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_DeviceInfo_canMapHostMemory(IntPtr obj, out int returnValue);
+      
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_printCudaDeviceInfo(int device);
