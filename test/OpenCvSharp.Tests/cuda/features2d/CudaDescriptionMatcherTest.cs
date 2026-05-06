@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OpenCvSharp.Cuda;
+using OpenCvSharp.Internal.Vectors;
 using OpenCvSharp.Tests.Cuda;
 using Xunit;
 
@@ -45,6 +46,51 @@ public class CudaDescriptionMatcherTest : CudaTestBase
         // We just verify it successfully wrote to the output array.
         Assert.Equal(2, gpuMatches.Rows); // 2 query descriptors
     }
+
+    [Fact]
+    public void KnnMatchAsync_BasicTest()
+    {
+        VerifyCudaSupport();
+
+        using var stream = new OpenCvSharp.Cuda.Stream();
+
+        // Create simple descriptors (query and train)
+        using var queryCpu = Mat.FromPixelData(3, 2, MatType.CV_32F, new float[]
+        {
+    0f, 0f,
+    1f, 1f,
+    2f, 2f
+        });
+
+        using var trainCpu = Mat.FromPixelData(3, 2, MatType.CV_32F, new float[]
+        {
+    0f, 0f,
+    1f, 1f,
+    2f, 2f
+        });
+
+        using var queryGpu = new GpuMat();
+        using var trainGpu = new GpuMat();
+
+        queryGpu.Upload(queryCpu, stream);
+        trainGpu.Upload(trainCpu, stream);
+
+        using var matcher = OpenCvSharp.Cuda.DescriptorMatcher.CreateBFMatcher(NormTypes.L2);
+        //matcher.Add([trainGpu]);
+        //matcher.Train();
+        using var matches = new GpuMat(queryGpu.Rows, 2, MatType.CV_32SC2);
+
+        // Act
+        matcher.KnnMatchAsync(queryGpu, matches, k: 2, stream: stream);
+
+        stream.WaitForCompletion();
+
+        // Assert
+        Assert.False(matches.Empty());
+
+       
+    }
+
     [Fact]
     public void KnnMatchAsync_And_Convert_Test()
     {
