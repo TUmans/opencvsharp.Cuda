@@ -49,6 +49,7 @@ if(ENABLED_CUDA)
     if(NOT OpenCV_CUDA_VERSION)
         message(WARNING "ENABLED_CUDA is ON, but OpenCV_CUDA_VERSION is empty. Build might fail if OpenCV wasn't built with CUDA.")
     endif()
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 # ==========================================================
 # ### END CUDA ADDITION ###

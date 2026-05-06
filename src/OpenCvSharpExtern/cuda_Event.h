@@ -9,10 +9,17 @@
 
 #include "include_opencv.h"
 
-CVAPI(ExceptionStatus) cuda_Event_new(cv::cuda::Event **returnValue)
+CVAPI(ExceptionStatus) cuda_Event_new1(cv::cuda::Event **returnValue)
 {
     BEGIN_WRAP
     *returnValue = new cv::cuda::Event();
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_Event_new2(int flags, cv::cuda::Event **returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = new cv::cuda::Event(static_cast<cv::cuda::Event::CreateFlags>(flags));
     END_WRAP
 }
 
@@ -42,5 +49,11 @@ CVAPI(ExceptionStatus) cuda_Event_waitForCompletion(cv::cuda::Event *obj)
 {
     BEGIN_WRAP
     obj->waitForCompletion();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_Event_elapsedTime(cv::cuda::Event *start, cv::cuda::Event *end, float *returnValue)
+{
+    BEGIN_WRAP
+    *returnValue = cv::cuda::Event::elapsedTime(*start, *end);
     END_WRAP
 }

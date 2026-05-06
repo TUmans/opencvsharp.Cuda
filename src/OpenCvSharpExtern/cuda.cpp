@@ -2,6 +2,9 @@
 
 #ifdef ENABLED_CUDA
 #include "cuda.h"
+
+#include "cuda_runtime.h"
+
 #include "cuda_Core.h"
 #include "cuda_GpuMat.h"
 #include "cuda_Arithm.h"
@@ -21,6 +24,7 @@
 #include "cuda_BufferPool.h"
 #include "cuda_DeviceInfo.h"
 #include "cuda_Event.h"
+#include "cuda_EventAccessor.h"
 #include "cuda_Stream.h"
 
 // arithm

@@ -131,6 +131,7 @@
     <ClInclude Include="cuda_DensePyrLKOpticalFlow.h" />
     <ClInclude Include="cuda_DeviceInfo.h" />
     <ClInclude Include="cuda_DFT.h" />
+    <ClInclude Include="cuda_EventAccessor.h" />
     <ClInclude Include="cuda_GeneralizedHough.h" />
     <ClInclude Include="cuda_GeneralizedHoughBallard.h" />
     <ClInclude Include="cuda_GeneralizedHoughGuil.h" />
@@ -143,6 +144,7 @@
     <ClInclude Include="cuda_LookUpTable.h" />
     <ClInclude Include="cuda_OpenGL.h" />
     <ClInclude Include="cuda_Photo.h" />
+    <ClInclude Include="cuda_runtime.h" />
     <ClInclude Include="cuda_Stereo.h" />
     <ClInclude Include="cuda_StereoBeliefPropagation.h" />
     <ClInclude Include="cuda_StereoBM.h" />

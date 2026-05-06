@@ -9,7 +9,9 @@ namespace OpenCvSharp.Internal;
 static partial class NativeMethods
 {
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_Event_new(out IntPtr returnValue);
+    public static extern ExceptionStatus cuda_Event_new1(out IntPtr returnValue);
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_Event_new2(int flags, out IntPtr returnValue);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_Event_delete(IntPtr obj);
@@ -25,4 +27,10 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_Event_elapsedTime(IntPtr start, IntPtr end, out float returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_Event_getEvent(IntPtr obj, out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_Event_wrapEvent(IntPtr rawHandle, out IntPtr returnValue);
 }
