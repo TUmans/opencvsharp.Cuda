@@ -72,6 +72,8 @@ public class CudaDescriptionMatcherTest : CudaTestBase
         // Wait for GPU to finish calculating matches
         stream.WaitForCompletion();
 
+        Assert.NotEqual(gpuMatches?.CvPtr, IntPtr.Zero);
+
         // 3. Act: Convert raw GPU matches buffer into C# objects
         DMatch[][] knnMatches = matcher.KnnMatchConvert(gpuMatches, compactResult: false);
 
