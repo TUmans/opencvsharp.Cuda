@@ -47,7 +47,7 @@ public class DescriptorMatcher : Algorithm
 
         var descriptorsPtrs = descriptorsArray.Select(x => x.CvPtr).ToArray();
         NativeMethods.HandleException(
-            NativeMethods.features2d_DescriptorMatcher_add(RawPtr, descriptorsPtrs, descriptorsPtrs.Length));
+            NativeMethods.cuda_DescriptorMatcher_add(RawPtr, descriptorsPtrs, descriptorsPtrs.Length));
         GC.KeepAlive(this);
         GC.KeepAlive(descriptorsArray);
     }
@@ -464,7 +464,6 @@ public class DescriptorMatcher : Algorithm
         gpuMatches.ThrowIfDisposed();
         ThrowIfDisposed();
 
-        // VectorOfVectorDMatch maps to std::vector<std::vector<cv::DMatch>>
         using var matchesVec = new VectorOfVectorDMatch();
 
         NativeMethods.HandleException(
