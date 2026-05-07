@@ -63,10 +63,6 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Internal\PInvoke\NativeMethods\cuda\filter\" />
-  </ItemGroup>
-
   <PropertyGroup Condition="$(TargetFramework.Contains('netstandard')) Or $(TargetFramework.Contains('netcoreapp')) ">
     <DefineConstants>TRACE;DOTNETCORE;WINRT</DefineConstants>
   </PropertyGroup>

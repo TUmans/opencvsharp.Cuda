@@ -6,8 +6,20 @@ namespace OpenCvSharp.Cuda;
 
 public enum ComputeMode
 {
-    Default = 0,            // multiple threads can use cudaSetDevice() with this device
-    Exclusive = 1,          // only one thread in one process will be able to use cudaSetDevice() with this device
-    Prohibited = 2,         // no threads can use cudaSetDevice() with this device
-    ExclusiveProcess = 3    // many threads in one process will be able to use cudaSetDevice() with this device
+    /// <summary>
+    /// multiple threads can use cudaSetDevice() with this device 
+    /// </summary>
+    Default = 0,            
+    /// <summary>
+    /// only one thread in one process will be able to use cudaSetDevice() with this device 
+    /// </summary>
+    Exclusive = 1,          
+    /// <summary>
+    /// no threads can use cudaSetDevice() with this device 
+    /// </summary>
+    Prohibited = 2,         
+    /// <summary>
+    /// many threads in one process will be able to use cudaSetDevice() with this device 
+    /// </summary>
+    ExclusiveProcess = 3    
 }

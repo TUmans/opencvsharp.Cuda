@@ -20,6 +20,40 @@ CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorFGD(cv::Ptr<cv::cuda::Back
     END_WRAP
 }
 
+struct FGDParams_Bridge
+{
+    float alpha1, alpha2, alpha3, delta;
+    int is_obj_without_holes;
+    int Lc, Lcc;
+    float minArea;
+    int N1c, N1cc, N2c, N2cc;
+    int perform_morphing;
+};
+
+CVAPI(ExceptionStatus) cuda_createBackgroundSubtractorFGD_withParams(
+    FGDParams_Bridge params, cv::Ptr<cv::cuda::BackgroundSubtractorFGD> **returnValue)
+{
+    BEGIN_WRAP
+    cv::cuda::FGDParams p;
+    p.alpha1 = params.alpha1;
+    p.alpha2 = params.alpha2;
+    p.alpha3 = params.alpha3;
+    p.delta = params.delta;
+    p.is_obj_without_holes = (params.is_obj_without_holes != 0);
+    p.Lc = params.Lc;
+    p.Lcc = params.Lcc;
+    p.minArea = params.minArea;
+    p.N1c = params.N1c;
+    p.N1cc = params.N1cc;
+    p.N2c = params.N2c;
+    p.N2cc = params.N2cc;
+    p.perform_morphing = params.perform_morphing;
+
+    auto ptr = cv::cuda::createBackgroundSubtractorFGD(p);
+    *returnValue = new cv::Ptr<cv::cuda::BackgroundSubtractorFGD>(ptr);
+    END_WRAP
+}
+
 // ---------- BackgroundSubtractorFGD_get --------------------------------------------------
 CVAPI(ExceptionStatus) cuda_BackgroundSubtractorFGD_get(cv::Ptr<cv::cuda::BackgroundSubtractorFGD> *ptr, cv::cuda::BackgroundSubtractorFGD **returnValue)
 {

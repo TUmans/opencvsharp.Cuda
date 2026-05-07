@@ -25,6 +25,30 @@ public class BackgroundSubtractorFGD : BackgroundSubtractor
     }
 
     /// <summary>
+    /// Creates an FGD Background Subtractor using custom parameters.
+    /// </summary>
+    /// <param name="params"></param>
+    /// <returns></returns>
+    public static BackgroundSubtractorFGD Create(FGDParams? @params = null)
+    {
+        IntPtr smartPtr;
+        if (@params.HasValue)
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_createBackgroundSubtractorFGD_withParams(@params.Value, out smartPtr));
+        }
+        else
+        {
+            // Use your existing cuda_createBackgroundSubtractorFGD (no params)
+            NativeMethods.HandleException(
+                NativeMethods.cuda_createBackgroundSubtractorFGD(out smartPtr));
+        }
+
+        NativeMethods.HandleException(NativeMethods.cuda_BackgroundSubtractorFGD_get(smartPtr, out IntPtr rawPtr));
+        return new BackgroundSubtractorFGD(smartPtr, rawPtr);
+    }
+
+    /// <summary>
     /// Updates the background model and computes the foreground mask, with CUDA Stream support.
     /// </summary>
     public virtual void Apply(OpenCvSharp.Cuda.InputArray image, OpenCvSharp.Cuda.OutputArray fgmask, double learningRate = -1)

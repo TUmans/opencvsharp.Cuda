@@ -7,11 +7,13 @@
 
 #include "cuda_Core.h"
 #include "cuda_GpuMat.h"
+#include "cuda_GpuData.h"
+
 #include "cuda_Arithm.h"
 #include "cuda_Imgproc.h"
 #include "cuda_Warping.h"
 #include "cuda_Legacy.h"
-#include "cuda_Filters.h"
+
 #include "cuda_Stereo.h"
 #include "cuda_OpenGL.h"
 #include "cuda_Photo.h"
@@ -37,6 +39,9 @@
 #include "cuda_Feature2DAsync.h"
 #include "cuda_FastFeatureDetector.h"
 
+// filter
+#include "cuda_Filters.h"
+
 // imgproc
 #include "cuda_CannyEdgeDetector.h"
 #include "cuda_CLAHE.h"
@@ -55,6 +60,7 @@
 #include "cuda_Bgsegm_gmg.h"
 #include "cuda_Bgsegm_fgd.h"
 #include "cuda_ImagePyramid.h"
+#include "cuda_FastOpticalFlowBM.h"
 
 //objectdetect
 #include "cuda_CascadeClassifier.h"

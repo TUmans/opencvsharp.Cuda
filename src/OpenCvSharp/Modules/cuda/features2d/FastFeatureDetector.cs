@@ -7,6 +7,11 @@ namespace OpenCvSharp.Cuda;
 
 public class FastFeatureDetector : Feature2DAsync
 {
+    public const int FeatureSize = 7;
+    public const int LocationRow = 0;
+    public const int ResponseRow = 1;
+    public const int RowsCount = 2;
+
     private FastFeatureDetector(IntPtr smartPtr, IntPtr rawPtr)
         : base(smartPtr, rawPtr, p => NativeMethods.HandleException(NativeMethods.cuda_FastFeatureDetector_delete(p)))
     {

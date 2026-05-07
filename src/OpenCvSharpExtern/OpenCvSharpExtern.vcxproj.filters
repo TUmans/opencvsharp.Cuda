@@ -109,9 +109,6 @@
     <ClCompile Include="cuda_Imgproc.h">
       <Filter>Header Files\cuda</Filter>
     </ClCompile>
-    <ClCompile Include="cuda_Filters.h">
-      <Filter>Header Files\cuda</Filter>
-    </ClCompile>
     <ClCompile Include="cuda_Event.h">
       <Filter>Header Files\cuda</Filter>
     </ClCompile>
@@ -132,6 +129,9 @@
     </ClCompile>
     <ClCompile Include="cuda_FarnebackOpticalFlow.h">
       <Filter>Header Files\cuda\optflow</Filter>
+    </ClCompile>
+    <ClCompile Include="cuda_Filters.h">
+      <Filter>Header Files\cuda\filters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -531,6 +531,12 @@
     </ClInclude>
     <ClInclude Include="cuda_FastFeatureDetector.h">
       <Filter>Header Files\cuda\features2d</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_FastOpticalFlowBM.h">
+      <Filter>Header Files\cuda\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="cuda_GpuData.h">
+      <Filter>Header Files\cuda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

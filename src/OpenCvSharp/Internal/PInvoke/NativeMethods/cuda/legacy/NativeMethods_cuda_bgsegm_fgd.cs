@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using OpenCvSharp.Cuda;
+using OpenCvSharp.Modules.core.Enum;
 
 namespace OpenCvSharp.Internal;
-
-// ReSharper disable InconsistentNaming
-
+#pragma warning disable 1591
 static partial class NativeMethods
 {
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_createBackgroundSubtractorFGD(out IntPtr returnValue);
+
+    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern ExceptionStatus cuda_createBackgroundSubtractorFGD_withParams(FGDParams @params, out IntPtr returnValue);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_BackgroundSubtractorFGD_get(IntPtr ptr, out IntPtr returnValue);
