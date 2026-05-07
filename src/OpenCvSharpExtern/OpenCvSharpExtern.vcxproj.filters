@@ -538,6 +538,9 @@
     <ClInclude Include="cuda_GpuData.h">
       <Filter>Header Files\cuda</Filter>
     </ClInclude>
+    <ClInclude Include="cuda_GpuMatND.h">
+      <Filter>Header Files\cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

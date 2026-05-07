@@ -141,6 +141,7 @@
     <ClInclude Include="cuda_GeneralizedHoughGuil.h" />
     <ClInclude Include="cuda_GpuData.h" />
     <ClInclude Include="cuda_GpuMat.h" />
+    <ClInclude Include="cuda_GpuMatND.h" />
     <ClInclude Include="cuda_HoughCirclesDetector.h" />
     <ClInclude Include="cuda_HoughLinesDetector.h" />
     <ClInclude Include="cuda_HoughSegmentDetector.h" />
