@@ -4,7 +4,6 @@
 // ReSharper disable CppInconsistentNaming
 // ReSharper disable CppNonInlineFunctionDefinitionInHeaderFile
 
-#ifdef ENABLED_CUDA
 
 #include "include_opencv.h"
 #include <opencv2/core/cuda.hpp>
@@ -175,18 +174,34 @@ CVAPI(ExceptionStatus) cuda_GpuMat_opToGpuMat(cv::Mat *src, cv::cuda::GpuMat **r
 
 #pragma region Methods
 
-CVAPI(ExceptionStatus) cuda_GpuMat_upload(cv::cuda::GpuMat *obj, cv::Mat *m)
+CVAPI(ExceptionStatus) cuda_GpuMat_upload(cv::cuda::GpuMat *obj, cv::_InputArray *m)
 {
     BEGIN_WRAP
     obj->upload(*m);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_download(cv::cuda::GpuMat *obj, cv::Mat *m)
+
+CVAPI(ExceptionStatus) cuda_GpuMat_upload_stream(cv::cuda::GpuMat *obj, cv::_InputArray *m, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->upload(*m, *stream);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_GpuMat_download(cv::cuda::GpuMat *obj, cv::_OutputArray *m)
 {
     BEGIN_WRAP
     obj->download(*m);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_GpuMat_download_stream(cv::cuda::GpuMat *obj, cv::_OutputArray *m, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    obj->download(*m, *stream);
+    END_WRAP
+}
+
 CVAPI(ExceptionStatus) cuda_GpuMat_row(cv::cuda::GpuMat *obj, int y, cv::cuda::GpuMat **returnValue)
 {
     BEGIN_WRAP
@@ -222,7 +237,7 @@ CVAPI(ExceptionStatus) cuda_GpuMat_clone(cv::cuda::GpuMat *obj, cv::cuda::GpuMat
     *returnValue = new cv::cuda::GpuMat(ret);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_copyTo(cv::cuda::GpuMat *obj, cv::_OutputArray *dst, cv::cuda::Stream *stream)
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo1(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     if (stream == nullptr)
@@ -231,7 +246,7 @@ CVAPI(ExceptionStatus) cuda_GpuMat_copyTo(cv::cuda::GpuMat *obj, cv::_OutputArra
         obj->copyTo(*dst, *stream);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_mask( cv::cuda::GpuMat *obj, cv::_OutputArray *dst, cv::_InputArray *mask, cv::cuda::Stream *stream)
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_mask1(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, cv::cuda::GpuMat *mask, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
     if (stream == nullptr)
@@ -240,11 +255,40 @@ CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_mask( cv::cuda::GpuMat *obj, cv::_Outp
         obj->copyTo(*dst, *mask, *stream);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_convertTo_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, int rtype, double alpha, double beta, cv::cuda::Stream *stream)
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo2(cv::cuda::GpuMat *obj, cv::_OutputArray *dst, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
-    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
-    obj->convertTo(*dst, rtype, alpha, beta, streamRef);
+    if (stream == nullptr)
+        obj->copyTo(*dst);
+    else
+        obj->copyTo(*dst, *stream);
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_mask2(cv::cuda::GpuMat *obj, cv::_OutputArray *dst, cv::_InputArray *mask, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    if (stream == nullptr)
+        obj->copyTo(*dst, *mask);
+    else
+        obj->copyTo(*dst, *mask, *stream);
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_GpuMat_convertTo1(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, int rtype, double alpha, double beta, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    if (stream == nullptr)
+        obj->convertTo(*dst, rtype, alpha, beta);
+    else
+        obj->convertTo(*dst, rtype, alpha, beta, *stream);
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_GpuMat_convertTo2(cv::cuda::GpuMat *obj, cv::_OutputArray *dst, int rtype, double alpha, double beta, cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    if (stream == nullptr)
+        obj->convertTo(*dst, rtype, alpha, beta);
+    else
+        obj->convertTo(*dst, rtype, alpha, beta, *stream);
     END_WRAP
 }
 
@@ -254,13 +298,23 @@ CVAPI(ExceptionStatus) cuda_GpuMat_assignTo(cv::cuda::GpuMat *obj, cv::cuda::Gpu
     obj->assignTo(*m, type);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_setTo(cv::cuda::GpuMat *obj, MyCvScalar s, cv::cuda::GpuMat *mask, cv::cuda::GpuMat **returnValue)
+CVAPI(ExceptionStatus) cuda_GpuMat_setTo(cv::cuda::GpuMat *obj, MyCvScalar s, cv::_InputArray *mask, cv::cuda::GpuMat **returnValue)
 {
     BEGIN_WRAP
     cv::cuda::GpuMat gm = (mask == nullptr) ? obj->setTo(cpp(s)) : obj->setTo(cpp(s), *mask);
     *returnValue = new cv::cuda::GpuMat(gm);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_GpuMat_setTo_stream(cv::cuda::GpuMat *obj, MyCvScalar s, cv::_InputArray *mask, cv::cuda::Stream *stream, cv::cuda::GpuMat **returnValue)
+{
+    BEGIN_WRAP
+    cv::cuda::GpuMat gm = (mask == nullptr) ? obj->setTo(cpp(s), *stream) : obj->setTo(cpp(s), *mask, *stream);
+    *returnValue = new cv::cuda::GpuMat(gm);
+    END_WRAP
+}
+
+
 CVAPI(ExceptionStatus) cuda_GpuMat_reshape(cv::cuda::GpuMat *obj, int cn, int rows, cv::cuda::GpuMat **returnValue)
 {
     BEGIN_WRAP
@@ -406,32 +460,8 @@ CVAPI(ExceptionStatus) cuda_ensureSizeIsEnough(int rows, int cols, int type, cv:
 }
 #pragma region GpuMat Stream Overloads
 
-CVAPI(ExceptionStatus) cuda_GpuMat_upload_stream(cv::cuda::GpuMat *obj, cv::Mat *m, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    obj->upload(*m, *stream);
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_GpuMat_download_stream(cv::cuda::GpuMat *obj, cv::Mat *m, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    obj->download(*m, *stream);
-    END_WRAP
-}
 
 
-
-CVAPI(ExceptionStatus) cuda_GpuMat_setTo_stream(cv::cuda::GpuMat *obj, MyCvScalar s, cv::cuda::GpuMat *mask, cv::cuda::Stream *stream, cv::cuda::GpuMat **returnValue)
-{
-    BEGIN_WRAP
-    if (mask == nullptr)
-        obj->setTo(cpp(s), *stream);
-    else
-        obj->setTo(cpp(s), *mask, *stream);
-    *returnValue = obj; // Returning the same pointer as per setTo pattern
-    END_WRAP
-}
 
 CVAPI(ExceptionStatus) cuda_GpuMat_cudaPtr(cv::cuda::GpuMat *obj, void **returnValue)
 {
@@ -477,4 +507,4 @@ CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_OutputArray(cv::cuda::GpuMat *obj, cv:
 
 #pragma endregion
 
-#endif
+

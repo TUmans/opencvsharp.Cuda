@@ -119,10 +119,15 @@ namespace OpenCvSharp.Internal
         public static extern ExceptionStatus cuda_GpuMat_clone(IntPtr obj, out IntPtr returnValue);
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_GpuMat_copyTo(IntPtr obj, IntPtr dst, IntPtr stream);
+        public static extern ExceptionStatus cuda_GpuMat_copyTo1(IntPtr obj, IntPtr dst, IntPtr stream);
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_GpuMat_copyTo_mask(IntPtr obj, IntPtr dst, IntPtr mask, IntPtr stream);
+        public static extern ExceptionStatus cuda_GpuMat_copyTo_mask1(IntPtr obj, IntPtr dst, IntPtr mask, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_copyTo2(IntPtr obj, IntPtr dst, IntPtr stream);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_copyTo_mask2(IntPtr obj, IntPtr dst, IntPtr mask, IntPtr stream);
 
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -201,7 +206,9 @@ namespace OpenCvSharp.Internal
         public static extern ExceptionStatus cuda_GpuMat_download_stream(IntPtr handle, IntPtr dst, IntPtr stream);
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
 
-        public static extern ExceptionStatus cuda_GpuMat_convertTo_stream(IntPtr handle, IntPtr dst, int rtype, double alpha, double beta, IntPtr stream);
+        public static extern ExceptionStatus cuda_GpuMat_convertTo1(IntPtr handle, IntPtr dst, int rtype, double alpha, double beta, IntPtr stream);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_GpuMat_convertTo2(IntPtr handle, IntPtr dst, int rtype, double alpha, double beta, IntPtr stream);
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_GpuMat_setTo_stream(IntPtr handle, Scalar s, IntPtr mask, IntPtr stream, out IntPtr returnValue);
 

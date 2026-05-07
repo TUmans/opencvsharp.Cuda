@@ -403,7 +403,7 @@ public class GpuMatTest : CudaTestBase
     }
 
     [Fact]
-    public void AsyncStreamCopyTo()
+    public void CopyTo_Async()
     {
         VerifyCudaSupport();
 
