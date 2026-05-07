@@ -10,8 +10,14 @@ using OpenCvSharp.Internal.Vectors;
 namespace OpenCvSharp.Cuda;
 
 
+/// <summary>
+/// Abstract base class for matching keypoint descriptors. 
+/// </summary>
 public class DescriptorMatcher : Algorithm
 {
+    /// <summary>
+    /// 
+    /// </summary>
     protected DescriptorMatcher(IntPtr smartPtr, IntPtr rawPtr)
           : base(smartPtr, rawPtr, p => NativeMethods.HandleException(NativeMethods.cuda_DescriptorMatcher_delete(p)))
     {
@@ -62,16 +68,7 @@ public class DescriptorMatcher : Algorithm
         GC.KeepAlive(this);
     }
 
-    /// <summary>
-    /// Returns true if there are no train descriptors in the collection. 
-    /// </summary>
-    public bool Empty()
-    {
-        ThrowIfDisposed();
-        NativeMethods.HandleException(NativeMethods.cuda_DescriptorMatcher_empty(RawPtr, out int val));
-        GC.KeepAlive(this);
-        return val != 0;
-    }
+
 
     /// <summary>
     /// Returns a constant link to the train descriptor collection. 
@@ -97,6 +94,9 @@ public class DescriptorMatcher : Algorithm
         return val != 0;
     }
 
+    /// <summary>
+    /// Trains a descriptor matcher. 
+    /// </summary>
     public void Train()
     {
         ThrowIfDisposed();
