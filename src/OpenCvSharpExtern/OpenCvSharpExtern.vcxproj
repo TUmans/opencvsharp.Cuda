@@ -133,6 +133,8 @@
     <ClInclude Include="cuda_DeviceInfo.h" />
     <ClInclude Include="cuda_DFT.h" />
     <ClInclude Include="cuda_EventAccessor.h" />
+    <ClInclude Include="cuda_FastFeatureDetector.h" />
+    <ClInclude Include="cuda_Feature2DAsync.h" />
     <ClInclude Include="cuda_GeneralizedHough.h" />
     <ClInclude Include="cuda_GeneralizedHoughBallard.h" />
     <ClInclude Include="cuda_GeneralizedHoughGuil.h" />

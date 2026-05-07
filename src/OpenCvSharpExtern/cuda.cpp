@@ -34,6 +34,8 @@
 
 // feature2d
 #include "cuda_DescriptorMatcher.h"
+#include "cuda_Feature2DAsync.h"
+#include "cuda_FastFeatureDetector.h"
 
 // imgproc
 #include "cuda_CannyEdgeDetector.h"
