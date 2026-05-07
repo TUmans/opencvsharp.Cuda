@@ -145,6 +145,49 @@ public class GpuMatTest : CudaTestBase
     }
 
     [Fact]
+    public void CopyTo_WithMask_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Source image (all 255), Mask (half 255, half 0)
+        using var gpuSrc = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(255));
+        using var gpuMask = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(0));
+        gpuMask.RowRange(0, 5).SetTo(new Scalar(255)); // Top half active
+
+        using var gpuDst = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(0));
+
+        // 2. Act
+        gpuSrc.CopyTo(gpuDst, gpuMask);
+
+        // 3. Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.Equal(255, cpuDst.At<byte>(0, 0)); // Inside mask
+        Assert.Equal(0, cpuDst.At<byte>(7, 7));   // Outside mask
+    }
+
+    [Fact]
+    public void CopyTo_Async_Test()
+    {
+        VerifyCudaSupport();
+
+        using var gpuSrc = new GpuMat(100, 100, MatType.CV_8UC1, new Scalar(123));
+        using var gpuDst = new GpuMat();
+        using var stream = new OpenCvSharp.Cuda.Stream();
+
+        // Act: Async copy
+        gpuSrc.CopyTo(gpuDst, stream);
+        stream.WaitForCompletion();
+
+        // Assert
+        Assert.False(gpuDst.Empty());
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+        Assert.Equal(123, cpuDst.At<byte>(0, 0));
+    }
+
+    [Fact]
     public void ConvertTo()
     {
         VerifyCudaSupport();
@@ -160,6 +203,45 @@ public class GpuMatTest : CudaTestBase
         using var hostDst = new Mat();
         dst.Download(hostDst);
         Assert.Equal(25.0f, hostDst.At<float>(0, 0), 5);
+    }
+
+    [Fact]
+    public void ConvertTo_Scaling_Test()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create CV_8U matrix filled with 100
+        using var gpuSrc = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(100));
+        using var gpuDst = new GpuMat();
+
+        // 2. Act: Convert to CV_32F and multiply by 0.5 (100 * 0.5 = 50.0)
+        gpuSrc.ConvertTo(gpuDst, MatType.CV_32FC1, 0.5, 0.0);
+
+        // 3. Assert
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+
+        Assert.Equal(MatType.CV_32FC1, cpuDst.Type());
+        Assert.Equal(50.0f, cpuDst.At<float>(0, 0));
+    }
+
+    [Fact]
+    public void ConvertTo_Async_Test()
+    {
+        VerifyCudaSupport();
+
+        using var gpuSrc = new GpuMat(10, 10, MatType.CV_8UC1, new Scalar(200));
+        using var gpuDst = new GpuMat();
+        using var stream = new OpenCvSharp.Cuda.Stream();
+
+        // Act: Async conversion
+        gpuSrc.ConvertTo(gpuDst, MatType.CV_8UC1, 1.0, 10.0, stream);
+        stream.WaitForCompletion();
+
+        // Assert: 200 + 10 = 210
+        using var cpuDst = new Mat();
+        gpuDst.Download(cpuDst);
+        Assert.Equal(210, cpuDst.At<byte>(0, 0));
     }
 
     [Fact]

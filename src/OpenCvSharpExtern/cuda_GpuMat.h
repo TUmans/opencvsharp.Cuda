@@ -222,24 +222,32 @@ CVAPI(ExceptionStatus) cuda_GpuMat_clone(cv::cuda::GpuMat *obj, cv::cuda::GpuMat
     *returnValue = new cv::cuda::GpuMat(ret);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_copyTo1(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *m)
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo(cv::cuda::GpuMat *obj, cv::_OutputArray *dst, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
-    obj->copyTo(*m);
+    if (stream == nullptr)
+        obj->copyTo(*dst);
+    else
+        obj->copyTo(*dst, *stream);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_copyTo2(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *m, cv::cuda::GpuMat *mask)
+CVAPI(ExceptionStatus) cuda_GpuMat_copyTo_mask( cv::cuda::GpuMat *obj, cv::_OutputArray *dst, cv::_InputArray *mask, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
-    obj->copyTo(*m, *mask);
+    if (stream == nullptr)
+        obj->copyTo(*dst, *mask);
+    else
+        obj->copyTo(*dst, *mask, *stream);
     END_WRAP
 }
-CVAPI(ExceptionStatus) cuda_GpuMat_convertTo(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *m, int rtype, double alpha, double beta)
+CVAPI(ExceptionStatus) cuda_GpuMat_convertTo_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, int rtype, double alpha, double beta, cv::cuda::Stream *stream)
 {
     BEGIN_WRAP
-    obj->convertTo(*m, rtype, alpha, beta);
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->convertTo(*dst, rtype, alpha, beta, streamRef);
     END_WRAP
 }
+
 CVAPI(ExceptionStatus) cuda_GpuMat_assignTo(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *m, int type)
 {
     BEGIN_WRAP
@@ -412,26 +420,7 @@ CVAPI(ExceptionStatus) cuda_GpuMat_download_stream(cv::cuda::GpuMat *obj, cv::Ma
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_GpuMat_copyTo1_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    obj->copyTo(*dst, *stream);
-    END_WRAP
-}
 
-CVAPI(ExceptionStatus) cuda_GpuMat_copyTo2_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, cv::cuda::GpuMat *mask, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    obj->copyTo(*dst, *mask, *stream);
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_GpuMat_convertTo_stream(cv::cuda::GpuMat *obj, cv::cuda::GpuMat *dst, int rtype, double alpha, double beta, cv::cuda::Stream *stream)
-{
-    BEGIN_WRAP
-    obj->convertTo(*dst, rtype, alpha, beta, *stream);
-    END_WRAP
-}
 
 CVAPI(ExceptionStatus) cuda_GpuMat_setTo_stream(cv::cuda::GpuMat *obj, MyCvScalar s, cv::cuda::GpuMat *mask, cv::cuda::Stream *stream, cv::cuda::GpuMat **returnValue)
 {

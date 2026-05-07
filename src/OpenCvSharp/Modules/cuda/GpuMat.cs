@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using OpenCvSharp.Internal;
 
@@ -929,73 +930,155 @@ namespace OpenCvSharp.Cuda
             return new GpuMat(ret);
         }
 
-        /// <summary>
-        /// copies those matrix elements to "m"
-        /// </summary>
-        /// <param name="m"></param>
-        public void CopyTo(GpuMat m)
-        {
-            ThrowIfDisposed();
-            if (m is null)
-                throw new ArgumentNullException(nameof(m));
-            NativeMethods.cuda_GpuMat_copyTo1(CvPtr, m.CvPtr);
-            GC.KeepAlive(this);
-            GC.KeepAlive(m);
-        }
+        #region CopyTo Overloads
 
         /// <summary>
-        /// copies those matrix elements to "m" that are marked with non-zero mask elements.
+        /// bindings overload which copies the GpuMat content to device memory (Blocking call) 
         /// </summary>
-        /// <param name="m"></param>
-        /// <param name="mask"></param>
-        public void CopyTo(GpuMat m, GpuMat mask)
-        {
-            ThrowIfDisposed();
-            if (m is null)
-                throw new ArgumentNullException(nameof(m));
-            if (mask is null)
-                throw new ArgumentNullException(nameof(mask));
-            NativeMethods.cuda_GpuMat_copyTo2(CvPtr, m.CvPtr, mask.CvPtr);
-            GC.KeepAlive(this);
-            GC.KeepAlive(m);
-            GC.KeepAlive(mask);
-        }
+        public void CopyTo(GpuMat dst) => CopyTo((OpenCvSharp.Cuda.OutputArray)dst);
 
         /// <summary>
-        /// Copies the GpuMat content to device or host memory (Blocking call).
+        /// bindings overload which copies those GpuMat elements to "m" that are marked with non-zero mask elements (Blocking call)
         /// </summary>
-        /// <param name="dst">Destination array. Can be a Mat or GpuMat.</param>
+        public void CopyTo(GpuMat dst, GpuMat mask) => CopyTo((OpenCvSharp.Cuda.OutputArray)dst, (OpenCvSharp.Cuda.InputArray)mask, null);
+
+        /// <summary>
+        /// bindings overload which copies those GpuMat elements to "m" that are marked with non-zero mask elements (Non-Blocking call) 
+        /// </summary>
+        public void CopyTo(GpuMat dst, GpuMat mask, Stream stream) => CopyTo((OpenCvSharp.Cuda.OutputArray)dst, (OpenCvSharp.Cuda.InputArray)mask, stream);
+
+        /// <summary>
+        /// bindings overload which copies the GpuMat content to device memory (Non-Blocking call) 
+        /// </summary>
+        public void CopyTo(GpuMat dst, Stream stream) => CopyTo((OpenCvSharp.Cuda.OutputArray)dst, stream);
+
+        /// <summary>
+        /// copies the GpuMat content to device memory (Blocking call)
+        /// </summary>
         public void CopyTo(OpenCvSharp.Cuda.OutputArray dst)
         {
-            if (dst is null) throw new ArgumentNullException(nameof(dst));
-
+            if (dst == null)
+                throw new ArgumentNullException(nameof(dst));
             ThrowIfDisposed();
             dst.ThrowIfNotReady();
 
             NativeMethods.HandleException(
-                NativeMethods.cuda_GpuMat_copyTo_OutputArray(CvPtr, dst.CvPtr));
+                NativeMethods.cuda_GpuMat_copyTo(CvPtr, dst.CvPtr, IntPtr.Zero));
 
             dst.Fix();
             GC.KeepAlive(this);
         }
 
         /// <summary>
-        /// converts matrix to another datatype with optional scalng. See cvConvertScale.
+        /// copies those GpuMat elements to "m" that are marked with non-zero mask elements (Blocking call) 
         /// </summary>
-        /// <param name="dst"></param>
-        /// <param name="rtype"></param>
-        /// <param name="alpha"></param>
-        /// <param name="beta"></param>
-        /// <returns></returns>
-        public void ConvertTo(GpuMat dst, MatType rtype, double alpha = 1, double beta = 0)
+        public void CopyTo(OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray mask) => CopyTo(dst, mask, null);
+
+        /// <summary>
+        /// copies those GpuMat elements to "m" that are marked with non-zero mask elements (Non-Blocking call) 
+        /// </summary>
+        public void CopyTo(OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.InputArray mask, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (dst == null)
+                throw new ArgumentNullException(nameof(dst));
+            if (mask == null)
+                throw new ArgumentNullException(nameof(mask));
+            ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+            mask.ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_copyTo_mask(CvPtr, dst.CvPtr, mask.CvPtr, stream?.CvPtr ?? IntPtr.Zero));
+
+            dst.Fix();
+            GC.KeepAlive(this);
+            GC.KeepAlive(stream);
+        }
+
+        /// <summary>
+        /// copies the GpuMat content to device memory (Non-Blocking call) 
+        /// </summary>
+        public void CopyTo(OpenCvSharp.Cuda.OutputArray dst, OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (dst == null) 
+                throw new ArgumentNullException(nameof(dst));
+            ThrowIfDisposed();
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_copyTo(CvPtr, dst.CvPtr, stream?.CvPtr ?? IntPtr.Zero));
+
+            dst.Fix();
+            GC.KeepAlive(this);
+            GC.KeepAlive(stream);
+        }
+
+        #endregion
+
+        #region ConvertTo
+
+        /// <summary>
+        /// bindings overload which converts GpuMat to another datatype (Blocking call) 
+        /// </summary>
+        public void ConvertTo(GpuMat dst, MatType rtype)
+            => ConvertTo(dst, rtype, 1.0, 0.0, null);
+
+        /// <summary>
+        /// bindings overload which converts GpuMat to another datatype with scaling (Non-Blocking call) 
+        /// </summary>
+        public void ConvertTo(GpuMat dst, MatType rtype, double alpha, double beta, Stream stream)
+            => ConvertTo((OutputArray)dst, rtype, alpha, beta, stream);
+
+        /// <summary>
+        /// bindings overload which converts GpuMat to another datatype (Non-Blocking call) 
+        /// </summary>
+        public void ConvertTo(GpuMat dst, MatType rtype, Stream stream)
+            => ConvertTo(dst, rtype, 1.0, 0.0, stream);
+
+        /// <summary>
+        /// converts GpuMat to another datatype (Blocking call) 
+        /// </summary>
+        public void ConvertTo(OutputArray dst, MatType rtype)
+            => ConvertTo(dst, rtype, 1.0, 0.0, null);
+
+        /// <summary>
+        /// converts GpuMat to another datatype with scaling (Non-Blocking call) 
+        /// </summary>
+        public void ConvertTo(OutputArray dst, MatType rtype, double alpha, double beta, Stream? stream = null)
         {
             ThrowIfDisposed();
-            if (dst is null)
+            if (dst == null)
                 throw new ArgumentNullException(nameof(dst));
-            NativeMethods.cuda_GpuMat_convertTo(CvPtr, dst.CvPtr, (int)rtype, alpha, beta);
+           
+            dst.ThrowIfNotReady();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_GpuMat_convertTo_stream(CvPtr, dst.CvPtr, rtype.Value, alpha, beta, stream?.CvPtr ?? IntPtr.Zero));
+
+            dst.Fix();
             GC.KeepAlive(this);
-            GC.KeepAlive(dst);
+            if (stream != null) GC.KeepAlive(stream);
         }
+
+        /// <summary>
+        /// converts GpuMat to another datatype with scaling (Blocking call) 
+        /// </summary>
+        public void ConvertTo(OutputArray dst, MatType rtype, double alpha, double beta = 0.0)
+            => ConvertTo(dst, rtype, alpha, beta, null);
+
+        /// <summary>
+        /// bindings overload which converts GpuMat to another datatype with scaling(Blocking call) 
+        /// </summary>
+        public void ConvertTo(OutputArray dst, MatType rtype, double alpha, Stream stream)
+            => ConvertTo(dst, rtype, alpha, 0.0, stream);
+
+        /// <summary>
+        /// converts GpuMat to another datatype (Non-Blocking call) 
+        /// </summary>
+        public void ConvertTo(OutputArray dst, MatType rtype, Stream stream)
+            => ConvertTo(dst, rtype, 1.0, 0.0, stream);
+
+        #endregion
 
         /// <summary>
         /// 
@@ -1188,50 +1271,9 @@ namespace OpenCvSharp.Cuda
             GC.KeepAlive(stream);
         }
 
-        /// <summary>
-        /// copies the GpuMat content to device memory (Non-Blocking call)
-        /// </summary>
-        public void CopyTo(GpuMat dst, Stream stream)
-        {
-            if (dst == null) throw new ArgumentNullException(nameof(dst));
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            ThrowIfDisposed();
-            // Use dst.CvPtr directly. Since dst is a GpuMat, this is a cv::cuda::GpuMat*
-            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_copyTo1_stream(CvPtr, dst.CvPtr, stream.CvPtr));
-            GC.KeepAlive(this);
-            GC.KeepAlive(dst);
-            GC.KeepAlive(stream);
-        }
+       
 
-        /// <summary>
-        /// copies those GpuMat elements to "m" that are marked with non-zero mask elements (Non-Blocking call)
-        /// </summary>
-        public void CopyTo(GpuMat dst, GpuMat mask, Stream stream)
-        {
-            if (dst == null) throw new ArgumentNullException(nameof(dst));
-            if (mask == null) throw new ArgumentNullException(nameof(mask));
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            ThrowIfDisposed();
-            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_copyTo2_stream(CvPtr, dst.CvPtr, mask.CvPtr, stream.CvPtr));
-            GC.KeepAlive(this);
-            GC.KeepAlive(dst);
-            GC.KeepAlive(mask);
-            GC.KeepAlive(stream);
-        }
-
-        /// <summary>
-        /// converts GpuMat to another datatype with optional scaling (Non-Blocking call)
-        /// </summary>
-        public void ConvertTo(GpuMat dst, MatType rtype, double alpha, double beta, Stream stream)
-        {
-            if (dst == null) throw new ArgumentNullException(nameof(dst));
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            ThrowIfDisposed();
-            NativeMethods.HandleException(NativeMethods.cuda_GpuMat_convertTo_stream(CvPtr, dst.CvPtr, (int)rtype, alpha, beta, stream.CvPtr));
-            GC.KeepAlive(this);
-            GC.KeepAlive(dst);
-            GC.KeepAlive(stream);
-        }
+      
 
         /// <summary>
         /// sets some of the GpuMat elements to s, according to the mask (Non-Blocking call)
