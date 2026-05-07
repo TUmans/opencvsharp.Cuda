@@ -23,10 +23,6 @@ static partial class NativeMethods
         IntPtr obj, out int val);
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_DescriptorMatcher_empty(
-        IntPtr obj, out int val);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_DescriptorMatcher_clear(
         IntPtr obj);
 

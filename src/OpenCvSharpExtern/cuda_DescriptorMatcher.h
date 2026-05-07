@@ -42,12 +42,7 @@ CVAPI(ExceptionStatus) cuda_DescriptorMatcher_isMaskSupported(cv::cuda::Descript
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_DescriptorMatcher_empty(cv::cuda::DescriptorMatcher *obj, int *val)
-{
-    BEGIN_WRAP
-    *val = obj->empty() ? 1 : 0;
-    END_WRAP
-}
+
 
 CVAPI(ExceptionStatus) cuda_DescriptorMatcher_clear(cv::cuda::DescriptorMatcher *obj)
 {
