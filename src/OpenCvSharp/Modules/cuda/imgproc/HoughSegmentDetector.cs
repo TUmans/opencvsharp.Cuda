@@ -58,5 +58,90 @@ namespace OpenCvSharp.Cuda
             GC.KeepAlive(this);
             GC.KeepAlive(src);
         }
+
+        public int MaxLineGap
+        {
+            get 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_getMaxLineGap(RawPtr, out int val)); 
+                GC.KeepAlive(this);
+                return val;
+            }
+            set 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_setMaxLineGap(RawPtr, value)); 
+                GC.KeepAlive(this); 
+            }
+        }
+
+        public int MaxLines
+        {
+            get
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_getMaxLines(RawPtr, out int val));
+                GC.KeepAlive(this);
+                return val;
+            }
+            set 
+            {
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_setMaxLines(RawPtr, value)); 
+                GC.KeepAlive(this);
+            }
+        }
+
+        public int MinLineLength
+        {
+            get
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_getMinLineLength(RawPtr, out int val)); 
+                GC.KeepAlive(this); 
+                return val; 
+            }
+            set 
+            {
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_setMinLineLength(RawPtr, value));
+                GC.KeepAlive(this);
+            }
+        }
+
+        public float Rho
+        {
+            get 
+            {
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_getRho(RawPtr, out float val));
+                GC.KeepAlive(this);
+                return val; 
+            }
+            set 
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_setRho(RawPtr, value)); 
+                GC.KeepAlive(this); 
+            }
+        }
+
+        public float Theta
+        {
+            get 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_getTheta(RawPtr, out float val)); 
+                GC.KeepAlive(this);
+                return val;
+            }
+            set 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughSegmentDetector_setTheta(RawPtr, value)); 
+                GC.KeepAlive(this);
+            }
+        }
     }
 }

@@ -44,3 +44,94 @@ CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_detect(cv::cuda::HoughCirclesDe
     obj->detect(*src, *circles, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getCannyThreshold(cv::cuda::HoughCirclesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getCannyThreshold();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setCannyThreshold(cv::cuda::HoughCirclesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setCannyThreshold(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getDp(cv::cuda::HoughCirclesDetector *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getDp();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setDp(cv::cuda::HoughCirclesDetector *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setDp(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getMaxCircles(cv::cuda::HoughCirclesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMaxCircles();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setMaxCircles(cv::cuda::HoughCirclesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMaxCircles(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getMaxRadius(cv::cuda::HoughCirclesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMaxRadius();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setMaxRadius(cv::cuda::HoughCirclesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMaxRadius(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getMinDist(cv::cuda::HoughCirclesDetector *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMinDist();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setMinDist(cv::cuda::HoughCirclesDetector *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setMinDist(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getMinRadius(cv::cuda::HoughCirclesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMinRadius();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setMinRadius(cv::cuda::HoughCirclesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMinRadius(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_getVotesThreshold(cv::cuda::HoughCirclesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getVotesThreshold();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughCirclesDetector_setVotesThreshold(cv::cuda::HoughCirclesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setVotesThreshold(val);
+    END_WRAP
+}

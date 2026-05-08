@@ -20,5 +20,30 @@ namespace OpenCvSharp.Internal
 
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_HoughSegmentDetector_detect(IntPtr obj, IntPtr src, IntPtr lines, IntPtr stream);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_getMaxLineGap(IntPtr obj, out int val);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_setMaxLineGap(IntPtr obj, int val);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_getMaxLines(IntPtr obj, out int val);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_setMaxLines(IntPtr obj, int val);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_getMinLineLength(IntPtr obj, out int val);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_setMinLineLength(IntPtr obj, int val);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_getRho(IntPtr obj, out float val);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_setRho(IntPtr obj, float val);
+
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_getTheta(IntPtr obj, out float val);
+        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern ExceptionStatus cuda_HoughSegmentDetector_setTheta(IntPtr obj, float val);
     }
 }

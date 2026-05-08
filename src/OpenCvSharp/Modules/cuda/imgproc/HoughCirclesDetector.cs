@@ -55,4 +55,121 @@ public class HoughCirclesDetector : Algorithm
         GC.KeepAlive(this);
         GC.KeepAlive(src);
     }
+
+    public int CannyThreshold
+    {
+        get 
+        { 
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getCannyThreshold(RawPtr, out int val)); 
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setCannyThreshold(RawPtr, value)); 
+            GC.KeepAlive(this);
+        }
+    }
+
+    public float Dp
+    {
+        get 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getDp(RawPtr, out float val)); 
+            GC.KeepAlive(this);
+            return val;
+        }
+        set 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setDp(RawPtr, value)); 
+            GC.KeepAlive(this);
+        }
+    }
+
+    public int MaxCircles
+    {
+        get 
+        { 
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getMaxCircles(RawPtr, out int val)); 
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setMaxCircles(RawPtr, value));
+            GC.KeepAlive(this); 
+        }
+    }
+
+    public int MaxRadius
+    {
+        get 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getMaxRadius(RawPtr, out int val)); 
+            GC.KeepAlive(this);
+            return val; 
+        }
+        set 
+        { 
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setMaxRadius(RawPtr, value)); 
+            GC.KeepAlive(this);
+        }
+    }
+
+    public float MinDist
+    {
+        get 
+        {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getMinDist(RawPtr, out float val));
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setMinDist(RawPtr, value)); 
+            GC.KeepAlive(this); 
+        }
+    }
+
+    public int MinRadius
+    {
+        get
+        { 
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getMinRadius(RawPtr, out int val));
+            GC.KeepAlive(this); 
+            return val; 
+        }
+        set 
+        {
+            ThrowIfDisposed(); 
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setMinRadius(RawPtr, value)); 
+            GC.KeepAlive(this); 
+        }
+    }
+
+    public int VotesThreshold
+    {
+        get {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_getVotesThreshold(RawPtr, out int val));
+            GC.KeepAlive(this);
+            return val;
+        }
+        set {
+            ThrowIfDisposed();
+            NativeMethods.HandleException(NativeMethods.cuda_HoughCirclesDetector_setVotesThreshold(RawPtr, value));
+            GC.KeepAlive(this);
+        }
+    }
 }

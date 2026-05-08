@@ -46,4 +46,32 @@ public class CudaHoughCirclesDetectorTest : CudaTestBase
         AssertAround(circle.Item1, 100f, 0.1); // Y
         AssertAround(circle.Item2, 50f, 0.2);  // Radius
     }
+
+    [Fact]
+    public void HoughCirclesDetector_PropertiesTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange: Create detector with specific initial values
+        using var detector = OpenCvSharp.Cuda.HoughCirclesDetector.Create(1.5f, 50.0f, 100, 30, 10, 100, 2000);
+
+        // 2. Assert Initial
+        Assert.Equal(1.5f, detector.Dp);
+        Assert.Equal(50.0f, detector.MinDist);
+        Assert.Equal(100, detector.CannyThreshold);
+        Assert.Equal(30, detector.VotesThreshold);
+        Assert.Equal(10, detector.MinRadius);
+        Assert.Equal(100, detector.MaxRadius);
+        Assert.Equal(2000, detector.MaxCircles);
+
+        // 3. Act: Modify Properties
+        detector.MinRadius = 20;
+        detector.MaxRadius = 150;
+        detector.CannyThreshold = 150;
+
+        // 4. Assert Modified
+        Assert.Equal(20, detector.MinRadius);
+        Assert.Equal(150, detector.MaxRadius);
+        Assert.Equal(150, detector.CannyThreshold);
+    }
 }

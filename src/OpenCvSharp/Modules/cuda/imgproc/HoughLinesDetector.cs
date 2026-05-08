@@ -58,5 +58,122 @@ namespace OpenCvSharp.Cuda
             GC.KeepAlive(this);
             GC.KeepAlive(src);
         }
+
+        /// <summary>
+        /// Downloads results from Detect to host memory.
+        /// </summary>
+        /// <param name="dLines">Result of Detect (GpuMat).</param>
+        /// <param name="hLines">Output host array (Mat).</param>
+        /// <param name="hVotes">Optional output array for line votes (Mat).</param>
+        /// <param name="stream">Stream for the asynchronous version.</param>
+        public virtual void DownloadResults(
+            OpenCvSharp.Cuda.InputArray dLines,
+            OpenCvSharp.OutputArray hLines,
+            OpenCvSharp.OutputArray? hVotes = null,
+            OpenCvSharp.Cuda.Stream? stream = null)
+        {
+            if (dLines is null) throw new ArgumentNullException(nameof(dLines));
+            if (hLines is null) throw new ArgumentNullException(nameof(hLines));
+
+            dLines.ThrowIfDisposed();
+            hLines.ThrowIfNotReady();
+            hVotes?.ThrowIfNotReady();
+            ThrowIfDisposed();
+
+            NativeMethods.HandleException(
+                NativeMethods.cuda_HoughLinesDetector_downloadResults(
+                    RawPtr, dLines.CvPtr, hLines.CvPtr, hVotes?.CvPtr ?? IntPtr.Zero, stream?.CvPtr ?? IntPtr.Zero));
+
+            hLines.Fix();
+            hVotes?.Fix();
+            GC.KeepAlive(this);
+            GC.KeepAlive(dLines);
+            GC.KeepAlive(hLines);
+            if (hVotes != null) GC.KeepAlive(hVotes);
+        }
+
+        public bool DoSort
+        {
+            get 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_getDoSort(RawPtr, out int val)); 
+                GC.KeepAlive(this);
+                return val != 0; 
+            }
+            set 
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_setDoSort(RawPtr, value ? 1 : 0)); 
+                GC.KeepAlive(this); 
+            }
+        }
+
+        public int MaxLines
+        {
+            get
+            {
+                ThrowIfDisposed(); NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_getMaxLines(RawPtr, out int val));
+                GC.KeepAlive(this);
+                return val;
+            }
+            set 
+            { 
+                ThrowIfDisposed(); NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_setMaxLines(RawPtr, value));
+                GC.KeepAlive(this);
+            }
+        }
+
+        public float Rho
+        {
+            get 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_getRho(RawPtr, out float val)); 
+                GC.KeepAlive(this); 
+                return val; 
+            }
+            set 
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_setRho(RawPtr, value)); 
+                GC.KeepAlive(this);
+            }
+        }
+
+        public float Theta
+        {
+            get 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_getTheta(RawPtr, out float val)); 
+                GC.KeepAlive(this); 
+                return val; 
+            }
+            set 
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_setTheta(RawPtr, value)); 
+                GC.KeepAlive(this); 
+            }
+        }
+
+        public int Threshold
+        {
+            get 
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_getThreshold(RawPtr, out int val));
+                GC.KeepAlive(this); 
+                return val; 
+            }
+            set 
+            {
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_HoughLinesDetector_setThreshold(RawPtr, value));
+                GC.KeepAlive(this); 
+            }
+        }
+
     }
 }

@@ -79,4 +79,31 @@ public class CudaHoughSegmentDetectorTest : CudaTestBase
 
         Assert.True(foundDiagonal, "No sufficiently long diagonal segment detected.");
     }
+
+    [Fact]
+    public void HoughSegmentDetector_PropertiesTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Arrange
+        float theta = (float)Math.PI / 180.0f;
+        using var detector = OpenCvSharp.Cuda.HoughSegmentDetector.Create(1.0f, theta, minLineLength: 50, maxLineGap: 10, maxLines: 500);
+
+        // 2. Assert Initial
+        Assert.Equal(1.0f, detector.Rho);
+        Assert.Equal(theta, detector.Theta);
+        Assert.Equal(50, detector.MinLineLength);
+        Assert.Equal(10, detector.MaxLineGap);
+        Assert.Equal(500, detector.MaxLines);
+
+        // 3. Act: Modify
+        detector.MinLineLength = 100;
+        detector.MaxLineGap = 5;
+        detector.MaxLines = 1000;
+
+        // 4. Assert Modified
+        Assert.Equal(100, detector.MinLineLength);
+        Assert.Equal(5, detector.MaxLineGap);
+        Assert.Equal(1000, detector.MaxLines);
+    }
 }

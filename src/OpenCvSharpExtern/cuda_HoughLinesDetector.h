@@ -44,3 +44,81 @@ CVAPI(ExceptionStatus) cuda_HoughLinesDetector_detect(cv::cuda::HoughLinesDetect
     obj->detect(*src, *lines, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_downloadResults(
+    cv::cuda::HoughLinesDetector *obj,
+    cv::_InputArray *d_lines,
+    cv::_OutputArray *h_lines,
+    cv::_OutputArray *h_votes,
+    cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->downloadResults(*d_lines, *h_lines, h_votes ? *h_votes : cv::noArray(), streamRef);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_getDoSort(cv::cuda::HoughLinesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getDoSort() ? 1 : 0;
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_setDoSort(cv::cuda::HoughLinesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setDoSort(val != 0);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_getMaxLines(cv::cuda::HoughLinesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMaxLines();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_setMaxLines(cv::cuda::HoughLinesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMaxLines(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_getRho(cv::cuda::HoughLinesDetector *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getRho();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_setRho(cv::cuda::HoughLinesDetector *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setRho(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_getTheta(cv::cuda::HoughLinesDetector *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getTheta();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_setTheta(cv::cuda::HoughLinesDetector *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setTheta(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_getThreshold(cv::cuda::HoughLinesDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getThreshold();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughLinesDetector_setThreshold(cv::cuda::HoughLinesDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setThreshold(val);
+    END_WRAP
+}

@@ -45,3 +45,68 @@ CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_detect(cv::cuda::HoughSegmentDe
     obj->detect(*src, *lines, streamRef);
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_getMaxLineGap(cv::cuda::HoughSegmentDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMaxLineGap();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_setMaxLineGap(cv::cuda::HoughSegmentDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMaxLineGap(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_getMaxLines(cv::cuda::HoughSegmentDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMaxLines();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_setMaxLines(cv::cuda::HoughSegmentDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMaxLines(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_getMinLineLength(cv::cuda::HoughSegmentDetector *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getMinLineLength();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_setMinLineLength(cv::cuda::HoughSegmentDetector *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setMinLineLength(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_getRho(cv::cuda::HoughSegmentDetector *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getRho();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_setRho(cv::cuda::HoughSegmentDetector *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setRho(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_getTheta(cv::cuda::HoughSegmentDetector *obj, float *val)
+{
+    BEGIN_WRAP
+    *val = obj->getTheta();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_HoughSegmentDetector_setTheta(cv::cuda::HoughSegmentDetector *obj, float val)
+{
+    BEGIN_WRAP
+    obj->setTheta(val);
+    END_WRAP
+}

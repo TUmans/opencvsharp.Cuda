@@ -5,10 +5,9 @@
 
 #include "cuda_runtime.h"
 
+
 #include "cuda_Core.h"
-#include "cuda_GpuMat.h"
-#include "cuda_GpuData.h"
-#include "cuda_GpuMatND.h"
+
 
 #include "cuda_Arithm.h"
 #include "cuda_Imgproc.h"
@@ -19,7 +18,7 @@
 #include "cuda_OpenGL.h"
 #include "cuda_Photo.h"
 
-
+// bgsegm
 #include "cuda_Bgsegm_mog.h"
 #include "cuda_Bgsegm_mog2.h"
 
@@ -29,6 +28,10 @@
 #include "cuda_Event.h"
 #include "cuda_EventAccessor.h"
 #include "cuda_Stream.h"
+#include "cuda_GpuMat.h"
+#include "cuda_GpuData.h"
+#include "cuda_GpuMatND.h"
+#include "cuda_HostMem.h"
 
 // arithm
 #include "cuda_Convolution.h"
@@ -65,12 +68,14 @@
 
 //objectdetect
 #include "cuda_CascadeClassifier.h"
+#include "cuda_HOG.h"
 
 //optiflow
 #include "cuda_BroxOpticalFlow.h"
 #include "cuda_DenseOpticalFlow.h"
 #include "cuda_DensePyrLKOpticalFlow.h"
 #include "cuda_FarnebackOpticalFlow.h"
+#include "cuda_OpticalFlowDual_TVL1.h"
 
 // stereo
 #include "cuda_DisparityBilateralFilter.h"
