@@ -43,4 +43,28 @@ public class CudaStereoBeliefPropagationTest : CudaTestBase
         float dispValue = disparityCpu.At<float>(50, 50);
         Assert.True(dispValue > 0, "Disparity should be detected for the shifted square.");
     }
+
+    [Fact]
+    public void StereoBP_PropertiesAndHeuristicTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Test Static Heuristic
+        OpenCvSharp.Cuda.StereoBeliefPropagation.EstimateRecommendedParams(640, 480, out int ndisp, out int iters, out int levels);
+        Assert.True(ndisp > 0);
+        Assert.True(iters > 0);
+        Assert.True(levels > 0);
+
+        // 2. Create and Test Properties
+        using var stereo = OpenCvSharp.Cuda.StereoBeliefPropagation.Create(ndisp, iters, levels);
+
+        stereo.DataWeight = 0.08f;
+        Assert.Equal(0.08f, stereo.DataWeight);
+
+        stereo.MaxDiscTerm = 2.0;
+        Assert.Equal(2.0, stereo.MaxDiscTerm);
+
+        // Default msgType is CV_32F
+        Assert.Equal(MatType.CV_32F, stereo.MsgType);
+    }
 }

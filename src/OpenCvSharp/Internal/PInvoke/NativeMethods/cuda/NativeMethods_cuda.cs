@@ -21,30 +21,7 @@ namespace OpenCvSharp.Internal
         [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ExceptionStatus cuda_deviceSupports(int feature_set, out int returnValue);
 
-        // TargetArchs
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_builtWith(int feature_set, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_has(int major, int minor, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_hasPtx(int major, int minor, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_hasBin(int major, int minor, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_hasEqualOrLessPtx(int major, int minor, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_hasEqualOrGreater(int major, int minor, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_hasEqualOrGreaterPtx(int major, int minor, out int returnValue);
-
-        [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern ExceptionStatus cuda_TargetArchs_hasEqualOrGreaterBin(int major, int minor, out int returnValue);
+       
 
         // DeviceInfo
       
@@ -56,11 +33,6 @@ namespace OpenCvSharp.Internal
         public static extern ExceptionStatus cuda_printShortCudaDeviceInfo(int device);
         #endregion
 
-        #region Stream
-
-      
-
-        #endregion
 
         #region CascadeClassifier_GPU
 

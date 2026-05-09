@@ -16,32 +16,36 @@ public class StereoMatcher : Algorithm
         : base(smartPtr, rawPtr, release) { }
 
     /// <summary>
-    /// Computes disparity map for the specified stereo pair
+    /// Computes disparity map for the specified stereo pair.
     /// </summary>
     /// <param name="left">Left 8-bit single-channel image.</param>
     /// <param name="right">Right image of the same size and the same type as the left one.</param>
-    /// <param name="disparity">Output disparity map. It has the same size as the input images. Some algorithms, 
-    /// like StereoBM or StereoSGBM compute 16-bit fixed-point disparity map(where each disparity value has 4 fractional bits), 
-    /// whereas other algorithms output 32 - bit floating - point disparity map.</param>
-    public virtual void Compute(OpenCvSharp.Cuda.InputArray left, OpenCvSharp.Cuda.InputArray right, OpenCvSharp.Cuda.OutputArray disparity)
+    /// <param name="disparity">Output disparity map.</param>
+    /// <param name="stream">Stream for the asynchronous version.</param>
+    public virtual void Compute(
+        OpenCvSharp.Cuda.InputArray left,
+        OpenCvSharp.Cuda.InputArray right,
+        OpenCvSharp.Cuda.OutputArray disparity,
+        OpenCvSharp.Cuda.Stream? stream = null)
     {
-        if (left is null)
-            throw new ArgumentNullException(nameof(left));
-        if (right is null)
-            throw new ArgumentNullException(nameof(right));
-        if (disparity is null)
-            throw new ArgumentNullException(nameof(disparity));
+        if (left == null) throw new ArgumentNullException(nameof(left));
+        if (right == null) throw new ArgumentNullException(nameof(right));
+        if (disparity == null) throw new ArgumentNullException(nameof(disparity));
+
         left.ThrowIfDisposed();
         right.ThrowIfDisposed();
         disparity.ThrowIfNotReady();
+        ThrowIfDisposed();
 
         NativeMethods.HandleException(
-            NativeMethods.calib3d_StereoMatcher_compute(RawPtr, left.CvPtr, right.CvPtr, disparity.CvPtr));
+            NativeMethods.cuda_StereoMatcher_compute(
+                RawPtr, left.CvPtr, right.CvPtr, disparity.CvPtr, stream?.CvPtr ?? IntPtr.Zero));
 
+        disparity.Fix();
         GC.KeepAlive(this);
         GC.KeepAlive(left);
         GC.KeepAlive(right);
-        disparity.Fix();
+        GC.KeepAlive(stream);
     }
 
     /// <summary>

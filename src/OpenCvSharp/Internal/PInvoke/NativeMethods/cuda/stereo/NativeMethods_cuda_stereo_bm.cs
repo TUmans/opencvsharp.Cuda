@@ -14,4 +14,6 @@ static partial class NativeMethods
 
     [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern ExceptionStatus cuda_StereoBM_delete(IntPtr ptr);
+
+
 }

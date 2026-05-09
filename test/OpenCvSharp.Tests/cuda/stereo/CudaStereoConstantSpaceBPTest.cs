@@ -45,4 +45,27 @@ public class CudaStereoConstantSpaceBPTest : CudaTestBase
         // We expect a disparity value greater than 0
         Assert.True(dispValue > 0, $"Disparity should be positive, but was {dispValue}");
     }
+
+    [Fact]
+    public void StereoCSBP_PropertiesAndHeuristicTest()
+    {
+        VerifyCudaSupport();
+
+        // 1. Test Static Heuristic
+        OpenCvSharp. Cuda.StereoConstantSpaceBP.EstimateRecommendedParams(640, 480,
+            out int ndisp, out int iters, out int levels, out int nrPlane);
+
+        Assert.True(ndisp > 0);
+        Assert.True(nrPlane > 0);
+
+        // 2. Create instance
+        using var stereo = OpenCvSharp.Cuda.StereoConstantSpaceBP.Create(ndisp, iters, levels, nrPlane);
+
+        // 3. Test CSBP unique properties
+        stereo.NrPlane = 8;
+        Assert.Equal(8, stereo.NrPlane);
+
+        stereo.UseLocalInitDataCost = true;
+        Assert.True(stereo.UseLocalInitDataCost);
+    }
 }

@@ -22,14 +22,5 @@ static partial class NativeMethods
     public static extern ExceptionStatus cuda_Feature2DAsync_convert(
         IntPtr obj, IntPtr gpu_keypoints, IntPtr keypoints);
 
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_ORB_create(
-    int nfeatures, float scaleFactor, int nlevels, int edgeThreshold, int firstLevel,
-    int WTA_K, int scoreType, int patchSize, int fastThreshold, int blurForDescriptor, out IntPtr returnValue);
 
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_ORB_get(IntPtr ptr, out IntPtr returnValue);
-
-    [DllImport(DllExtern, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern ExceptionStatus cuda_ORB_delete(IntPtr ptr);
 }

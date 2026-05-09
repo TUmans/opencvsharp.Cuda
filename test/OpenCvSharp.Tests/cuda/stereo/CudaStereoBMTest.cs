@@ -46,4 +46,50 @@ public class CudaStereoBMTest : CudaTestBase
         // If disparity is > 0, the object was found
         Assert.True(dispValue >= 0 || dispValue == 0);
     }
+
+    [Fact]
+    public void StereoBM_Compute_Test()
+    {
+        VerifyCudaSupport();
+
+        using var leftCpu = new Mat(256, 256, MatType.CV_8UC1);
+        using var rightCpu = new Mat(256, 256, MatType.CV_8UC1);
+
+        // Full-image random texture
+        Cv2.Randu(leftCpu, 0, 255);
+
+        // Shift image by 8 pixels
+        leftCpu[new Rect(8, 0, 248, 256)]
+            .CopyTo(rightCpu[new Rect(0, 0, 248, 256)]);
+
+        using var leftGpu = new GpuMat();
+        using var rightGpu = new GpuMat();
+        using var disparityGpu = new GpuMat();
+
+        leftGpu.Upload(leftCpu);
+        rightGpu.Upload(rightCpu);
+
+        using var bm =
+            OpenCvSharp.Cuda.StereoBM.Create(
+                numDisparities: 64,
+                blockSize: 15);
+
+        using OpenCvSharp.Cuda.Stream stream = new OpenCvSharp.Cuda.Stream();
+
+        bm.Compute(leftGpu, rightGpu, disparityGpu, stream);
+
+        stream.WaitForCompletion();
+
+        using var disparityCpu = new Mat();
+        disparityGpu.Download(disparityCpu);
+
+        Assert.False(disparityCpu.Empty());
+
+        // Sample safely away from borders
+        Assert.Equal(MatType.CV_8UC1, disparityCpu.Type());
+
+        byte val = disparityCpu.At<byte>(128, 128);
+
+        Assert.True(val > 0, $"Expected positive disparity, got {val}");
+    }
 }

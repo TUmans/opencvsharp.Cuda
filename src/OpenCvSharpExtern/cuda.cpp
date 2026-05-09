@@ -28,10 +28,12 @@
 #include "cuda_Event.h"
 #include "cuda_EventAccessor.h"
 #include "cuda_Stream.h"
+#include "cuda_StreamAccessor.h"
 #include "cuda_GpuMat.h"
 #include "cuda_GpuData.h"
 #include "cuda_GpuMatND.h"
 #include "cuda_HostMem.h"
+#include "cuda_TargetArchs.h"
 
 // arithm
 #include "cuda_Convolution.h"
@@ -42,6 +44,8 @@
 #include "cuda_DescriptorMatcher.h"
 #include "cuda_Feature2DAsync.h"
 #include "cuda_FastFeatureDetector.h"
+#include "cuda_ORB.h"
+#include "cuda_SURF_CUDA.h"
 
 // filter
 #include "cuda_Filters.h"
@@ -76,6 +80,11 @@
 #include "cuda_DensePyrLKOpticalFlow.h"
 #include "cuda_FarnebackOpticalFlow.h"
 #include "cuda_OpticalFlowDual_TVL1.h"
+#include "cuda_NvidiaHWOpticalFlow.h"
+#include "cuda_NvidiaOpticalFlow_1_0.h"
+#include "cuda_NvidiaOpticalFlow_2_0.h"
+#include "cuda_SparseOpticalFlow.h"
+#include "cuda_SparsePyrLKOpticalFlow.h"
 
 // stereo
 #include "cuda_DisparityBilateralFilter.h"

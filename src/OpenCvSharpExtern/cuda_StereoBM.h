@@ -34,3 +34,16 @@ CVAPI(ExceptionStatus) cuda_StereoBM_delete(cv::Ptr<cv::cuda::StereoBM> *ptr)
     delete ptr;
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_StereoMatcher_compute(
+    cv::cuda::StereoBM *obj,
+    cv::_InputArray *left,
+    cv::_InputArray *right,
+    cv::_OutputArray *disparity,
+    cv::cuda::Stream *stream)
+{
+    BEGIN_WRAP
+    cv::cuda::Stream &streamRef = stream ? *stream : cv::cuda::Stream::Null();
+    obj->compute(*left, *right, *disparity, streamRef);
+    END_WRAP
+}

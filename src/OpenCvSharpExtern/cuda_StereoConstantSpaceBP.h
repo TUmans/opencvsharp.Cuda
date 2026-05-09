@@ -35,3 +35,37 @@ CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_delete(cv::Ptr<cv::cuda::Stere
     delete ptr;
     END_WRAP
 }
+
+CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_estimateRecommendedParams(
+    int width, int height, int *ndisp, int *iters, int *levels, int *nr_plane)
+{
+    BEGIN_WRAP
+    cv::cuda::StereoConstantSpaceBP::estimateRecommendedParams(width, height, *ndisp, *iters, *levels, *nr_plane);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_getNrPlane(cv::cuda::StereoConstantSpaceBP *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getNrPlane();
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_setNrPlane(cv::cuda::StereoConstantSpaceBP *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setNrPlane(val);
+    END_WRAP
+}
+
+CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_getUseLocalInitDataCost(cv::cuda::StereoConstantSpaceBP *obj, int *val)
+{
+    BEGIN_WRAP
+    *val = obj->getUseLocalInitDataCost() ? 1 : 0;
+    END_WRAP
+}
+CVAPI(ExceptionStatus) cuda_StereoConstantSpaceBP_setUseLocalInitDataCost(cv::cuda::StereoConstantSpaceBP *obj, int val)
+{
+    BEGIN_WRAP
+    obj->setUseLocalInitDataCost(val != 0);
+    END_WRAP
+}

@@ -35,5 +35,48 @@ namespace OpenCvSharp.Cuda
 
             return new StereoConstantSpaceBP(smartPtr, rawPtr);
         }
+
+        /// <summary>
+        /// Uses a heuristic method to compute the recommended parameters.
+        /// </summary>
+        public static void EstimateRecommendedParams(int width, int height, out int ndisp, out int iters, out int levels, out int nrPlane)
+        {
+            NativeMethods.HandleException(
+                NativeMethods.cuda_StereoConstantSpaceBP_estimateRecommendedParams(width, height, out ndisp, out iters, out levels, out nrPlane));
+        }
+
+        public int NrPlane
+        {
+            get
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_StereoConstantSpaceBP_getNrPlane(RawPtr, out int val)); 
+                GC.KeepAlive(this);
+                return val;
+            }
+            set
+            { 
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_StereoConstantSpaceBP_setNrPlane(RawPtr, value));
+                GC.KeepAlive(this);
+            }
+        }
+
+        public bool UseLocalInitDataCost
+        {
+            get 
+            {
+                ThrowIfDisposed(); 
+                NativeMethods.HandleException(NativeMethods.cuda_StereoConstantSpaceBP_getUseLocalInitDataCost(RawPtr, out int val));
+                GC.KeepAlive(this); 
+                return val != 0;
+            }
+            set 
+            { 
+                ThrowIfDisposed();
+                NativeMethods.HandleException(NativeMethods.cuda_StereoConstantSpaceBP_setUseLocalInitDataCost(RawPtr, value ? 1 : 0)); 
+                GC.KeepAlive(this);
+            }
+        }
     }
 }

@@ -49,29 +49,4 @@ CVAPI(ExceptionStatus) cuda_Feature2DAsync_convert(
     END_WRAP
 }
 
-CVAPI(ExceptionStatus) cuda_ORB_create(
-    int nfeatures, float scaleFactor, int nlevels, int edgeThreshold, int firstLevel,
-    int WTA_K, int scoreType, int patchSize, int fastThreshold, int blurForDescriptor,
-    cv::Ptr<cv::cuda::ORB> **returnValue)
-{
-    BEGIN_WRAP
-    auto ptr = cv::cuda::ORB::create(
-        nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel,
-        WTA_K, scoreType, patchSize, fastThreshold, blurForDescriptor != 0);
-    *returnValue = new cv::Ptr<cv::cuda::ORB>(ptr);
-    END_WRAP
-}
 
-CVAPI(ExceptionStatus) cuda_ORB_get(cv::Ptr<cv::cuda::ORB> *ptr, cv::cuda::ORB **returnValue)
-{
-    BEGIN_WRAP
-    *returnValue = ptr->get();
-    END_WRAP
-}
-
-CVAPI(ExceptionStatus) cuda_ORB_delete(cv::Ptr<cv::cuda::ORB> *ptr)
-{
-    BEGIN_WRAP
-    delete ptr;
-    END_WRAP
-}
